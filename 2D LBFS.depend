@@ -1,0 +1,53 @@
+# depslib dependency file v1.0
+1451923311 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\main.cpp
+	<iostream>
+	"Uniform_Mesh.h"
+	"vector_var.h"
+	<stdio.h>
+	<iostream>
+	<math.h>
+
+1451747547 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\uniform_mesh.h
+
+1450443710 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\node.cpp
+	"Node.h"
+	<string>
+
+1450441596 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\node.h
+
+1450457576 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\uniform_mesh.cpp
+	"Uniform_Mesh.h"
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<algorithm>
+
+1451918785 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\boundary_conditions.cpp
+	"Boundary_Conditions.h"
+	<stdlib.h>
+
+1451918820 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\boundary_conditions.h
+
+1451918851 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\solution.cpp
+	"Solution.h"
+	<algorithm>
+
+1451918851 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\solution.h
+	"Uniform_Mesh.h"
+
+1451923424 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\vector_var.cpp
+	"vector_var.h"
+	<math.h>
+
+1451920112 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\vector_var.h
+
+1451922037 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\solver.cpp
+	"Solver.h"
+	<math.h>
+	"vector_var.h"
+
+1451922037 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\solver.h
+	"Uniform_Mesh.h"
+	"Boundary_Conditions.h"
+	"Solution.h"
+
