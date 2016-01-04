@@ -31,3 +31,10 @@ void Solution::Initialise() {
 
 
 }
+void Solution::update ( double _rho, double _u, double _v, double _w , int i){
+
+    rho[i] =_rho;
+    u[i] = _u;
+    v[i] = _v;
+    w[i] = _w;
+}

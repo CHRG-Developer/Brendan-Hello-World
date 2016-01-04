@@ -57,7 +57,58 @@ Boundary_Conditions::~Boundary_Conditions()
 }
 
 
-void Boundary_Conditions::assign_boundary_conditions(){
+void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y){
 
+
+    /// this method should be user defined to reflect the geometry of the problem
+    int t = 0;
+
+    //lid driven cavity conditions
+    for (int i =0; i < num_x; i++){
+        for( int j=0; j < num_y; j++){
+
+            // West boundary
+            if( i ==0){
+                w_bc[t] = true;
+                w_rho[t] = 1;
+                w_u[t] = 0;
+                w_v[t] = 0;
+
+
+            }
+
+            // east boundary
+            if ( i == num_x){
+                e_bc[t] = true;
+                e_rho[t] = 1;
+                e_u[t] = 0;
+                e_v[t] = 0;
+
+
+            }
+
+            // south boundary
+            if(j == 0){
+                s_bc[t] = true;
+                s_rho[t] = 1;
+                s_u[t] = 0;
+                s_v[t] = 0;
+
+            }
+
+            // north boundary
+            if( j == num_y){
+                n_bc[t] = true;
+                n_rho[t] = 1;
+                n_u[t] = 10; //key value of U in lid driven cavity
+                n_v[t] = 0;
+
+            }
+
+            t++;
+        }
+
+
+    }
 
 }

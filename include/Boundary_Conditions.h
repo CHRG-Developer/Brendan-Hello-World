@@ -7,7 +7,7 @@ class Boundary_Conditions
     public:
         Boundary_Conditions(int num_x, int num_y);
         virtual ~Boundary_Conditions();
-        void assign_boundary_conditions();
+        void assign_boundary_conditions(int num_x, int num_y);
         bool get_n_bc( int i) {return n_bc[i];};
         bool get_s_bc ( int i) {return s_bc [i];};
         bool get_w_bc( int i) {return w_bc[i];};

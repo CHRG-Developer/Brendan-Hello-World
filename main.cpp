@@ -11,18 +11,45 @@ void vector_var_tests();
 int main()
 {
     double X,Y,dx,dy,dt;
-    double kine_viscosity;
+    double reynolds,kine_viscosity;
+    double U;
+
+
+    reynolds = 1000
     X= 4;
     Y=4;
     dx=1;
     dy = 1;
     dt = 1;
+    U = 10;
 
-    kine_viscosity = 1000;
+    kine_viscosity = U * X/ reynolds;
 
-    vector_var_tests();
+    //vector_var_tests();
 
-    //Uniform_Mesh mesh(X,Y,dx,dy);
+    // create Mesh
+    Uniform_Mesh mesh(X,Y,dx,dy);
+
+    // create boundary conditions
+    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
+    bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y());
+
+
+    //create solution
+    Solution soln(mesh.get_total_nodes());
+
+
+    // Solve
+
+    Solver solve();
+
+    solve.Uniform_Mesh_Solver(dt,kine_viscosity, mesh,soln,bc);
+
+
+
+
+
+
 
 
     return 0;

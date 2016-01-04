@@ -1,7 +1,7 @@
 #include "Uniform_Mesh.h"
 #include "Boundary_Conditions.h"
 #include "Solution.h"
-
+#include "vector_var.h"
 
 #ifndef SOLVER_H
 #define SOLVER_H
@@ -26,6 +26,7 @@ class Solver
 //            double y;
 //            double z;
 //        };
+        vector_var get_e_alpha(int k, double &lattice_weight );
 
         struct flux_var {
             double P;
@@ -42,7 +43,8 @@ class Solver
             double v;
 
         };
-
+        void cell_interface_variables( int j,int i ,vector_var interface_node, int neighbour, double interface_area,
+                              vector_var cell_normal, Boundary_Conditions boundary_conditions,  bc_var bc ,Uniform_Mesh Mesh) ;
 };
 
 #endif // SOLVER_H

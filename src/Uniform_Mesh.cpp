@@ -60,6 +60,10 @@ Uniform_Mesh::Uniform_Mesh(double c_X, double c_Y, double c_dx, double c_dy)
     e_area = (double*) malloc (total_nodes+1);
         if (e_area==NULL) exit (1);
 
+    cell_volume = (double*) malloc (total_nodes+1);
+        if (cell_volume==NULL) exit (1);
+
+
     n_i = (double*) malloc (total_nodes+1);
         if (n_i==NULL) exit (1);
     n_j = (double*) malloc (total_nodes+1);

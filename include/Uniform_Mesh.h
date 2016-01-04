@@ -49,6 +49,7 @@ class Uniform_Mesh
         int get_s_node( int i) {return s_node[i];};
         int get_e_node( int i) {return e_node[i];};
         int get_w_node( int i) {return w_node[i];};
+        double get_cell_volume( int i) {return cell_volume[i];};
 
 
     protected:
@@ -66,6 +67,11 @@ class Uniform_Mesh
         double * south_x, * south_y, * south_z;
         // magnitude of surface at cell interface
         double * n_area, * s_area, * w_area, * e_area;
+
+        // cell volume
+
+        double * cell_volume;
+
 
         //cell interface unit vectors
         double *n_i, *n_j, *n_k;
