@@ -6,7 +6,7 @@ class Uniform_Mesh
 {
     public:
         Uniform_Mesh(double X, double Y, double dx, double dy);
-        virtual ~Uniform_Mesh();
+        virtual ~Uniform_Mesh(){};
         double get_node_x(int node_num);
         int get_num_x() { return num_x_nodes; };
         int get_num_y () { return num_y_nodes; };

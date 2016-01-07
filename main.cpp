@@ -4,6 +4,11 @@
 #include <stdio.h>      /* printf */
 #include <iostream>
 #include <math.h>
+#include "Boundary_Conditions.h"
+#include "Solution.h"
+#include "Solver.h"
+
+
 using namespace std;
 
 void vector_var_tests();
@@ -15,7 +20,7 @@ int main()
     double U;
 
 
-    reynolds = 1000
+    reynolds = 1000;
     X= 4;
     Y=4;
     dx=1;
@@ -38,12 +43,11 @@ int main()
     //create solution
     Solution soln(mesh.get_total_nodes());
 
-
     // Solve
 
-    Solver solve();
+    Solver solve;
+    solve.Uniform_Mesh_Solver(dt,kine_viscosity,mesh,soln,bc);
 
-    solve.Uniform_Mesh_Solver(dt,kine_viscosity, mesh,soln,bc);
 
 
 

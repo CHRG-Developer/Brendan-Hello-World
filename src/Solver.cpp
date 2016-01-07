@@ -38,7 +38,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
         flux_var cell_flux;
 
         double interface_area;
-
+        interface_area = 0.0;
         bc_var bc;
 
         int neighbour;
@@ -73,14 +73,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
             y_flux.Momentum_y =0;
             y_flux.Momentum_z =0;
 
-            //calculate slope of macro variables
-            cell_2.x = Mesh.get_centroid_x(neighbour);
-            cell_2.y = Mesh.get_centroid_y((neighbour));
-            cell_2.z = Mesh.get_centroid_z(neighbour);
 
-            delta_rho.Get_Gradient(soln.get_rho(i), soln.get_rho(neighbour),cell_1,cell_2 );
-            delta_u.Get_Gradient(soln.get_u(i), soln.get_u(neighbour),cell_1,cell_2 );
-            delta_v.Get_Gradient(soln.get_v(i), soln.get_v(neighbour),cell_1,cell_2 );
 
             // include w in 3d
             delta_w.x = 0;
@@ -130,6 +123,17 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
 
 
                 }else{
+
+                    //calculate slope of macro variables
+                    cell_2.x = Mesh.get_centroid_x(neighbour);
+                    cell_2.y = Mesh.get_centroid_y((neighbour));
+                    cell_2.z = Mesh.get_centroid_z(neighbour);
+
+                    delta_rho.Get_Gradient(soln.get_rho(i), soln.get_rho(neighbour),cell_1,cell_2 );
+                    delta_u.Get_Gradient(soln.get_u(i), soln.get_u(neighbour),cell_1,cell_2 );
+                    delta_v.Get_Gradient(soln.get_v(i), soln.get_v(neighbour),cell_1,cell_2 );
+
+
                      //no bc present
 
                     rho_lattice = delta_rho.Dot_Product(lattice_node)
@@ -250,8 +254,8 @@ vector_var Solver::get_e_alpha(int k, double &lattice_weight ){
 }
 
 
-void Solver::cell_interface_variables( int j, int i, vector_var interface_node, int neighbour, double interface_area,
-                              vector_var cell_normal, Boundary_Conditions boundary_conditions,  bc_var bc,
+void Solver::cell_interface_variables( int j, int i, vector_var &interface_node, int &neighbour, double &interface_area,
+                              vector_var &cell_normal, Boundary_Conditions boundary_conditions,  bc_var &bc,
                               Uniform_Mesh Mesh) {
 
           switch(j) {
@@ -260,7 +264,7 @@ void Solver::cell_interface_variables( int j, int i, vector_var interface_node, 
                 interface_node.x = Mesh.get_west_x(i);
                 interface_node.y = Mesh.get_west_y(i);
                 interface_node.z= Mesh.get_west_z(i);
-                neighbour =Mesh.get_w_node(i);
+                neighbour = Mesh.get_w_node(i);
                 interface_area = Mesh.get_w_area(i);
                 cell_normal.x = Mesh.get_w_i(i);
                 cell_normal.y = Mesh.get_w_j(i);

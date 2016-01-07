@@ -6,10 +6,10 @@ vector_var::vector_var()
     //ctor
 }
 
-vector_var::~vector_var()
-{
-    //dtor
-}
+//vector_var::~vector_var()
+//{
+//    //dtor
+//}
 
 double  vector_var::Dot_Product(vector_var b){
 

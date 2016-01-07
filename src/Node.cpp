@@ -27,8 +27,8 @@ double Node::get_y(){
 double Node::get_z(){
 	return z;
 }
-
-Node::~Node() {
-	// TODO Auto-generated destructor stub
-}
+//
+//Node::~Node() {
+//	// TODO Auto-generated destructor stub
+//}
 

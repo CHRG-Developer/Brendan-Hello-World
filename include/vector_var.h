@@ -6,7 +6,7 @@ class vector_var
 {
     public:
         vector_var();
-        virtual ~vector_var();
+        virtual ~vector_var(){};
         double x;
         double y;
         double z;

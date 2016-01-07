@@ -5,13 +5,13 @@ Solution::Solution(int _total_nodes)
 {
     //ctor
     total_nodes = _total_nodes;
-     rho = (double*) malloc (total_nodes+1);
+     rho = (double*) malloc (sizeof(double)*(total_nodes));
         if (rho==NULL) exit (1);
-     u = (double*) malloc (total_nodes+1);
+     u = (double*) malloc (sizeof(double)*(total_nodes));
         if (u==NULL) exit (1);
-     v = (double*) malloc (total_nodes+1);
+     v = (double*) malloc (sizeof(double)*(total_nodes));
         if (v==NULL) exit (1);
-     w = (double*) malloc (total_nodes+1);
+     w = (double*) malloc (sizeof(double)*(total_nodes));
         if (w==NULL) exit (1);
     Initialise();
 

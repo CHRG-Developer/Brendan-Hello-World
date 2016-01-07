@@ -43,8 +43,8 @@ class Solver
             double v;
 
         };
-        void cell_interface_variables( int j,int i ,vector_var interface_node, int neighbour, double interface_area,
-                              vector_var cell_normal, Boundary_Conditions boundary_conditions,  bc_var bc ,Uniform_Mesh Mesh) ;
+        void cell_interface_variables( int j,int i ,vector_var &interface_node, int &neighbour, double &interface_area,
+                              vector_var &cell_normal, Boundary_Conditions boundary_conditions,  bc_var &bc ,Uniform_Mesh Mesh) ;
 };
 
 #endif // SOLVER_H

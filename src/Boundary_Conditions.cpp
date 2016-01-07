@@ -9,40 +9,40 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
 
 
 
-      n_bc = (bool*) malloc (total_nodes+1);
+      n_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
         if (n_bc==NULL) exit (1);
-      s_bc = (bool*) malloc (total_nodes+1);
+      s_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
         if (s_bc==NULL) exit (1);
-      w_bc = (bool*) malloc (total_nodes+1);
+      w_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
         if (w_bc==NULL) exit (1);
-      e_bc = (bool*) malloc (total_nodes+1);
+      e_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
         if (e_bc==NULL) exit (1);
 
-     n_rho = (double*) malloc (total_nodes+1);
+     n_rho = (double*) malloc (sizeof(double)*(total_nodes));
         if (n_rho==NULL) exit (1);
-      s_rho = (double*) malloc (total_nodes+1);
+      s_rho = (double*) malloc (sizeof(double)*(total_nodes));
         if (s_rho==NULL) exit (1);
-      w_rho = (double*) malloc (total_nodes+1);
+      w_rho = (double*) malloc (sizeof(double)*(total_nodes));
         if (w_rho==NULL) exit (1);
-      e_rho = (double*) malloc (total_nodes+1);
+      e_rho = (double*) malloc (sizeof(double)*(total_nodes));
         if (e_rho==NULL) exit (1);
 
-      n_u = (double*) malloc (total_nodes+1);
+      n_u = (double*) malloc (sizeof(double)*(total_nodes));
         if (n_u==NULL) exit (1);
-      s_u = (double*) malloc (total_nodes+1);
+      s_u = (double*) malloc (sizeof(double)*(total_nodes));
         if (s_u==NULL) exit (1);
-      w_u = (double*) malloc (total_nodes+1);
+      w_u = (double*) malloc (sizeof(double)*(total_nodes));
         if (w_u==NULL) exit (1);
-      e_u = (double*) malloc (total_nodes+1);
+      e_u = (double*) malloc (sizeof(double)*(total_nodes));
         if (e_u==NULL) exit (1);
 
-      n_v = (double*) malloc (total_nodes+1);
+      n_v = (double*) malloc (sizeof(double)*(total_nodes));
         if (n_v==NULL) exit (1);
-      s_v = (double*) malloc (total_nodes+1);
+      s_v = (double*) malloc (sizeof(double)*(total_nodes));
         if (s_v==NULL) exit (1);
-      w_v = (double*) malloc (total_nodes+1);
+      w_v = (double*) malloc (sizeof(double)*(total_nodes));
         if (w_v==NULL) exit (1);
-      e_v = (double*) malloc (total_nodes+1);
+      e_v = (double*) malloc (sizeof(double)*(total_nodes));
         if (e_v==NULL) exit (1);
 
 
@@ -78,7 +78,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y){
             }
 
             // east boundary
-            if ( i == num_x){
+            if ( i == (num_x -1)){
                 e_bc[t] = true;
                 e_rho[t] = 1;
                 e_u[t] = 0;
@@ -97,7 +97,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y){
             }
 
             // north boundary
-            if( j == num_y){
+            if( j == (num_y-1)){
                 n_bc[t] = true;
                 n_rho[t] = 1;
                 n_u[t] = 10; //key value of U in lid driven cavity
