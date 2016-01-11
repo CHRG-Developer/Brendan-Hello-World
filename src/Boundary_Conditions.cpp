@@ -71,7 +71,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y){
             if( i ==0){
                 w_bc[t] = true;
                 w_rho[t] = 1;
-                w_u[t] = 0;
+                w_u[t] = 1;
                 w_v[t] = 0;
 
 
@@ -100,7 +100,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y){
             if( j == (num_y-1)){
                 n_bc[t] = true;
                 n_rho[t] = 1;
-                n_u[t] = 10; //key value of U in lid driven cavity
+                n_u[t] = 0; //key value of U in lid driven cavity
                 n_v[t] = 0;
 
             }

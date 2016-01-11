@@ -22,13 +22,13 @@ int main()
 
 
     reynolds = 1000;
-    X= 81;
-    Y=81;
+    X= 5;
+    Y=1;
     dx=1; // grid spacing
     dy = 1;  // grid spacing
-    dt = 0.5;  // let dt =dx = dy
-    U = 10;
-    simulation_length = 10;
+    dt = 0.05;  // let dt =dx = dy i.e. lattice spacing
+    U = 1;
+    simulation_length = 20;
     kine_viscosity = U * X/ reynolds;
 
     //vector_var_tests();

@@ -1,6 +1,8 @@
 #include "Solver.h"
 #include <math.h>
 #include "vector_var.h"
+#include <iostream>
+using namespace std;
 Solver::Solver()
 {
     //ctor
@@ -25,7 +27,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
     // U is equal to max theoretical velocity in solution
 
     double delta_t;
-    delta_t = 0.05;
+    delta_t = 0.5;
 
     vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
     vector_var e_alpha, u_lattice,  rho_u_interface , u_interface;
@@ -48,7 +50,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
     //calculate timesteps
 
     int timesteps;
-
+    double time;
     timesteps = ceil( simulation_length/delta_t);
 
     // loop through each cell
@@ -184,6 +186,9 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
 
 
                 // divide rho * u to get u but only after complete summation
+                if( rho_interface < pow(10,-5)){
+                    u_magnitude = 1;
+                }
                 u_interface.x = rho_u_interface.x /rho_interface;
                 u_interface.y = rho_u_interface.y /rho_interface;
                 u_interface.z = rho_u_interface.z /rho_interface;
@@ -216,7 +221,10 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
 
 
                 }
+                if( Mesh.get_cell_volume(i) < pow(10,-5)){
+                    cell_flux.P = 1;
 
+                }
                 cell_flux.P = cell_flux.P + interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
                 cell_flux.Momentum_x = cell_flux.Momentum_x + interface_area/ Mesh.get_cell_volume(i)*
                                 ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y );
@@ -238,10 +246,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
 
 
 
-
         }
-
+        time = t*delta_t;
+        cout << "time t=" << time << std::endl;
     }
+
 
 }
 
