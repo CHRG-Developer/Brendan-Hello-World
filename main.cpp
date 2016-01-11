@@ -18,16 +18,17 @@ int main()
     double X,Y,dx,dy,dt;
     double reynolds,kine_viscosity;
     double U;
+    double simulation_length;
 
 
     reynolds = 1000;
-    X= 4;
-    Y=4;
-    dx=1;
-    dy = 1;
-    dt = 1;
+    X= 81;
+    Y=81;
+    dx=1; // grid spacing
+    dy = 1;  // grid spacing
+    dt = 0.5;  // let dt =dx = dy
     U = 10;
-
+    simulation_length = 10;
     kine_viscosity = U * X/ reynolds;
 
     //vector_var_tests();
@@ -46,7 +47,7 @@ int main()
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,kine_viscosity,mesh,soln,bc);
+    solve.Uniform_Mesh_Solver(dt,kine_viscosity,mesh,soln,bc,simulation_length);
 
 
 

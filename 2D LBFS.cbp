@@ -38,11 +38,9 @@
 		<Unit filename="include/Solution.h" />
 		<Unit filename="include/Solver.h" />
 		<Unit filename="include/Uniform_Mesh.h" />
-		<Unit filename="include/Volume.h" />
 		<Unit filename="include/vector_var.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/Boundary_Conditions.cpp" />
-		<Unit filename="src/Node.cpp" />
 		<Unit filename="src/Solution.cpp" />
 		<Unit filename="src/Solver.cpp" />
 		<Unit filename="src/Uniform_Mesh.cpp" />

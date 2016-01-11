@@ -159,6 +159,33 @@ void Uniform_Mesh::create_mesh(){
 
             delta_t[counter] = 0.5 * std::min(dy,dx);
 
+             // West boundary
+            if( i ==0){
+                w_node[counter] = 0 ;//dummy value
+            }else{
+                w_node[counter] = counter - num_y_nodes;
+            }
+
+            // east boundary
+            if ( i == (num_x_nodes -1)){
+                e_node[counter] = 0; //dummy value
+            }else{
+                e_node[counter] = counter + num_y_nodes;
+            }
+
+            // south boundary
+            if(j == 0){
+                s_node[counter] = 0; //dummy value
+            }else{
+                s_node[counter] = counter - 1;
+            }
+
+            // north boundary
+            if( j == (num_y_nodes-1)){
+                n_node[counter] = 0; //dummy value
+            }else{
+                n_node[counter] = counter + 1;
+            }
 
             counter = counter +1;
         }

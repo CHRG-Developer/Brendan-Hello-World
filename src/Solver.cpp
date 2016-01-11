@@ -11,12 +11,12 @@ Solver::~Solver()
     //dtor
 }
 
-void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, Solution soln, Boundary_Conditions boundary_conditions)
+void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, Solution soln, Boundary_Conditions boundary_conditions, double simulation_length)
 {
     //dtor
     dt = _dt; // timestepping for streaming
     kine_viscosity = _dvis;
-    c = Mesh.get_dx() / dt;
+    c = Mesh.get_dx()/2 / dt; // divide by 2 to get lattice spacing
     cs = c/sqrt(3.0);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
 
@@ -25,86 +25,135 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
     // U is equal to max theoretical velocity in solution
 
     double delta_t;
-    delta_t = 1;
+    delta_t = 0.05;
+
+    vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
+    vector_var e_alpha, u_lattice,  rho_u_interface , u_interface;
+    vector_var cell_normal;
+    double rho_interface,feq_interface,fneq_interface;
+    flux_var x_flux , y_flux;
+    flux_var cell_flux;
+
+    double interface_area;
+
+    bc_var bc;
+
+    int neighbour;
+
+    double rho_lattice ;
+    double feq_lattice [9];
+    double lattice_weight;
+    double u_magnitude;
+
+    //calculate timesteps
+
+    int timesteps;
+
+    timesteps = ceil( simulation_length/delta_t);
+
     // loop through each cell
+    for (int t= 0; t < timesteps; t++){
+        for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
 
-    for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
 
-        vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
-        vector_var e_alpha, u_lattice,  rho_u_interface ;
-        vector_var cell_normal;
-        double rho_interface,feq_interface,fneq_interface;
-        flux_var x_flux , y_flux;
-        flux_var cell_flux;
+            interface_area = 0.0;
 
-        double interface_area;
-        interface_area = 0.0;
-        bc_var bc;
+            cell_1.x = Mesh.get_centroid_x(i);
+            cell_1.y = Mesh.get_centroid_y(i);
+            cell_1.z =Mesh.get_centroid_z(i);
 
-        int neighbour;
-        cell_1.x = Mesh.get_centroid_x(i);
-        cell_1.y = Mesh.get_centroid_y(i);
-        cell_1.z =Mesh.get_centroid_z(i);
+            cell_flux.P =0.0;
+            cell_flux.Momentum_x =0.0;
+            cell_flux.Momentum_y = 0.0;
+            cell_flux.Momentum_z = 0.0;
+            // loop through cell interfaces
+            for (int j= 0; j <4; j++ ){
+                bc.present = false;
+                cell_interface_variables( j, i,interface_node, neighbour, interface_area,cell_normal, boundary_conditions, bc, Mesh);
 
-        double rho_lattice ;
-        double feq_lattice [8];
-        double lattice_weight;
-        double u_magnitude;
-        // loop through cell interfaces
-        for (int j= 0; j <6; j++ ){
-            bc.present = false;
-            cell_interface_variables( j, i,interface_node, neighbour, interface_area,cell_normal, boundary_conditions, bc, Mesh);
+                // initialise variables
 
-            // initialise variables
+                rho_interface = 0;
 
-            rho_interface = 0;
+                rho_u_interface.x =0;
+                rho_u_interface.y = 0;
+                rho_u_interface.z = 0;
 
-            rho_u_interface.x =0;
-            rho_u_interface.y = 0;
-            rho_u_interface.z = 0;
+                x_flux.P = 0;
+                x_flux.Momentum_x =0;
+                x_flux.Momentum_y =0;
+                x_flux.Momentum_z =0;
 
-            x_flux.P = 0;
-            x_flux.Momentum_x =0;
-            x_flux.Momentum_y =0;
-            x_flux.Momentum_z =0;
-
-            y_flux.P = 0;
-            y_flux.Momentum_x =0;
-            y_flux.Momentum_y =0;
-            y_flux.Momentum_z =0;
+                y_flux.P = 0;
+                y_flux.Momentum_x =0;
+                y_flux.Momentum_y =0;
+                y_flux.Momentum_z =0;
 
 
 
-            // include w in 3d
-            delta_w.x = 0;
-            delta_w.y = 0;
-            delta_w.z = 0; //update for 3d
+                // include w in 3d
+                delta_w.x = 0;
+                delta_w.y = 0;
+                delta_w.z = 0; //update for 3d
 
-            // using D2Q9 , loop through each lattice node
-            for (int k =0 ; k<9; k++){
-                e_alpha = get_e_alpha(k,lattice_weight);
+                // using D2Q9 , loop through each lattice node
+                for (int k =0 ; k<9; k++){
+                    e_alpha = get_e_alpha(k,lattice_weight);
 
 
-                 //f( r- e*c*dt) relative to cell_centroid
-                lattice_node.x = interface_node.x -cell_1.x - e_alpha.x * c * dt;
-                lattice_node.y = interface_node.y -cell_1.y - e_alpha.y * c * dt;
-                lattice_node.z = 0; // update in 3d
-                // y = mx + c
+                     //f( r- e*c*dt) relative to cell_centroid
+                    lattice_node.x = interface_node.x -cell_1.x - e_alpha.x * c * dt;
+                    lattice_node.y = interface_node.y -cell_1.y - e_alpha.y * c * dt;
+                    lattice_node.z = 0; // update in 3d
+                    // y = mx + c
 
-                // bc present
-                if ( bc.present){
+                    // bc present
+                    if ( bc.present){
 
-                    // greater than 90 -> lattice node within domain
-                    if( cell_normal.Angle_Between_Vectors(e_alpha) > M_PI/2 ){
+                        // less than 90 -> lattice node within domain
+                        if( (cell_normal.Angle_Between_Vectors(e_alpha) - M_PI/2 )< 0){
 
-                            // gradient is calculated between centroid and cell interface
-                            // this is because of the boundary condition
-                        delta_rho.Get_Gradient(soln.get_rho(i), bc.rho,cell_1,interface_node );
-                        delta_u.Get_Gradient(soln.get_u(i), bc.u,cell_1,interface_node );
-                        delta_v.Get_Gradient(soln.get_v(i), bc.v,cell_1,interface_node );
+                                // gradient is calculated between centroid and cell interface
+                                // this is because of the boundary condition
+                            delta_rho.Get_Gradient(soln.get_rho(i), bc.rho,cell_1,interface_node );
+                            delta_u.Get_Gradient(soln.get_u(i), bc.u,cell_1,interface_node );
+                            delta_v.Get_Gradient(soln.get_v(i), bc.v,cell_1,interface_node );
+
+                            rho_lattice = delta_rho.Dot_Product(lattice_node)
+                                        + soln.get_rho(i) ;
+
+                            u_lattice.x = delta_u.Dot_Product(lattice_node)
+                                            + soln.get_u(i) ;
+                            u_lattice.y = delta_v.Dot_Product(lattice_node)
+                                            + soln.get_v(i) ;
+                            u_lattice.z = 0;
+
+                        //  greater/equal than 90 -> lattice node outside domain
+                        }else{
+                            rho_lattice = bc.rho;
+                            u_lattice.x = bc.u;
+                            u_lattice.y = bc.v;
+                            u_lattice.z = 0; //update in 3d
+
+                        }
+
+
+                    }else{
+
+                        //calculate slope of macro variables
+                        cell_2.x = Mesh.get_centroid_x(neighbour);
+                        cell_2.y = Mesh.get_centroid_y((neighbour));
+                        cell_2.z = Mesh.get_centroid_z(neighbour);
+
+                        delta_rho.Get_Gradient(soln.get_rho(i), soln.get_rho(neighbour),cell_1,cell_2 );
+                        delta_u.Get_Gradient(soln.get_u(i), soln.get_u(neighbour),cell_1,cell_2 );
+                        delta_v.Get_Gradient(soln.get_v(i), soln.get_v(neighbour),cell_1,cell_2 );
+
+
+                         //no bc present
 
                         rho_lattice = delta_rho.Dot_Product(lattice_node)
-                                    + soln.get_rho(i) ;
+                                        + soln.get_rho(i) ;
 
                         u_lattice.x = delta_u.Dot_Product(lattice_node)
                                         + soln.get_u(i) ;
@@ -112,89 +161,61 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
                                         + soln.get_v(i) ;
                         u_lattice.z = 0;
 
-                    // less than 90 -> lattice node outside domain
-                    }else{
-                        rho_lattice = bc.rho;
-                        u_lattice.x = bc.u;
-                        u_lattice.y = bc.v;
-                        u_lattice.z = 0; //update in 3d
-
                     }
 
 
-                }else{
 
-                    //calculate slope of macro variables
-                    cell_2.x = Mesh.get_centroid_x(neighbour);
-                    cell_2.y = Mesh.get_centroid_y((neighbour));
-                    cell_2.z = Mesh.get_centroid_z(neighbour);
+                                    //3d version
+        //            w_lattice = (delta_w.x * lattice_node.x
+        //                           + delta_w.y * lattice_node.y
+        //                           + delta_w.z * lattice_node.z)
+        //                            + soln.get_w(i) ;
+                    u_magnitude = u_lattice.Magnitude();
+                    feq_lattice[k] = 1 ;
+                    feq_lattice[k] = feq_lattice[k] + e_alpha.Dot_Product(u_lattice) / pow(cs,2);
+                    feq_lattice[k] = feq_lattice[k] + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
+                    feq_lattice[k] = feq_lattice[k] *lattice_weight * rho_lattice;
 
-                    delta_rho.Get_Gradient(soln.get_rho(i), soln.get_rho(neighbour),cell_1,cell_2 );
-                    delta_u.Get_Gradient(soln.get_u(i), soln.get_u(neighbour),cell_1,cell_2 );
-                    delta_v.Get_Gradient(soln.get_v(i), soln.get_v(neighbour),cell_1,cell_2 );
-
-
-                     //no bc present
-
-                    rho_lattice = delta_rho.Dot_Product(lattice_node)
-                                    + soln.get_rho(i) ;
-
-                    u_lattice.x = delta_u.Dot_Product(lattice_node)
-                                    + soln.get_u(i) ;
-                    u_lattice.y = delta_v.Dot_Product(lattice_node)
-                                    + soln.get_v(i) ;
-                    u_lattice.z = 0;
-
+                    rho_interface = rho_interface + feq_lattice[k];
+                    rho_u_interface.x = rho_u_interface.x + feq_lattice[k] * e_alpha.x;
+                    rho_u_interface.y = rho_u_interface.y + feq_lattice[k] * e_alpha.y;
+                    rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha.z;
                 }
 
 
-
-                                //3d version
-    //            w_lattice = (delta_w.x * lattice_node.x
-    //                           + delta_w.y * lattice_node.y
-    //                           + delta_w.z * lattice_node.z)
-    //                            + soln.get_w(i) ;
-                u_magnitude = u_lattice.Magnitude();
-                feq_lattice[k] = 1 ;
-                feq_lattice[k] = feq_lattice[k] + e_alpha.Dot_Product(u_lattice) / pow(cs,2);
-                feq_lattice[k] = feq_lattice[k] + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
-                feq_lattice[k] = feq_lattice[k] *lattice_weight * rho_lattice;
-
-                rho_interface = rho_interface + feq_lattice[k];
-                rho_u_interface.x = rho_u_interface.x + feq_lattice[k] * e_alpha.x;
-                rho_u_interface.y = rho_u_interface.y + feq_lattice[k] * e_alpha.y;
-                rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha.z;
-            }
+                // divide rho * u to get u but only after complete summation
+                u_interface.x = rho_u_interface.x /rho_interface;
+                u_interface.y = rho_u_interface.y /rho_interface;
+                u_interface.z = rho_u_interface.z /rho_interface;
+                u_magnitude = u_interface.Magnitude();
+                for (int k =0 ; k<9; k++){
 
 
-            // divide rho * u to get u but only after complete summation
-            rho_u_interface.x = rho_u_interface.x /rho_interface;
-            rho_u_interface.y = rho_u_interface.y /rho_interface;
-            rho_u_interface.z = rho_u_interface.z /rho_interface;
-            u_magnitude = rho_u_interface.Magnitude();
-            for (int k =0 ; k<9; k++){
+                    e_alpha = get_e_alpha(k,lattice_weight);
+
+    //
+                    // get feq at cell interface
+                    feq_interface = 1 ;
+                    feq_interface = feq_interface  + e_alpha.Dot_Product(u_interface) / pow(cs,2);
+                    feq_interface = feq_interface  + ( pow(e_alpha.Dot_Product(u_interface),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
+                    feq_interface = feq_interface  *lattice_weight * rho_interface;
+
+                    //get fneq at cell interface
+                    fneq_interface = -tau * ( feq_interface -feq_lattice[k]);
 
 
-                e_alpha = get_e_alpha(k,lattice_weight);
-                e_alpha = get_e_alpha(k, lattice_weight);
-//
-                // get feq at cell interface
-                feq_interface = 1 ;
-                feq_interface = feq_interface  + e_alpha.Dot_Product(u_lattice) / pow(cs,2);
-                feq_interface = feq_interface  + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
-                feq_interface = feq_interface  *lattice_weight * rho_lattice;
-
-                //get fneq at cell interface
-                fneq_interface = -tau * ( feq_interface -feq_lattice[k]);
+                    //calculate fluxes from feq and fneq
+                    x_flux.P = x_flux.P + e_alpha.x * feq_interface;
+                    y_flux.P = y_flux.P + e_alpha.y * feq_interface;
+                    x_flux.Momentum_x = x_flux.Momentum_x + pow(e_alpha.x,2) *( feq_interface + (1-1/(2*tau))*fneq_interface);
+                    x_flux.Momentum_y = x_flux.Momentum_y + e_alpha.x*e_alpha.y *( feq_interface + (1-1/(2*tau))*fneq_interface);
+                    y_flux.Momentum_x = y_flux.Momentum_x + e_alpha.x*e_alpha.y *( feq_interface + (1-1/(2*tau))*fneq_interface);
+                    y_flux.Momentum_y = y_flux.Momentum_y + pow(e_alpha.y,2) *( feq_interface + (1-1/(2*tau))*fneq_interface);
 
 
-                //calculate fluxes from feq and fneq
-                x_flux.P = x_flux.P + e_alpha.x * feq_interface;
-                y_flux.P = y_flux.P + e_alpha.y * feq_interface;
-                x_flux.Momentum_x = x_flux.Momentum_x + pow(e_alpha.x,2) *( feq_interface + (1-1/(2*tau))*fneq_interface);
-                x_flux.Momentum_y = x_flux.Momentum_y + e_alpha.x*e_alpha.y *( feq_interface + (1-1/(2*tau))*fneq_interface);
-                y_flux.Momentum_x = y_flux.Momentum_x + e_alpha.x*e_alpha.y *( feq_interface + (1-1/(2*tau))*fneq_interface);
-                y_flux.Momentum_y = y_flux.Momentum_y + pow(e_alpha.y,2) *( feq_interface + (1-1/(2*tau))*fneq_interface);
+
+
+                }
 
                 cell_flux.P = cell_flux.P + interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
                 cell_flux.Momentum_x = cell_flux.Momentum_x + interface_area/ Mesh.get_cell_volume(i)*
@@ -205,25 +226,23 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
 
             }
 
+            // forward euler method
+            double f0,f1,f2,f3,f4;
+
+            f1= soln.get_rho(i) + delta_t * cell_flux.P;
+            f2 =  soln.get_rho(i) * soln.get_u(i) + (delta_t * cell_flux.Momentum_x) * f1;
+            f2 = f2 /f1;
+            f3 =  soln.get_rho(i) * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) * f1;
+            f3 = f3 /f1;
+            soln.update(f1,f2,f3,0.0, i);
+
 
 
 
         }
 
-        // forward euler method
-        double f0,f1,f2,f3,f4;
-
-        f1= soln.get_rho(i) + delta_t * cell_flux.P;
-        f2 =  soln.get_rho(i) * soln.get_u(i) + (delta_t * cell_flux.Momentum_x) * f1;
-        f2 = f2 /f1;
-        f3 =  soln.get_rho(i) * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) * f1;
-        f3 = f3 /f1;
-        soln.update(f1,f2,f3,0.0, 1);
-
-
-
-
     }
+
 }
 
 vector_var Solver::get_e_alpha(int k, double &lattice_weight ){
@@ -235,19 +254,19 @@ vector_var Solver::get_e_alpha(int k, double &lattice_weight ){
             temp.x = cos((k-1)*M_PI/2 );
             temp.y = sin((k-1)*M_PI/2 );
             temp.z = 0; //update in 3D
-            lattice_weight = 1/36;
+            lattice_weight = 1.0/9.0;
         }else if( k >4){
 
             temp.x = sqrt(2) * cos((k-5)*M_PI/2 + M_PI/4 ) ;
             temp.y = sqrt(2) * sin((k-5)*M_PI/2 + M_PI/4 );
             temp.z = 0; //update in 3D
-            lattice_weight = 1/9;
+            lattice_weight = 1.0/36.0;
 
         }else{
             temp.x = 0 ;
             temp.y = 0;
             temp.z = 0;
-            lattice_weight = 4/9;
+            lattice_weight = 4.0/9.0;
         }
 
     return temp;

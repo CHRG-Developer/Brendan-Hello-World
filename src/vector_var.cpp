@@ -37,8 +37,18 @@ void vector_var::Get_Gradient(double y1, double y2, vector_var x1, vector_var x2
 
         x = y2 -y1 ;
         y = y2 -y1 ;
-        x =  x / (x2.x - x1.x );
+
+        //check if x1 and x2 are same co-ordinate -> zero gradient
+        if( fabs(x2.x - x1.x ) < pow(10,-5) ){
+            x = 0;
+        }else{
+            x =  x / (x2.x - x1.x );
+        }
+        if( fabs(x2.y -x1.y) < pow(10,-5) ){
+            x = 0;
+        }else{
         y = y / (x2.y -x1.y);
+        }
         z = 0; //update for 3d
 
 
