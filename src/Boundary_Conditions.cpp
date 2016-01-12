@@ -1,6 +1,7 @@
 #include "Boundary_Conditions.h"
 #include <stdlib.h>
 
+
 Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
 {
     //ctor
@@ -57,10 +58,11 @@ Boundary_Conditions::~Boundary_Conditions()
 }
 
 
-void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y){
+void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_bcs _bc){
 
 
     /// this method should be user defined to reflect the geometry of the problem
+    /// currently set up for quad problem domain-> potential overload of this operator.
     int t = 0;
 
     //lid driven cavity conditions
@@ -70,39 +72,47 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y){
             // West boundary
             if( i ==0){
                 w_bc[t] = true;
-                w_rho[t] = 1;
-                w_u[t] = 1;
-                w_v[t] = 0;
+                w_rho[t] = _bc.w_rho;
+                w_u[t] = _bc.w_u;
+                w_v[t] = _bc.w_v;
 
 
+            }else{
+                w_bc[t] =false;
             }
 
             // east boundary
             if ( i == (num_x -1)){
                 e_bc[t] = true;
-                e_rho[t] = 1;
-                e_u[t] = 0;
-                e_v[t] = 0;
+                e_rho[t] = _bc.e_rho;
+                e_u[t] = _bc.e_u;
+                e_v[t] = _bc.e_v;
 
 
+            }else {
+                    e_bc[t] = false;
             }
 
             // south boundary
             if(j == 0){
                 s_bc[t] = true;
-                s_rho[t] = 1;
-                s_u[t] = 0;
-                s_v[t] = 0;
+                s_rho[t] = _bc.s_rho;
+                s_u[t] = _bc.s_u;
+                s_v[t] = _bc.s_v;
 
+            }else{
+                s_bc[t] = false;
             }
 
             // north boundary
             if( j == (num_y-1)){
                 n_bc[t] = true;
-                n_rho[t] = 1;
-                n_u[t] = 0; //key value of U in lid driven cavity
-                n_v[t] = 0;
+                n_rho[t] = _bc.n_rho;
+                n_u[t] = _bc.n_u;
+                n_v[t] = _bc.n_v;
 
+            }else {
+                n_bc[t] = false;
             }
 
             t++;

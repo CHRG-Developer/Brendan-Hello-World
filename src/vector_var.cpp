@@ -45,7 +45,7 @@ void vector_var::Get_Gradient(double y1, double y2, vector_var x1, vector_var x2
             x =  x / (x2.x - x1.x );
         }
         if( fabs(x2.y -x1.y) < pow(10,-5) ){
-            x = 0;
+            y = 0;
         }else{
             y = y / (x2.y -x1.y);
         }

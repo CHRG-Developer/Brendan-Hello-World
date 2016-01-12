@@ -2,6 +2,7 @@
 #include <math.h>
 #include "vector_var.h"
 #include <iostream>
+#include "Solution.h"
 using namespace std;
 Solver::Solver()
 {
@@ -13,21 +14,24 @@ Solver::~Solver()
     //dtor
 }
 
-void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, Solution soln, Boundary_Conditions boundary_conditions, double simulation_length)
+void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh Mesh, Solution soln, Boundary_Conditions boundary_conditions,
+                                  double simulation_length, double delta_t)
 {
     //dtor
     dt = _dt; // timestepping for streaming
-    kine_viscosity = _dvis;
-    c = Mesh.get_dx()/2 / dt; // divide by 2 to get lattice spacing
+
+    c = 1; // assume lattice spacing is equal to streaming timestep
     cs = c/sqrt(3.0);
-    tau = kine_viscosity + 0.5* pow(cs,2) *dt;
+
+    tau = _dtau;
+    Solution temp_soln(Mesh.get_total_nodes());
+
 
     //time increment on runge kutta must satisfy CFL condition
     //U delta_t/delta_x  < 1  ->> delta_t < 1/ U
     // U is equal to max theoretical velocity in solution
 
-    double delta_t;
-    delta_t = 0.5;
+
 
     vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
     vector_var e_alpha, u_lattice,  rho_u_interface , u_interface;
@@ -112,32 +116,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
                     // bc present
                     if ( bc.present){
 
-                        // less than 90 -> lattice node within domain
-                        if( (cell_normal.Angle_Between_Vectors(e_alpha) - M_PI/2 )< 0){
+                        rho_lattice = bc.rho;
+                        u_lattice.x = bc.u;
+                        u_lattice.y = bc.v;
+                        u_lattice.z = 0; //update in 3d
 
-                                // gradient is calculated between centroid and cell interface
-                                // this is because of the boundary condition
-                            delta_rho.Get_Gradient(soln.get_rho(i), bc.rho,cell_1,interface_node );
-                            delta_u.Get_Gradient(soln.get_u(i), bc.u,cell_1,interface_node );
-                            delta_v.Get_Gradient(soln.get_v(i), bc.v,cell_1,interface_node );
-
-                            rho_lattice = delta_rho.Dot_Product(lattice_node)
-                                        + soln.get_rho(i) ;
-
-                            u_lattice.x = delta_u.Dot_Product(lattice_node)
-                                            + soln.get_u(i) ;
-                            u_lattice.y = delta_v.Dot_Product(lattice_node)
-                                            + soln.get_v(i) ;
-                            u_lattice.z = 0;
-
-                        //  greater/equal than 90 -> lattice node outside domain
-                        }else{
-                            rho_lattice = bc.rho;
-                            u_lattice.x = bc.u;
-                            u_lattice.y = bc.v;
-                            u_lattice.z = 0; //update in 3d
-
-                        }
 
 
                     }else{
@@ -187,12 +170,17 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
 
                 // divide rho * u to get u but only after complete summation
                 if( rho_interface < pow(10,-5)){
-                    u_magnitude = 1;
+                    u_magnitude = 0;
+                    u_interface.x = 0;
+                    u_interface.y = 0;
+                    u_interface.z = 0;
+                }else{
+                    u_interface.x = rho_u_interface.x /rho_interface;
+                    u_interface.y = rho_u_interface.y /rho_interface;
+                    u_interface.z = rho_u_interface.z /rho_interface;
+                    u_magnitude = u_interface.Magnitude();
                 }
-                u_interface.x = rho_u_interface.x /rho_interface;
-                u_interface.y = rho_u_interface.y /rho_interface;
-                u_interface.z = rho_u_interface.z /rho_interface;
-                u_magnitude = u_interface.Magnitude();
+
                 for (int k =0 ; k<9; k++){
 
 
@@ -222,31 +210,45 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dvis, Uniform_Mesh Mesh, So
 
                 }
                 if( Mesh.get_cell_volume(i) < pow(10,-5)){
-                    cell_flux.P = 1;
+                    //do nothing for now
 
+                }else{
+                    cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
+                    cell_flux.Momentum_x = cell_flux.Momentum_x + (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                    ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y );
+                    cell_flux.Momentum_y = cell_flux.Momentum_y + (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                    ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
                 }
-                cell_flux.P = cell_flux.P + interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
-                cell_flux.Momentum_x = cell_flux.Momentum_x + interface_area/ Mesh.get_cell_volume(i)*
-                                ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y );
-                cell_flux.Momentum_y = cell_flux.Momentum_y + interface_area/ Mesh.get_cell_volume(i)*
-                                ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
+
 
 
             }
 
             // forward euler method
-            double f0,f1,f2,f3,f4;
-
+            double f1,f2,f3;
+            // try removing
             f1= soln.get_rho(i) + delta_t * cell_flux.P;
             f2 =  soln.get_rho(i) * soln.get_u(i) + (delta_t * cell_flux.Momentum_x) * f1;
-            f2 = f2 /f1;
             f3 =  soln.get_rho(i) * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) * f1;
-            f3 = f3 /f1;
-            soln.update(f1,f2,f3,0.0, i);
+
+            if (f1 < pow(10,-5)){
+
+                 f2 = soln.get_rho(i) * soln.get_u(i);
+                 f3 =soln.get_rho(i) * soln.get_v(i) ;
+
+                }else {
+
+                f2 = f2 /f1;
+                f3 = f3 /f1;
+            }
+
+            temp_soln.update(f1,f2,f3,0.0, i);
 
 
 
         }
+        soln = temp_soln;
+
         time = t*delta_t;
         cout << "time t=" << time << std::endl;
     }
