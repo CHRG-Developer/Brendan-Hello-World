@@ -16,7 +16,7 @@ int main()
 {
 
     test_cases w_to_e;
-    w_to_e.west_to_east_1d();
+    w_to_e.west_to_east_fill_pipe();
     test_cases lid_driven_cav;
     //lid_driven_cav.lid_driven_cavity_N();
 

@@ -90,7 +90,7 @@ void test_cases::lid_driven_cavity_N(){
     tau = 1;
 
 }
-void test_cases::west_to_east_1d(){
+void test_cases::west_to_east_fill_pipe(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
     double reynolds,kine_viscosity,tau;
@@ -102,13 +102,13 @@ void test_cases::west_to_east_1d(){
 
     /// Parameters unique to test case
     reynolds = 1000;
-    X= 100;
+    X= 7;
     Y=1;
     dx=1; // grid spacing
     dy = 1;  // grid spacing
-    dt = 0.05;  // streaming time step let dt =dx = dy i.e. lattice spacing
+    dt = 0.01;  // streaming time step let dt =dx = dy i.e. lattice spacing
     U = 1;
-    simulation_length = 200;
+    simulation_length = 5;
     kine_viscosity = U * X/ reynolds;
     //kine_viscosity = 20;
     delta_t = 0.1;
@@ -117,7 +117,7 @@ void test_cases::west_to_east_1d(){
     //tau =0.75;
 
     // set boundary conditions for this test case
-    bcs.w_rho = 0;
+    bcs.w_rho = 1;
     bcs.w_u = 1;
     bcs.w_v = 0;
     bcs.w_w = 0;

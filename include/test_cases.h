@@ -7,7 +7,7 @@ class test_cases
     public:
         test_cases();
         virtual ~test_cases();
-        void west_to_east_1d();
+        void west_to_east_fill_pipe();
         void vector_var_tests();
         void lid_driven_cavity_N();
     protected:

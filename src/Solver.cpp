@@ -14,7 +14,7 @@ Solver::~Solver()
     //dtor
 }
 
-void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh Mesh, Solution soln, Boundary_Conditions boundary_conditions,
+void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, Solution &soln, Boundary_Conditions &boundary_conditions,
                                   double simulation_length, double delta_t)
 {
     //dtor
@@ -247,7 +247,15 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh Mesh, So
 
 
         }
-        soln = temp_soln;
+
+        for (int i =0; i< Mesh.get_total_nodes(); i++){
+            soln.set_rho(i,temp_soln.get_rho(i));
+            soln.set_u(i,temp_soln.get_u(i));
+            soln.set_v(i,temp_soln.get_v(i));
+            soln.set_w(i,temp_soln.get_w(i));
+
+        }
+
 
         time = t*delta_t;
         cout << "time t=" << time << std::endl;
@@ -285,8 +293,8 @@ vector_var Solver::get_e_alpha(int k, double &lattice_weight ){
 
 
 void Solver::cell_interface_variables( int j, int i, vector_var &interface_node, int &neighbour, double &interface_area,
-                              vector_var &cell_normal, Boundary_Conditions boundary_conditions,  bc_var &bc,
-                              Uniform_Mesh Mesh) {
+                              vector_var &cell_normal, Boundary_Conditions &boundary_conditions,  bc_var &bc,
+                              Uniform_Mesh &Mesh) {
 
           switch(j) {
 

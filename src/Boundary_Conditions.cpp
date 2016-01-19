@@ -10,40 +10,40 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
 
 
 
-      n_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
+      n_bc = new bool [total_nodes +1];
         if (n_bc==NULL) exit (1);
-      s_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
+      s_bc = new bool [total_nodes +1];
         if (s_bc==NULL) exit (1);
-      w_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
+      w_bc = new bool [total_nodes +1];
         if (w_bc==NULL) exit (1);
-      e_bc = (bool*) malloc (sizeof(bool)*(total_nodes));
+      e_bc = new bool [total_nodes +1];
         if (e_bc==NULL) exit (1);
 
-     n_rho = (double*) malloc (sizeof(double)*(total_nodes));
+     n_rho = new double [total_nodes +1];
         if (n_rho==NULL) exit (1);
-      s_rho = (double*) malloc (sizeof(double)*(total_nodes));
+      s_rho = new double [total_nodes +1];
         if (s_rho==NULL) exit (1);
-      w_rho = (double*) malloc (sizeof(double)*(total_nodes));
+      w_rho = new double [total_nodes +1];
         if (w_rho==NULL) exit (1);
-      e_rho = (double*) malloc (sizeof(double)*(total_nodes));
+      e_rho = new double [total_nodes +1];
         if (e_rho==NULL) exit (1);
 
-      n_u = (double*) malloc (sizeof(double)*(total_nodes));
+      n_u = new double [total_nodes +1];
         if (n_u==NULL) exit (1);
-      s_u = (double*) malloc (sizeof(double)*(total_nodes));
+      s_u = new double [total_nodes +1];
         if (s_u==NULL) exit (1);
-      w_u = (double*) malloc (sizeof(double)*(total_nodes));
+      w_u = new double [total_nodes +1];
         if (w_u==NULL) exit (1);
-      e_u = (double*) malloc (sizeof(double)*(total_nodes));
+      e_u = new double [total_nodes +1];
         if (e_u==NULL) exit (1);
 
-      n_v = (double*) malloc (sizeof(double)*(total_nodes));
+      n_v = new double [total_nodes +1];
         if (n_v==NULL) exit (1);
-      s_v = (double*) malloc (sizeof(double)*(total_nodes));
+      s_v = new double [total_nodes +1];
         if (s_v==NULL) exit (1);
-      w_v = (double*) malloc (sizeof(double)*(total_nodes));
+      w_v = new double [total_nodes +1];
         if (w_v==NULL) exit (1);
-      e_v = (double*) malloc (sizeof(double)*(total_nodes));
+      e_v = new double [total_nodes +1];
         if (e_v==NULL) exit (1);
 
 
@@ -55,6 +55,38 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
 Boundary_Conditions::~Boundary_Conditions()
 {
     //dtor
+    delete [] (n_bc);
+    n_bc = NULL;
+    delete []  (s_bc);
+    s_bc = NULL;
+    delete []  (w_bc);
+    w_bc = NULL;
+    delete []  (e_bc);
+    e_bc = NULL;
+    delete []  (n_u);
+    n_u = NULL;
+    delete []  (n_v);
+    n_v = NULL;
+    delete []  (n_rho);
+    n_rho = NULL;
+    delete []  (e_u);
+    e_u = NULL;
+    delete []  (e_v);
+    e_v = NULL;
+    delete []  (e_rho);
+    e_rho = NULL;
+    delete []  (w_u);
+    w_u = NULL;
+    delete []  (w_v);
+    w_v = NULL;
+    delete []  (w_rho);
+    w_rho = NULL;
+    delete []  (s_u);
+    s_u = NULL;
+    delete []  (s_v);
+    s_v = NULL;
+    delete []  (s_rho);
+    s_rho = NULL;
 }
 
 
