@@ -13,93 +13,93 @@ Uniform_Mesh::Uniform_Mesh(double c_X, double c_Y, double c_dx, double c_dy)
 
 	num_x_nodes = ceil(X/dx);
 	num_y_nodes = ceil(Y/dy);
-	total_nodes = num_x_nodes * num_y_nodes;
+	total_nodes  = num_x_nodes * num_y_nodes;
 
 	dx = X/num_x_nodes; // reset dx/dy t0 allow for ceiling
     dy = Y/num_y_nodes;
 
     // allocate memory to arrays
 
-    centroid_x = (double*) malloc (sizeof(double)*(total_nodes));
+    centroid_x = new double [total_nodes +1];
         if (centroid_x==NULL) exit (1);
-    centroid_y = (double*) malloc (sizeof(double)*(total_nodes));
+    centroid_y = new double [total_nodes +1];
         if (centroid_y==NULL) exit (1);
-    centroid_z = (double*) malloc (sizeof(double)*(total_nodes));
+    centroid_z = new double [total_nodes +1];
         if (centroid_z==NULL) exit (1);
-    north_x = (double*) malloc (sizeof(double)*(total_nodes));
+    north_x = new double [total_nodes +1];
         if (north_x==NULL) exit (1);
-    north_y = (double*) malloc (sizeof(double)*(total_nodes));
+    north_y = new double [total_nodes +1];
         if (north_y==NULL) exit (1);
-    north_z = (double*) malloc (sizeof(double)*(total_nodes));
+    north_z = new double [total_nodes +1];
         if (north_z==NULL) exit (1);
-    east_x = (double*) malloc (sizeof(double)*(total_nodes));
+    east_x = new double [total_nodes +1];
         if (east_x==NULL) exit (1);
-    east_y = (double*) malloc (sizeof(double)*(total_nodes));
+    east_y = new double [total_nodes +1];
         if (east_y==NULL) exit (1);
-    east_z = (double*) malloc (sizeof(double)*(total_nodes));
+    east_z = new double [total_nodes +1];
         if (east_z==NULL) exit (1);
-    west_x = (double*) malloc (sizeof(double)*(total_nodes));
+    west_x = new double [total_nodes +1];
         if (west_x==NULL) exit (1);
-    west_y = (double*) malloc (sizeof(double)*(total_nodes));
+    west_y = new double [total_nodes +1];
         if (west_y==NULL) exit (1);
-    west_z = (double*) malloc (sizeof(double)*(total_nodes));
+    west_z = new double [total_nodes +1];
         if (west_z==NULL) exit (1);
-    south_x = (double*) malloc (sizeof(double)*(total_nodes));
+    south_x = new double [total_nodes +1];
         if (south_x==NULL) exit (1);
-    south_y = (double*) malloc (sizeof(double)*(total_nodes));
+    south_y = new double [total_nodes +1];
         if (south_y==NULL) exit (1);
-    south_z = (double*) malloc (sizeof(double)*(total_nodes));
+    south_z = new double [total_nodes +1];
         if (south_z==NULL) exit (1);
 
-    n_area = (double*) malloc (sizeof(double)*(total_nodes));
+    n_area = new double [total_nodes +1];
         if (n_area==NULL) exit (1);
-    s_area = (double*) malloc (sizeof(double)*(total_nodes));
+    s_area = new double [total_nodes +1];
         if (s_area==NULL) exit (1);
-    w_area = (double*) malloc (sizeof(double)*(total_nodes));
+    w_area = new double [total_nodes +1];
         if (w_area==NULL) exit (1);
-    e_area = (double*) malloc (sizeof(double)*(total_nodes));
+    e_area = new double [total_nodes +1];
         if (e_area==NULL) exit (1);
 
-    cell_volume = (double*) malloc (sizeof(double)*(total_nodes));
+    cell_volume = new double [total_nodes +1];
         if (cell_volume==NULL) exit (1);
 
 
-    n_i = (double*) malloc (sizeof(double)*(total_nodes));
+    n_i = new double [total_nodes +1];
         if (n_i==NULL) exit (1);
-    n_j = (double*) malloc (sizeof(double)*(total_nodes));
+    n_j = new double [total_nodes +1];
         if (n_j==NULL) exit (1);
-    n_k = (double*) malloc (sizeof(double)*(total_nodes));
+    n_k = new double [total_nodes +1];
         if (n_k==NULL) exit (1);
-     e_i = (double*) malloc (sizeof(double)*(total_nodes));
+     e_i = new double [total_nodes +1];
         if (e_i==NULL) exit (1);
-    e_j = (double*) malloc (sizeof(double)*(total_nodes));
+    e_j = new double [total_nodes +1];
         if (e_j==NULL) exit (1);
-    e_k = (double*) malloc (sizeof(double)*(total_nodes));
+    e_k = new double [total_nodes +1];
         if (e_k==NULL) exit (1);
-     w_i = (double*) malloc (sizeof(double)*(total_nodes));
+     w_i = new double [total_nodes +1];
         if (w_i==NULL) exit (1);
-    w_j = (double*) malloc (sizeof(double)*(total_nodes));
+    w_j = new double [total_nodes +1];
         if (w_j==NULL) exit (1);
-    w_k = (double*) malloc (sizeof(double)*(total_nodes));
+    w_k = new double [total_nodes +1];
         if (w_k==NULL) exit (1);
-     s_i = (double*) malloc (sizeof(double)*(total_nodes));
+     s_i = new double [total_nodes +1];
         if (s_i==NULL) exit (1);
-    s_j = (double*) malloc (sizeof(double)*(total_nodes));
+    s_j = new double [total_nodes +1];
         if (s_j==NULL) exit (1);
-    s_k = (double*) malloc (sizeof(double)*(total_nodes));
+    s_k = new double [total_nodes +1];
         if (s_k==NULL) exit (1);
 
 
-     n_node = (int*) malloc (sizeof(int)*(total_nodes));
+     n_node = new int [total_nodes +1];
         if (n_node==NULL) exit (1);
-    s_node = (int*) malloc (sizeof(int)*(total_nodes));
+    s_node = new int [total_nodes +1];
         if (s_node==NULL) exit (1);
-    w_node = (int*) malloc (sizeof(int)*(total_nodes));
+    w_node = new int [total_nodes +1];
         if (w_node==NULL) exit (1);
-    e_node = (int*) malloc (sizeof(int)*(total_nodes));
+    e_node = new int [total_nodes +1];
         if (e_node==NULL) exit (1);
 
-    delta_t = (double*) malloc (sizeof(double)*(total_nodes));
+    delta_t = new double [total_nodes +1];
         if (delta_t==NULL) exit (1);
 
 	this->create_mesh();
@@ -107,10 +107,91 @@ Uniform_Mesh::Uniform_Mesh(double c_X, double c_Y, double c_dx, double c_dy)
 	X=X;
 }
 
-//Uniform_Mesh::~Uniform_Mesh()
-//{
-//    //dtor
-//}
+Uniform_Mesh::~Uniform_Mesh()
+{
+    //dtor
+    delete [](centroid_x);
+    centroid_x = NULL;
+    delete [] (north_x);
+    north_x = NULL;
+    delete [] (south_x);
+    south_x = NULL;
+    delete [] (east_x);
+    east_x = NULL;
+    delete [] (west_x);
+    west_x = NULL;
+
+    delete [](centroid_y);
+    centroid_y = NULL;
+    delete [] (north_y);
+    north_y = NULL;
+    delete [] (south_y);
+    south_y = NULL;
+    delete [] (east_y);
+    east_y = NULL;
+    delete [] (west_y);
+    west_y = NULL;
+
+    delete [](centroid_z);
+    centroid_z = NULL;
+    delete [] (north_z);
+    north_z = NULL;
+    delete [] (south_z);
+    south_z = NULL;
+    delete [] (east_z);
+    east_z = NULL;
+    delete [] (west_z);
+    west_z = NULL;
+
+    delete [](cell_volume);
+    cell_volume = NULL;
+    delete [](delta_t);
+    delta_t = NULL;
+
+    delete [](n_area);
+    n_area = NULL;
+    delete [](n_i);
+    n_i = NULL;
+    delete [](n_j);
+    n_j = NULL;
+    delete [](n_k);
+    n_k = NULL;
+    delete [](n_node);
+    n_node = NULL;
+
+    delete [](e_area);
+    e_area = NULL;
+    delete [](e_i);
+    e_i = NULL;
+    delete [](e_j);
+    e_j = NULL;
+    delete [](e_k);
+    e_k = NULL;
+    delete [](e_node);
+    e_node = NULL;
+
+    delete [](w_area);
+    w_area = NULL;
+    delete [](w_i);
+    w_i = NULL;
+    delete [](w_j);
+    w_j = NULL;
+    delete [](w_k);
+    w_k = NULL;
+    delete [](w_node);
+    w_node = NULL;
+
+    delete [](s_area);
+    s_area = NULL;
+    delete [](s_i);
+    s_i = NULL;
+    delete [](s_j);
+    s_j = NULL;
+    delete [](s_k);
+    s_k = NULL;
+    delete [](s_node);
+    s_node = NULL;
+}
 
 void Uniform_Mesh::create_mesh(){
     int counter =0;

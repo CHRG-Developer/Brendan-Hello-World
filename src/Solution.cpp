@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "Solution.h"
 #include <algorithm>
 
@@ -5,13 +6,14 @@ Solution::Solution(int _total_nodes)
 {
     //ctor
     total_nodes = _total_nodes;
-     rho = (double*) malloc (sizeof(double)*(total_nodes));
+     //rho = (double*) malloc (sizeof(double)*(total_nodes));
+     rho = new double [total_nodes +1];
         if (rho==NULL) exit (1);
-     u = (double*) malloc (sizeof(double)*(total_nodes));
+     u = new double [total_nodes+1];
         if (u==NULL) exit (1);
-     v = (double*) malloc (sizeof(double)*(total_nodes));
+     v = new double [total_nodes +1];
         if (v==NULL) exit (1);
-     w = (double*) malloc (sizeof(double)*(total_nodes));
+     w = new double [total_nodes +1];
         if (w==NULL) exit (1);
     Initialise();
 
@@ -20,14 +22,23 @@ Solution::Solution(int _total_nodes)
 Solution::~Solution()
 {
     //dtor
+    delete [] rho;
+    rho = NULL;
+    delete [] u;
+    u = NULL;
+    delete [] v;
+    v= NULL;
+    delete [] w;
+    w= NULL;
+
 }
 
 void Solution::Initialise() {
 
-    std::fill_n(rho, total_nodes+1 , 1);
-    std::fill_n(u, total_nodes+1 , 0);
-    std::fill_n(v, total_nodes+1 , 0);
-    std::fill_n(w, total_nodes+1 , 0);
+    std::fill_n(rho, total_nodes , 1.0);
+    std::fill_n(u, total_nodes, 0.0);
+    std::fill_n(v, total_nodes , 0.0);
+    std::fill_n(w, total_nodes , 0.0);
 
 
 }
