@@ -26,8 +26,11 @@ class Boundary_Conditions
         double get_e_rho( int i) {return e_rho[i];};
         double get_e_u( int i) {return e_u[i];};
         double get_e_v( int i) {return e_v[i];};
-
-
+        int get_n_type( int i) {return n_type[i];};
+        int get_e_type( int i) {return e_type[i];};
+        int get_w_type( int i) {return w_type[i];};
+        int get_s_type( int i) {return s_type[i];};
+        int get_periodic_node( int i) {return periodic_node[i];};
     protected:
     private:
 
@@ -38,6 +41,8 @@ class Boundary_Conditions
         double * s_rho, * s_u, * s_v ;
         double * w_rho, * w_u, * w_v ;
         double * e_rho, * e_u, * e_v ;
+        int *n_type, *e_type, *w_type, *s_type;
+        int *periodic_node;
 };
 
 #endif // BOUNDARY_CONDITIONS_H

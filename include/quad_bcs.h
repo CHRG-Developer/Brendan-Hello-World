@@ -11,6 +11,8 @@ class quad_bcs
         double s_rho, s_u, s_v, s_w;
         double e_rho, e_u, e_v, e_w;
         double n_rho, n_u, n_v, n_w;
+        int w_type, s_type, e_type,n_type;
+        int periodic_node;
 
     protected:
     private:

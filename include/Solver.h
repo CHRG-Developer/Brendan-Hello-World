@@ -13,7 +13,7 @@ class Solver
         Solver();
         virtual ~Solver();
          void Uniform_Mesh_Solver(double _dt,double _vis, Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
-                                   double simulation_length,double delta_t);
+                                   double simulation_length,double delta_t, double dx);
     protected:
     private:
 
@@ -27,7 +27,7 @@ class Solver
 //            double y;
 //            double z;
 //        };
-        vector_var get_e_alpha(int k, double &lattice_weight );
+        vector_var get_e_alpha(int k, double &lattice_weight, double c );
 
         struct flux_var {
             double P;
@@ -42,6 +42,8 @@ class Solver
             double rho;
             double u;
             double v;
+            int type;
+            int periodic_node;
 
         };
         void cell_interface_variables( int j,int i ,vector_var &interface_node, int &neighbour, double &interface_area,

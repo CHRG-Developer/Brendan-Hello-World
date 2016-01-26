@@ -9,7 +9,7 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
     int total_nodes = num_x_nodes * num_y_nodes;
 
 
-
+      // if boundary condition is present for this cell face
       n_bc = new bool [total_nodes +1];
         if (n_bc==NULL) exit (1);
       s_bc = new bool [total_nodes +1];
@@ -46,10 +46,24 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
       e_v = new double [total_nodes +1];
         if (e_v==NULL) exit (1);
 
+        /// integer describing the boundary condition type
 
+        // 1: Dirichlet Boundary Condition i.e. constant value at boundary
+        // 2: Neumann boundary condition i.e. gradient = fixed value.
+        // 3: Periodic Boundary Condition
 
+     n_type = new int [total_nodes +1];
+        if (n_v==NULL) exit (1);
+      s_type = new int [total_nodes +1];
+        if (s_v==NULL) exit (1);
+      w_type = new int [total_nodes +1];
+        if (w_v==NULL) exit (1);
+      e_type = new int [total_nodes +1];
+        if (e_v==NULL) exit (1);
 
-
+     // node u[n] which will source u[0]
+     periodic_node = new int [total_nodes +1];
+        if (e_v==NULL) exit (1);
 }
 
 Boundary_Conditions::~Boundary_Conditions()
@@ -87,6 +101,18 @@ Boundary_Conditions::~Boundary_Conditions()
     s_v = NULL;
     delete []  (s_rho);
     s_rho = NULL;
+
+    delete [] n_type;
+    n_type = NULL;
+    delete [] e_type;
+    e_type = NULL;
+    delete [] w_type;
+    w_type = NULL;
+    delete [] s_type;
+    s_type = NULL;
+
+    delete [] periodic_node;
+    periodic_node = NULL;
 }
 
 
@@ -107,7 +133,11 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 w_rho[t] = _bc.w_rho;
                 w_u[t] = _bc.w_u;
                 w_v[t] = _bc.w_v;
+                w_type[t] = _bc.w_type;
 
+                if (_bc.w_type == 3){
+                    periodic_node[t] = (num_x-1) * (num_y ) + t;
+                }
 
             }else{
                 w_bc[t] =false;
@@ -119,6 +149,11 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 e_rho[t] = _bc.e_rho;
                 e_u[t] = _bc.e_u;
                 e_v[t] = _bc.e_v;
+                e_type[t] = _bc.e_type;
+
+                if (_bc.e_type == 3){
+                    periodic_node[t] = t - (num_x-1) * (num_y );
+                }
 
 
             }else {
@@ -131,6 +166,12 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 s_rho[t] = _bc.s_rho;
                 s_u[t] = _bc.s_u;
                 s_v[t] = _bc.s_v;
+                s_type[t] = _bc.s_type;
+
+                if (_bc.s_type == 3){
+                    periodic_node[t] = t + (num_y-1);
+                }
+
 
             }else{
                 s_bc[t] = false;
@@ -142,6 +183,12 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 n_rho[t] = _bc.n_rho;
                 n_u[t] = _bc.n_u;
                 n_v[t] = _bc.n_v;
+                n_type[t] = _bc.n_type;
+
+                 if (_bc.n_type == 3){
+                    periodic_node[t] = t - (num_y-1);
+                }
+
 
             }else {
                 n_bc[t] = false;

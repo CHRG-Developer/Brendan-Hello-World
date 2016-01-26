@@ -85,7 +85,7 @@ void test_cases::lid_driven_cavity_N(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t, dx);
 
     tau = 1;
 
@@ -101,17 +101,19 @@ void test_cases::west_to_east_fill_pipe(){
     double cs;
 
     /// Parameters unique to test case
-    reynolds = 1000;
-    X= 7;
+    reynolds = 4000;
+    X= 0.3;
     Y=1;
-    dx=1; // grid spacing
-    dy = 1;  // grid spacing
-    dt = 0.01;  // streaming time step let dt =dx = dy i.e. lattice spacing
-    U = 1;
-    simulation_length = 5;
-    kine_viscosity = U * X/ reynolds;
-    //kine_viscosity = 20;
-    delta_t = 0.1;
+    dx=0.1; // grid spacing
+    dy = 0.1;  // grid spacing
+    dt = 0.05;  // streaming time step -> dictates mach number -> grid spacing /2
+    /// Error :: let dt =dx = dy i.e. lattice spacing
+    U = 2;
+    simulation_length = 2500;
+    //kine_viscosity = U * X/ reynolds;
+    kine_viscosity = 0.6;
+
+    delta_t = 0.1;  // time marching step
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
@@ -121,21 +123,27 @@ void test_cases::west_to_east_fill_pipe(){
     bcs.w_u = 1;
     bcs.w_v = 0;
     bcs.w_w = 0;
+    bcs.w_type = 3;
 
-    bcs.s_rho = 0;
+    bcs.s_rho = 1;
     bcs.s_u = 0;
     bcs.s_v = 0;
     bcs.s_w = 0;
+    bcs.s_type = 1;
 
     bcs.e_rho = 0;
     bcs.e_u = 0;
     bcs.e_v = 0;
     bcs.e_w = 0;
+    bcs.e_type =2;
 
-    bcs.n_rho = 0;
-    bcs.n_u = 0;
+    bcs.n_rho = 1;
+    bcs.n_u = U;
     bcs.n_v = 0;
     bcs.n_w = 0;
+    bcs.n_type = 1;
+
+
 
     /// Methods to run the test case
     //vector_var_tests();
@@ -154,7 +162,7 @@ void test_cases::west_to_east_fill_pipe(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx);
 
     tau = 1;
 
