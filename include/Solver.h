@@ -13,7 +13,7 @@ class Solver
         Solver();
         virtual ~Solver();
          void Uniform_Mesh_Solver(double _dt,double _vis, Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
-                                   double simulation_length,double delta_t, double dx);
+                                   double simulation_length,double delta_t, double dx,double tolerance);
     protected:
     private:
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Solution.h"
 #include <cmath>
+#include <fstream>
 using namespace std;
 Solver::Solver()
 {
@@ -16,7 +17,7 @@ Solver::~Solver()
 }
 
 void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, Solution &soln, Boundary_Conditions &boundary_conditions,
-                                  double simulation_length, double delta_t, double _dx)
+                                  double simulation_length, double delta_t, double _dx, double tolerance)
 {
     //dtor
     dt = _dt; // timestepping for streaming
@@ -32,12 +33,18 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     //U delta_t/delta_x  < 1  ->> delta_t < 1/ U
     // U is equal to max theoretical velocity in solution
 
+    std::ofstream error_output ;
+    error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
 
 
     vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
     vector_var e_alpha, u_lattice,  rho_u_interface , u_interface;
     vector_var cell_normal;
     double rho_interface,feq_interface,fneq_interface;
+    double rho_rms_num, u_rms_num, v_rms_num, w_rms_num, error;
+    double rho_rms_den, u_rms_den, v_rms_den, w_rms_den;
+    double rho_rms, u_rms, v_rms, w_rms;
+
     flux_var x_flux , y_flux;
     flux_var cell_flux;
 
@@ -62,6 +69,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     // loop through each cell
     for (int t= 0; t < timesteps; t++){
 
+
         //loop through periodic boundary conditions
         for ( int m =0 ; m< Mesh.get_total_nodes(); m++){
 
@@ -78,6 +86,10 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                 }
 
         }
+        rho_rms = 0;
+        u_rms =0;
+        v_rms = 0;
+        w_rms = 0;
 
 
         for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
@@ -296,9 +308,50 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
             temp_soln.update(f1,f2,f3,0.0, i);
 
+            // error calculations
+
+            rho_rms_num = rho_rms_num + pow( f1 -soln.get_rho(i) ,2.0 );
+            if( f1 < pow(1,-8)){
+                rho_rms_den = rho_rms_den + pow(1,5) ;
+            }else{
+                rho_rms_den = rho_rms_den + pow(f1,2) ;
+            }
+            u_rms_num = u_rms_num + pow( f2 -soln.get_u(i) ,2.0 );
+            u_rms_den = u_rms_den + pow(f2,2) ;
+            v_rms_num = v_rms_num + pow( f3 -soln.get_v(i) ,2.0 ) ;
+            v_rms_den = v_rms_den +pow(f3,2);
 
 
         }
+
+
+        // get root of squared approximation error
+
+        if (rho_rms_den < pow(1, -8)){
+            rho_rms = 0 ;
+        }else{
+            rho_rms = sqrt(rho_rms_num / rho_rms_den);
+        }
+
+        if (u_rms_den < pow(1, -8)){
+            u_rms = u_rms ;
+        }else{
+            u_rms =sqrt(u_rms_num / u_rms_den);
+        }
+        if (v_rms_den < pow(1, -8)){
+            v_rms = v_rms;
+        }else{
+            v_rms = sqrt(v_rms_num / v_rms_den) ;
+        }
+
+
+
+        error = fmax(rho_rms, u_rms);
+        error = fmax(error, v_rms);
+
+        error_output << t << ", "  << error << "/n" ;
+
+
 
         for (int i =0; i< Mesh.get_total_nodes(); i++){
             soln.set_rho(i,temp_soln.get_rho(i));
@@ -311,9 +364,16 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
         time = t*delta_t;
         cout << "time t=" << time << std::endl;
+
+        if ( error < tolerance ){
+
+            //error_output.close();
+            //return ;
+
+        }
     }
 
-
+    error_output.close();
 }
 
 vector_var Solver::get_e_alpha(int k, double &lattice_weight, double c ){

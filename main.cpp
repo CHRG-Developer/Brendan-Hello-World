@@ -15,8 +15,12 @@ using namespace std;
 int main()
 {
 
-    test_cases w_to_e;
-    w_to_e.west_to_east_fill_pipe();
+    test_cases couette_flow;
+    couette_flow.west_to_east_couette_flow();
+ //   couette_flow.east_to_west_couette_flow();
+    // couette_flow.north_to_south_couette_flow();
+   // couette_flow.south_to_north_couette_flow();
+
     test_cases lid_driven_cav;
     //lid_driven_cav.lid_driven_cavity_N();
 

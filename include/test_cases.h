@@ -7,7 +7,10 @@ class test_cases
     public:
         test_cases();
         virtual ~test_cases();
-        void west_to_east_fill_pipe();
+        void west_to_east_couette_flow();
+        void east_to_west_couette_flow();
+        void north_to_south_couette_flow();
+        void south_to_north_couette_flow();
         void vector_var_tests();
         void lid_driven_cavity_N();
     protected:

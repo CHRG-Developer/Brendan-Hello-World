@@ -36,8 +36,8 @@ Solution::~Solution()
 void Solution::Initialise() {
 
     std::fill_n(rho, total_nodes , 1.0);
-    std::fill_n(u, total_nodes, 0.0);
-    std::fill_n(v, total_nodes , 0.0);
+    std::fill_n(u, total_nodes, 1.0);
+    std::fill_n(v, total_nodes , 1.0);
     std::fill_n(w, total_nodes , 0.0);
 
 
