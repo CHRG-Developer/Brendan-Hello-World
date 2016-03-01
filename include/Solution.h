@@ -1,4 +1,5 @@
 #include "Uniform_Mesh.h"
+#include <string>
 
 #ifndef SOLUTION_H
 #define SOLUTION_H
@@ -20,6 +21,7 @@ class Solution
         void set_w( int i,double arg) {w[i] =arg;};
 
         void update ( double rho, double u, double v, double w , int i);
+        void output (std::string output_location);
     protected:
     private:
         double *rho, *u, *v, *w;

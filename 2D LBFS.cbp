@@ -39,6 +39,7 @@
 		<Unit filename="include/Solver.h" />
 		<Unit filename="include/Uniform_Mesh.h" />
 		<Unit filename="include/quad_bcs.h" />
+		<Unit filename="include/quad_bcs_plus.h" />
 		<Unit filename="include/test_cases.h" />
 		<Unit filename="include/vector_var.h" />
 		<Unit filename="main.cpp" />
@@ -47,6 +48,7 @@
 		<Unit filename="src/Solver.cpp" />
 		<Unit filename="src/Uniform_Mesh.cpp" />
 		<Unit filename="src/quad_bcs.cpp" />
+		<Unit filename="src/quad_bcs_plus.cpp" />
 		<Unit filename="src/test_cases.cpp" />
 		<Unit filename="src/vector_var.cpp" />
 		<Extensions>

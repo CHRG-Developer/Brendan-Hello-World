@@ -13,12 +13,18 @@ class test_cases
         void south_to_north_couette_flow();
         void vector_var_tests();
         void lid_driven_cavity_N();
+        void west_to_east_poiseuille_flow();
     protected:
     private:
         double X,Y,dx,dy,dt;
         double reynolds,kine_viscosity;
         double U;
         double simulation_length;
+
+        // Constants
+        static const int dirichlet = 1;
+        static const int neumann = 2;
+        static const int periodic = 3;
 
 };
 
