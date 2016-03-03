@@ -5,7 +5,13 @@ vector_var::vector_var()
 {
     //ctor
 }
-
+vector_var::vector_var(double _x, double _y, double _z)
+{
+    //ctor
+    x = _x;
+    y = _y;
+    z = _z;
+}
 //vector_var::~vector_var()
 //{
 //    //dtor
@@ -16,10 +22,29 @@ double  vector_var::Dot_Product(vector_var b){
     return x * b.x + y *b.y + z * b.z;
 
 }
+void  vector_var::add(vector_var b){
+
+    x = x + b.x;
+    y = y + b.y;
+    z = z + b.z;
+}
+vector_var vector_var::line_magnitude(vector_var intercept, vector_var slope, vector_var displacement){
+
+    vector_var temp;
+
+    temp.x = intercept.x + slope.x * displacement.x;
+    temp.y = intercept.y + slope.y *displacement.y;
+    temp.z = intercept.z + slope.z * displacement.z;
+
+    return temp;
+
+
+}
 double vector_var::Magnitude(){
 
     return sqrt(pow(x,2) + pow(y,2) + pow(z,2) );
 }
+
 double  vector_var::Angle_Between_Vectors(vector_var b){
     double num, denom;
     num = Dot_Product(b);

@@ -38,13 +38,37 @@ Solution::~Solution()
 
 void Solution::Initialise() {
 
-    std::fill_n(rho, total_nodes , 1.05);
+    std::fill_n(rho, total_nodes , 1.00);
     std::fill_n(u, total_nodes, 0.0);
     std::fill_n(v, total_nodes , 0.0);
     std::fill_n(w, total_nodes , 0.0);
 
 
 }
+
+void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradient_origin,
+    vector_var origin_magnitude, Uniform_Mesh Mesh){
+
+   vector_var displacement;
+   vector_var rho_temp;
+
+   for( int t =0 ; t< Mesh.get_total_nodes(); t++){
+
+
+            displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
+            displacement.y = Mesh.get_centroid_y(t)- gradient_origin.y;
+            displacement.z = Mesh.get_centroid_z(t) - gradient_origin.z;
+
+            rho_temp = rho_temp.line_magnitude(origin_magnitude,_gradient,displacement);
+            rho[t] = rho_temp.Magnitude();
+
+        }
+    displacement.add(rho_temp) ;
+
+   }
+
+
+
 void Solution::update ( double _rho, double _u, double _v, double _w , int i){
 
     rho[i] =_rho;

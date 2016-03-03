@@ -33,11 +33,12 @@ void test_cases::west_to_east_poiseuille_flow(){
     double cs;
     double tolerance;
     std::string output_file;
+    vector_var pressure_gradient(2,0,0), origin(1,0,0), origin_loc(0,0,0) ;
 
     /// Parameters unique to test case
 
     X= 5;
-    Y=1;
+    Y=1.1;
     dx=0.1; // grid spacing
     dy = 0.1;  // grid spacing
     dt = 0.05;  // streaming time step -> dictates mach number -> grid spacing /2
@@ -106,7 +107,7 @@ void test_cases::west_to_east_poiseuille_flow(){
 
     //create solution
     Solution soln(mesh.get_total_nodes());
-
+    soln.assign_pressure_gradient(pressure_gradient,origin_loc,origin,mesh);
     // Solve
 
     Solver solve;
@@ -217,10 +218,10 @@ void test_cases::west_to_east_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
 
-    tolerance = pow(10,-2);
-//    output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
+    tolerance = pow(10,-10);
+    output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
-    output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
+    //output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
     //tau =0.75;
 
     // set boundary conditions for this test case

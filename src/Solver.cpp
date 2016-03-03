@@ -300,8 +300,8 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                     //do nothing for now
 
                 }else{
-                    //cell_flux.P = 0;
-                    cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
+                    cell_flux.P = 0;
+                    //cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
                     cell_flux.Momentum_x = cell_flux.Momentum_x + (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                     ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y );
                     cell_flux.Momentum_y = cell_flux.Momentum_y + (-1)*interface_area/ Mesh.get_cell_volume(i)*
@@ -336,17 +336,17 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
             rho_rms_num = rho_rms_num + pow( f1 -soln.get_rho(i) ,2.0 );
             if( f1 < pow(1,-8)){
-                //rho_rms_den = rho_rms_den + pow(1,5) ;
-                rho_rms_den = rho_rms_den + 1;
+                rho_rms_den = rho_rms_den + pow(1,5) ;
+
             }else{
-                //rho_rms_den = rho_rms_den + pow(f1,2) ;
-                rho_rms_den = rho_rms_den + 1;
+                rho_rms_den = rho_rms_den + pow(f1,2) ;
+
             }
             u_rms_num = u_rms_num + pow( f2 -soln.get_u(i) ,2.0 );
-            //u_rms_den = u_rms_den + pow(f2,2) ;
-            u_rms_den = u_rms_den + 1;
+            u_rms_den = u_rms_den + pow(f2,2) ;
+
             v_rms_num = v_rms_num + pow( f3 -soln.get_v(i) ,2.0 ) ;
-            //v_rms_den = v_rms_den +pow(f3,2);
+            v_rms_den = v_rms_den +pow(f3,2);
             v_rms_den = v_rms_den + 1;
 
 
