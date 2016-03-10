@@ -9,6 +9,8 @@
 #include "Solution.h"
 #include "Solver.h"
 #include "quad_bcs.h"
+#include "external_forces.h"
+#include "global_variables.h"
 
 using namespace std;
 
@@ -31,35 +33,35 @@ void test_cases::west_to_east_poiseuille_flow(){
     double delta_t; // time stepping step
     quad_bcs_plus bcs;
     double cs;
-    double tolerance;
+    double pressure_grad;
+    global_variables globals;
     std::string output_file;
-    vector_var pressure_gradient(2,0,0), origin(1,0,0), origin_loc(0,0,0) ;
+    vector_var pressure_gradient(-0.01,0,0), origin(1.1,0,0), origin_loc(0,0,0) ;
+    //vector_var pressure_gradient(0,0,0), origin(1.00,0,0), origin_loc(0,0,0) ;
 
     /// Parameters unique to test case
 
-    X= 5;
+    X= 0.3;
     Y=1.1;
-    dx=0.1; // grid spacing
-    dy = 0.1;  // grid spacing
-    dt = 0.05;  // streaming time step -> dictates mach number -> grid spacing /2
+    dx=0.05; // grid spacing
+    dy = 0.05;  // grid spacing
+    dt = 0.025;  // streaming time step -> dictates mach number -> grid spacing /2
     /// Error :: let dt =dx = dy i.e. lattice spacing
 
     simulation_length = 2500;
     //kine_viscosity = U * X/ reynolds;
     kine_viscosity = 0.6;
 
-    delta_t = 0.1;  // time marching step
+    delta_t = 0.05;  // time marching step
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
 
-    tolerance = pow(10,-6);
+    // Pressure gradient = (RHOin - RHOout)/ length /3 / rho
+    //pressure_grad = (1.1-1.0)/5 /3 /1;
+    pressure_grad =0;
+    //output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
 
-#ifdef _WIN32
-    output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
-#else
     output_file = "/home/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
-#endif // _WIN32
-
 
     //tau =0.75;
 
@@ -68,29 +70,31 @@ void test_cases::west_to_east_poiseuille_flow(){
     bcs.w_u = 0;
     bcs.w_v = 0;
     bcs.w_w = 0;
-    bcs.w_type_vel = dirichlet;
-    bcs.w_type_rho = dirichlet;
+    bcs.w_type_vel = globals.periodic;
+    bcs.w_type_rho = globals.dirichlet;
 
     bcs.s_rho = 0;
     bcs.s_u = 0;
     bcs.s_v = 0;
     bcs.s_w = 0;
-    bcs.s_type_vel= dirichlet;
-    bcs.s_type_rho = neumann;
+    bcs.s_type_vel= globals.dirichlet;
+    bcs.s_type_rho = globals.neumann;
 
     bcs.e_rho = 1;
     bcs.e_u = 0;
     bcs.e_v = 0;
     bcs.e_w = 0;
-    bcs.e_type_vel= neumann;
-    bcs.e_type_rho = dirichlet;
+    bcs.e_type_vel= globals.neumann;
+    bcs.e_type_rho = globals.dirichlet;
 
     bcs.n_rho = 0;
     bcs.n_u = 0;
     bcs.n_v = 0;
     bcs.n_w = 0;
-    bcs.n_type_vel= dirichlet;
-    bcs.n_type_rho = neumann;
+    bcs.n_type_vel= globals.dirichlet;
+    bcs.n_type_rho = globals.neumann;
+
+
 
 
 
@@ -104,6 +108,9 @@ void test_cases::west_to_east_poiseuille_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(pressure_grad);
 
     //create solution
     Solution soln(mesh.get_total_nodes());
@@ -111,7 +118,7 @@ void test_cases::west_to_east_poiseuille_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,tolerance,output_file);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file,source_term);
     soln.output(output_file);
     tau = 1;
 
@@ -127,7 +134,7 @@ void test_cases::lid_driven_cavity_N(){
 
 
     quad_bcs bcs;
-    double cs,delta_t,tolerance;
+    double cs,delta_t;
 
     /// Parameters unique to test case
     reynolds = 1000;
@@ -144,7 +151,7 @@ void test_cases::lid_driven_cavity_N(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = 0.5;
+
 
     // set boundary conditions for this test case
     bcs.w_rho = 1;
@@ -198,7 +205,7 @@ void test_cases::west_to_east_couette_flow(){
     double delta_t; // time stepping step
     quad_bcs bcs;
     double cs;
-    double tolerance;
+
     std::string output_file;
 
     /// Parameters unique to test case
@@ -218,10 +225,10 @@ void test_cases::west_to_east_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
 
-    tolerance = pow(10,-10);
-    output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
-    //output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
+    //output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
+
+    output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
     //tau =0.75;
 
     // set boundary conditions for this test case
@@ -261,6 +268,10 @@ void test_cases::west_to_east_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
+
 
     //create solution
     Solution soln(mesh.get_total_nodes());
@@ -268,7 +279,7 @@ void test_cases::west_to_east_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,tolerance,output_file);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file, source_term);
     soln.output(output_file);
     tau = 1;
 
@@ -283,7 +294,7 @@ void test_cases::east_to_west_couette_flow(){
     double delta_t; // time stepping step
     quad_bcs bcs;
     double cs;
-    double tolerance;
+
     std::string output_file;
      output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
     /// Parameters unique to test case
@@ -303,7 +314,7 @@ void test_cases::east_to_west_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = pow(1,-5);
+
 
     output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
@@ -344,6 +355,9 @@ void test_cases::east_to_west_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
 
     //create solution
     Solution soln(mesh.get_total_nodes());
@@ -352,7 +366,7 @@ void test_cases::east_to_west_couette_flow(){
 
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, tolerance,output_file);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file,source_term);
     soln.output(output_file);
 
     tau = 1;
@@ -366,7 +380,7 @@ void test_cases::north_to_south_couette_flow(){
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs bcs;
-    double cs,tolerance;
+    double cs;
     std::string output_file;
      output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
@@ -387,7 +401,7 @@ void test_cases::north_to_south_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = pow(10,-5);
+
 
 
     // set boundary conditions for this test case
@@ -427,6 +441,9 @@ void test_cases::north_to_south_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
 
     //create solution
     Solution soln(mesh.get_total_nodes());
@@ -434,7 +451,7 @@ void test_cases::north_to_south_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,tolerance,output_file);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,output_file,source_term);
 
     tau = 1;
 
@@ -448,7 +465,7 @@ void test_cases::south_to_north_couette_flow(){
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs bcs;
-    double cs, tolerance;
+    double cs;
     std::string output_file;
      output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
@@ -469,7 +486,6 @@ void test_cases::south_to_north_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = pow(10,-5);
 
     // set boundary conditions for this test case
     bcs.w_rho = 1;
@@ -508,6 +524,9 @@ void test_cases::south_to_north_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
 
     //create solution
     Solution soln(mesh.get_total_nodes());
@@ -515,7 +534,7 @@ void test_cases::south_to_north_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, tolerance,output_file);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file, source_term);
 
     tau = 1;
 

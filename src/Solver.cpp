@@ -5,6 +5,8 @@
 #include "Solution.h"
 #include <cmath>
 #include <fstream>
+#include <global_variables.h>
+
 using namespace std;
 Solver::Solver()
 {
@@ -17,7 +19,7 @@ Solver::~Solver()
 }
 
 void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, Solution &soln, Boundary_Conditions &boundary_conditions,
-                                  double simulation_length, double delta_t, double _dx, double tolerance, std::string output_file)
+                                  double simulation_length, double delta_t, double _dx,  std::string output_file, external_forces &source_term)
 {
     //dtor
     dt = _dt; // timestepping for streaming
@@ -48,7 +50,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     double rho_rms_num, u_rms_num, v_rms_num, w_rms_num, error;
     double rho_rms_den, u_rms_den, v_rms_den, w_rms_den;
     double rho_rms, u_rms, v_rms, w_rms;
-
+    global_variables globals;
     flux_var x_flux , y_flux;
     flux_var cell_flux;
 
@@ -63,6 +65,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     double lattice_weight;
     double u_magnitude;
     double u_bc, rho_bc,  v_bc;
+
     int bc_node;
     //calculate timesteps
 
@@ -72,24 +75,6 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
     // loop through each cell
     for (int t= 0; t < timesteps; t++){
-
-
-//        //loop through periodic boundary conditions
-//        for ( int m =0 ; m< Mesh.get_total_nodes(); m++){
-//
-//            if ( boundary_conditions.get_e_type(m) == 3 || boundary_conditions.get_w_type(m) == 3
-//                || boundary_conditions.get_n_type(m) == 3 || boundary_conditions.get_s_type(m) == 3){
-//
-//
-//                    u_bc = soln.get_u( boundary_conditions.get_periodic_node(m));
-//                    v_bc = soln.get_v( boundary_conditions.get_periodic_node(m));
-//                    rho_bc = soln.get_rho( boundary_conditions.get_periodic_node(m));
-//
-//                    soln.update(rho_bc,u_bc,v_bc,0.0,m);
-//
-//                }
-//
-//        }
 
         rho_rms = 0;
         u_rms =0;
@@ -303,7 +288,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                     cell_flux.P = 0;
                     //cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
                     cell_flux.Momentum_x = cell_flux.Momentum_x + (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                    ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y );
+                                    ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y ) ;
                     cell_flux.Momentum_y = cell_flux.Momentum_y + (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                     ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
                 }
@@ -313,10 +298,13 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             }
 
             // forward euler method
-            double f1,f2,f3;
+            double f1,f2,f3,temp_force;
+            temp_force = source_term.get_force(i)* Mesh.get_cell_volume(i) * soln.get_rho(i);
             // try removing
             f1= soln.get_rho(i) + delta_t * cell_flux.P;
-            f2 =  soln.get_rho(i) * soln.get_u(i) + (delta_t * cell_flux.Momentum_x) ;
+            f2 =  soln.get_rho(i) * soln.get_u(i) + (delta_t *
+                    (cell_flux.Momentum_x +
+                    source_term.get_force(i)* Mesh.get_cell_volume(i) * soln.get_rho(i) ));
             f3 =  soln.get_rho(i) * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) ;
 
             if (f1 < pow(10,-5)){
@@ -355,18 +343,19 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
         // get root of squared approximation error
 
-        if (rho_rms_den < pow(1, -8)){
+        if (rho_rms_den < globals.small_number){
             rho_rms = 0 ;
         }else{
             rho_rms = sqrt(rho_rms_num / rho_rms_den);
         }
 
-        if (u_rms_den < pow(1, -8)){
+        if (u_rms_den < globals.small_number){
             u_rms = u_rms ;
         }else{
-            u_rms =sqrt(u_rms_num / u_rms_den);
+            u_rms = sqrt(u_rms_num / u_rms_den);
         }
-        if (v_rms_den < pow(1, -8)){
+
+        if (v_rms_den < globals.small_number){
             v_rms = v_rms;
         }else{
             v_rms = sqrt(v_rms_num / v_rms_den) ;
@@ -393,7 +382,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
         time = t*delta_t;
         cout << "time t=" << time << std::endl;
 
-        if ( error < tolerance ){
+        if ( error < globals.tolerance ){
 
             error_output.close();
             return ;

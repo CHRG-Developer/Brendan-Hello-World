@@ -47,7 +47,7 @@ void Solution::Initialise() {
 }
 
 void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradient_origin,
-    vector_var origin_magnitude, Uniform_Mesh Mesh){
+    vector_var origin_magnitude, Uniform_Mesh &Mesh){
 
    vector_var displacement;
    vector_var rho_temp;

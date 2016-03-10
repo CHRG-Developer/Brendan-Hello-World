@@ -21,7 +21,7 @@ class Solution
         void set_v( int i,double arg) {v[i] =arg;};
         void set_w( int i,double arg) {w[i] =arg;};
         void assign_pressure_gradient( vector_var _gradient, vector_var gradient_origin,
-            vector_var origin_magnitude,Uniform_Mesh Mesh);
+            vector_var origin_magnitude,Uniform_Mesh &Mesh);
         void update ( double rho, double u, double v, double w , int i);
         void output (std::string output_location);
     protected:
