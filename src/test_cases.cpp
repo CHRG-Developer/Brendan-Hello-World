@@ -28,7 +28,7 @@ void test_cases::west_to_east_poiseuille_flow(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
     double kine_viscosity,tau;
-
+    double reynolds;
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs_plus bcs;
@@ -36,25 +36,35 @@ void test_cases::west_to_east_poiseuille_flow(){
     double pressure_grad;
     global_variables globals;
     std::string output_file;
-    vector_var pressure_gradient(-0.01,0,0), origin(1.1,0,0), origin_loc(0,0,0) ;
-    //vector_var pressure_gradient(0,0,0), origin(1.00,0,0), origin_loc(0,0,0) ;
+    double average_pressure;
+
+    average_pressure =1*3;
+
+
+    //vector_var pressure_gradient(-0.01,0,0), origin(1.1,0,0), origin_loc(0,0,0) ;
+    vector_var pressure_gradient(0,0,0), origin(average_pressure,0,0), origin_loc(0,0,0) ;
 
     /// Parameters unique to test case
 
-    X= 0.3;
-    Y=1.1;
-    dx=0.05; // grid spacing
-    dy = 0.05;  // grid spacing
-    dt = 0.025;  // streaming time step -> dictates mach number -> grid spacing /2
+    X= 16;
+    Y= 4.4;
+    dx= 0.2; // grid spacing
+    dy = 0.2;  // grid spacing
+    dt = 0.1;  // streaming time step -> dictates mach number -> grid spacing /2
     /// Error :: let dt =dx = dy i.e. lattice spacing
 
-    simulation_length = 2500;
+    simulation_length = 25000;
     //kine_viscosity = U * X/ reynolds;
-    kine_viscosity = 0.6;
+    kine_viscosity = 0.0833333;
 
-    delta_t = 0.05;  // time marching step
+    delta_t = 0.1;  // time marching step
     cs = 1/sqrt(3);
-    tau = kine_viscosity + 0.5* pow(cs,2) *dt;
+
+   // tau = 0.5 + kine_viscosity/ pow(cs,2) /(2*dt);  // ordinary LBM
+    reynolds = 33.7094;
+
+    // tau = 0.5 + Umax* Length / reynolds/dt  --- assumes c = 1.
+    tau = 0.5 + 0.17557*X /reynolds /dt;
 
     // Pressure gradient = (RHOin - RHOout)/ length /3 / rho
     //pressure_grad = (1.1-1.0)/5 /3 /1;
@@ -66,11 +76,11 @@ void test_cases::west_to_east_poiseuille_flow(){
     //tau =0.75;
 
     // set boundary conditions for this test case
-    bcs.w_rho = 1.1;
+    bcs.w_rho = 1.1*3;
     bcs.w_u = 0;
     bcs.w_v = 0;
     bcs.w_w = 0;
-    bcs.w_type_vel = globals.periodic;
+    bcs.w_type_vel = globals.neumann;
     bcs.w_type_rho = globals.dirichlet;
 
     bcs.s_rho = 0;
@@ -80,7 +90,7 @@ void test_cases::west_to_east_poiseuille_flow(){
     bcs.s_type_vel= globals.dirichlet;
     bcs.s_type_rho = globals.neumann;
 
-    bcs.e_rho = 1;
+    bcs.e_rho = 1*3;
     bcs.e_u = 0;
     bcs.e_v = 0;
     bcs.e_w = 0;
@@ -115,6 +125,7 @@ void test_cases::west_to_east_poiseuille_flow(){
     //create solution
     Solution soln(mesh.get_total_nodes());
     soln.assign_pressure_gradient(pressure_gradient,origin_loc,origin,mesh);
+    soln.set_average_rho(average_pressure);
     // Solve
 
     Solver solve;
@@ -275,6 +286,7 @@ void test_cases::west_to_east_couette_flow(){
 
     //create solution
     Solution soln(mesh.get_total_nodes());
+    soln.set_average_rho(1.0);
 
     // Solve
 

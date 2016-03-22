@@ -13,7 +13,7 @@ class global_variables
         const int neumann = 2;
 
         const double small_number = 0.00000000001;
-        const double tolerance = 0.0000001;
+        const double tolerance = 0.0001;
 
     protected:
     private:

@@ -222,10 +222,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
 
                     u_magnitude = u_lattice.Magnitude();
-                    feq_lattice[k] = 1 ;
-                    feq_lattice[k] = feq_lattice[k] + e_alpha.Dot_Product(u_lattice) / pow(cs,2);
-                    feq_lattice[k] = feq_lattice[k] + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
-                    feq_lattice[k] = feq_lattice[k] *lattice_weight * rho_lattice;
+                    feq_lattice[k] = 1 * rho_lattice ;
+                    feq_lattice[k] = feq_lattice[k] + e_alpha.Dot_Product(u_lattice) / pow(cs,2) * soln.get_average_rho();
+                    feq_lattice[k] = feq_lattice[k] + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )
+                    / (2 * pow(cs,4)) * soln.get_average_rho();
+                    feq_lattice[k] = feq_lattice[k] *lattice_weight ;
 
                     rho_interface = rho_interface + feq_lattice[k];
                     rho_u_interface.x = rho_u_interface.x + feq_lattice[k] * e_alpha.x;
@@ -241,9 +242,12 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                     u_interface.y = 0;
                     u_interface.z = 0;
                 }else{
-                    u_interface.x = rho_u_interface.x /rho_interface;
-                    u_interface.y = rho_u_interface.y /rho_interface;
-                    u_interface.z = rho_u_interface.z /rho_interface;
+                    //u_interface.x = rho_u_interface.x /rho_interface;
+                    //u_interface.y = rho_u_interface.y /rho_interface;
+                    //u_interface.z = rho_u_interface.z /rho_interface;
+                    u_interface.x = rho_u_interface.x /soln.get_average_rho();
+                    u_interface.y = rho_u_interface.y /soln.get_average_rho();
+                    u_interface.z = rho_u_interface.z /soln.get_average_rho();
                     u_magnitude = u_interface.Magnitude();
                 }
 
@@ -254,10 +258,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
     //
                     // get feq at cell interface
-                    feq_interface = 1 ;
-                    feq_interface = feq_interface  + e_alpha.Dot_Product(u_interface) / pow(cs,2);
-                    feq_interface = feq_interface  + ( pow(e_alpha.Dot_Product(u_interface),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
-                    feq_interface = feq_interface  *lattice_weight * rho_interface;
+                    feq_interface = 1 * rho_interface;
+                    feq_interface = feq_interface  + e_alpha.Dot_Product(u_interface) / pow(cs,2) *soln.get_average_rho();
+                    feq_interface = feq_interface  + ( pow(e_alpha.Dot_Product(u_interface),2)  - pow((u_magnitude* cs),2) )
+                            / (2 * pow(cs,4))*soln.get_average_rho();
+                    feq_interface = feq_interface  *lattice_weight ;
                     feq_int_debug[k] = feq_interface;
 
                     //get fneq at cell interface
@@ -285,8 +290,8 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                     //do nothing for now
 
                 }else{
-                    cell_flux.P = 0;
-                    //cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
+                    //cell_flux.P = 0;
+                    cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
                     cell_flux.Momentum_x = cell_flux.Momentum_x + (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                     ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y ) ;
                     cell_flux.Momentum_y = cell_flux.Momentum_y + (-1)*interface_area/ Mesh.get_cell_volume(i)*
@@ -302,10 +307,10 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             temp_force = source_term.get_force(i)* Mesh.get_cell_volume(i) * soln.get_rho(i);
             // try removing
             f1= soln.get_rho(i) + delta_t * cell_flux.P;
-            f2 =  soln.get_rho(i) * soln.get_u(i) + (delta_t *
+            f2 =  soln.get_average_rho()* soln.get_u(i) + (delta_t *
                     (cell_flux.Momentum_x +
-                    source_term.get_force(i)* Mesh.get_cell_volume(i) * soln.get_rho(i) ));
-            f3 =  soln.get_rho(i) * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) ;
+                    source_term.get_force(i)* Mesh.get_cell_volume(i) * soln.get_average_rho()));
+            f3 =  soln.get_average_rho() * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) ;
 
             if (f1 < pow(10,-5)){
 
@@ -314,8 +319,8 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
                 }else {
 
-                f2 = f2 /f1;
-                f3 = f3 /f1;
+                f2 = f2 /soln.get_average_rho();
+                f3 = f3 /soln.get_average_rho();
             }
 
             temp_soln.update(f1,f2,f3,0.0, i);
@@ -376,6 +381,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             soln.set_v(i,temp_soln.get_v(i));
             soln.set_w(i,temp_soln.get_w(i));
 
+            if (isnan(temp_soln.get_rho(i)) || isnan(temp_soln.get_u(i))) {
+                error_output.close();
+                return;
+
+            }
         }
 
 
@@ -388,6 +398,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             return ;
 
         }
+
     }
 
     error_output.close();

@@ -43,6 +43,7 @@ void Solution::Initialise() {
     std::fill_n(v, total_nodes , 0.0);
     std::fill_n(w, total_nodes , 0.0);
 
+    average_rho = 0.0; //default value
 
 }
 
