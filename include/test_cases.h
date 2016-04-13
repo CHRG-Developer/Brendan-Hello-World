@@ -1,3 +1,5 @@
+#include <string>
+
 #ifndef TEST_CASES_H
 #define TEST_CASES_H
 
@@ -14,6 +16,7 @@ class test_cases
         void vector_var_tests();
         void lid_driven_cavity_N();
         void west_to_east_poiseuille_flow();
+        std::string create_output_directory(double tol, double dx, double dt);
     protected:
     private:
         double X,Y,dx,dy,dt;

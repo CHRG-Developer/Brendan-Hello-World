@@ -82,9 +82,9 @@ void Solution::output (std::string output_location){
 
     std::ofstream rho_txt,u_txt,v_txt ;
     std::string rho_file, u_file, v_file;
-    rho_file = output_location + "rho.txt";
-    u_file = output_location + "u.txt";
-    v_file = output_location + "v.txt";
+    rho_file = output_location + "/rho.txt";
+    u_file = output_location + "/u.txt";
+    v_file = output_location + "/v.txt";
 
     rho_txt.open(rho_file.c_str(), ios::out);
     u_txt.open(u_file.c_str(), ios::out);

@@ -11,8 +11,14 @@
 #include "quad_bcs.h"
 #include "external_forces.h"
 #include "global_variables.h"
+#include <algorithm>
+#include <string>
+#include <sstream>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
+using namespace boost::filesystem;
 
 test_cases::test_cases()
 {
@@ -28,7 +34,7 @@ void test_cases::west_to_east_poiseuille_flow(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
     double kine_viscosity,tau;
-    double reynolds;
+    double reynolds, umax;
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs_plus bcs;
@@ -48,32 +54,28 @@ void test_cases::west_to_east_poiseuille_flow(){
 
     X= 16;
     Y= 4.4;
-    dx= 0.2; // grid spacing
-    dy = 0.2;  // grid spacing
-    dt = 0.1;  // streaming time step -> dictates mach number -> grid spacing /2
-    /// Error :: let dt =dx = dy i.e. lattice spacing
+    dx= 0.1; // grid spacing
+    dy = 0.1;  // grid spacing
+    dt = 0.05;  // streaming time step -> dictates mach number -> grid spacing /2
+    /// Error :: let dt = l_dx = l_dy i.e. lattice spacing
 
     simulation_length = 25000;
     //kine_viscosity = U * X/ reynolds;
     kine_viscosity = 0.0833333;
 
-    delta_t = 0.1;  // time marching step
+    delta_t = 0.05;  // time marching step
     cs = 1/sqrt(3);
 
-   // tau = 0.5 + kine_viscosity/ pow(cs,2) /(2*dt);  // ordinary LBM
     reynolds = 33.7094;
-
+    umax = 0.17557;
     // tau = 0.5 + Umax* Length / reynolds/dt  --- assumes c = 1.
-    tau = 0.5 + 0.17557*X /reynolds /dt;
+    tau = 0.5 + umax*X /reynolds /dt;
 
-    // Pressure gradient = (RHOin - RHOout)/ length /3 / rho
-    //pressure_grad = (1.1-1.0)/5 /3 /1;
     pressure_grad =0;
-    //output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
 
-    output_file = "/home/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
+    //tau =0.75
+    output_file = create_output_directory(globals.tolerance,dx,delta_t);
 
-    //tau =0.75;
 
     // set boundary conditions for this test case
     bcs.w_rho = 1.1*3;
@@ -552,6 +554,27 @@ void test_cases::south_to_north_couette_flow(){
 
 }
 
+std::string test_cases::create_output_directory(double tol, double dx, double dt){
+
+    std::string output_file;
+    std::string folder;
+    std::ostringstream s;
+    //output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
+
+    output_file = "/home/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
+    s << "tol " << tol << " x " << dx
+     << " t " << dt;
+     folder = s.str();
+    //folder.replace(folder.begin(),folder.end(), ".",  "_");
+    boost::replace_all(folder, "." , "_");
+    output_file = output_file + folder;
+
+    boost::filesystem::path dir(output_file);
+    boost::filesystem::create_directories(dir);
+
+    return output_file;
+
+}
 
 void test_cases::vector_var_tests(){
      vector_var a,b,c,d,e,f;

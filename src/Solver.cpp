@@ -381,9 +381,10 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             soln.set_v(i,temp_soln.get_v(i));
             soln.set_w(i,temp_soln.get_w(i));
 
-            if (isnan(temp_soln.get_rho(i)) || isnan(temp_soln.get_u(i))) {
+            if (std::isnan(temp_soln.get_rho(i)) || std::isnan(temp_soln.get_u(i))) {
                 error_output.close();
                 return;
+
 
             }
         }

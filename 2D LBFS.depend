@@ -64,7 +64,7 @@
 
 1457027661 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\vector_var.h
 
-1457630375 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\solver.cpp
+1458578887 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\solver.cpp
 	"Solver.h"
 	<math.h>
 	"vector_var.h"
@@ -74,7 +74,7 @@
 	<fstream>
 	<global_variables.h>
 
-1457630375 riables.h>
+1458578887 riables.h>
 
 1457366851 r.h"
 
@@ -88,6 +88,8 @@
 1457447149 forces.h"
 
 1457027661 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
+	"Boundary_Conditions.h"
+	<stdlib.h>
 	"Boundary_Conditions.h"
 	<stdlib.h>
 	"Boundary_Conditions.h"
@@ -134,6 +136,8 @@
 	"quad_bcs_plus.h"
 	"quad_bcs.h"
 	"quad_bcs_plus.h"
+	"quad_bcs.h"
+	"quad_bcs_plus.h"
 
 1450443710 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Node.cpp
 	"Node.h"
@@ -142,6 +146,11 @@
 1450441596 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Node.h
 
 1457628727 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
+	<stdlib.h>
+	"Solution.h"
+	<algorithm>
+	<fstream>
+	<iostream>
 	<stdlib.h>
 	"Solution.h"
 	<algorithm>
@@ -214,10 +223,13 @@
 	"Uniform_Mesh.h"
 	"vector_var.h"
 	<string>
+	"Uniform_Mesh.h"
+	"vector_var.h"
+	<string>
 
 1453812249 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Uniform_Mesh.h
 
-1457630375 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1458578887 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	"Solver.h"
 	<math.h>
 	"vector_var.h"
@@ -246,6 +258,14 @@
 	"Solution.h"
 	<cmath>
 	<fstream>
+	"Solver.h"
+	<math.h>
+	"vector_var.h"
+	<iostream>
+	"Solution.h"
+	<cmath>
+	<fstream>
+	<global_variables.h>
 	"Solver.h"
 	<math.h>
 	"vector_var.h"
@@ -328,10 +348,20 @@
 	"Solution.h"
 	"vector_var.h"
 	"external_forces.h"
+	"Uniform_Mesh.h"
+	"Boundary_Conditions.h"
+	"Solution.h"
+	"vector_var.h"
+	"external_forces.h"
 
 1457027661 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/vector_var.h
 
 1453812249 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Uniform_Mesh.cpp
+	"Uniform_Mesh.h"
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<algorithm>
 	"Uniform_Mesh.h"
 	<math.h>
 	<stdio.h>
@@ -425,8 +455,20 @@
 	<math.h>
 	"vector_var.h"
 	<math.h>
+	"vector_var.h"
+	<math.h>
 
 1457979542 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/main.cpp
+	<iostream>
+	"Uniform_Mesh.h"
+	"vector_var.h"
+	<stdio.h>
+	<iostream>
+	<math.h>
+	"Boundary_Conditions.h"
+	"Solution.h"
+	"Solver.h"
+	"test_cases.h"
 	<iostream>
 	"Uniform_Mesh.h"
 	"vector_var.h"
@@ -525,7 +567,7 @@
 1453812249 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\quad_bcs.cpp
 	"quad_bcs.h"
 
-1458081744 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\test_cases.cpp
+1458646771 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\test_cases.cpp
 	"test_cases.h"
 	<iostream>
 	"Uniform_Mesh.h"
@@ -558,8 +600,9 @@
 	"quad_bcs.h"
 	"quad_bcs.h"
 	"quad_bcs.h"
+	"quad_bcs.h"
 
-1458045684 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/test_cases.cpp
+1458579000 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/test_cases.cpp
 	"test_cases.h"
 	<iostream>
 	"Uniform_Mesh.h"
@@ -627,6 +670,19 @@
 	"Solver.h"
 	"quad_bcs.h"
 	"external_forces.h"
+	"test_cases.h"
+	<iostream>
+	"Uniform_Mesh.h"
+	"vector_var.h"
+	<stdio.h>
+	<iostream>
+	<math.h>
+	"Boundary_Conditions.h"
+	"Solution.h"
+	"Solver.h"
+	"quad_bcs.h"
+	"external_forces.h"
+	"global_variables.h"
 	"test_cases.h"
 	<iostream>
 	"Uniform_Mesh.h"
@@ -669,6 +725,7 @@
 	"quad_bcs_plus.h"
 	"quad_bcs_plus.h"
 	"quad_bcs_plus.h"
+	"quad_bcs_plus.h"
 
 1457362851 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/global_variables.cpp
 	"global_variables.h"
@@ -676,8 +733,9 @@
 	"global_variables.h"
 	"global_variables.h"
 	"global_variables.h"
+	"global_variables.h"
 
-1457631727 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
+1458081318 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
 
 1458081318 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\global_variables.h
 
@@ -693,6 +751,8 @@
 1457443973 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/external_forces.h
 
 1457451032 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/external_forces.cpp
+	"external_forces.h"
+	<stdlib.h>
 	"external_forces.h"
 	<stdlib.h>
 	"external_forces.h"
@@ -740,7 +800,8 @@
 
 1457443973 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/external_forces.h
 
-1457027661 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/test_cases.h
+1458650367 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/test_cases.h
+	<string>
 
 1457027661 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
 	"Boundary_Conditions.h"
@@ -753,7 +814,7 @@
 1457362851 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/global_variables.cpp
 	"global_variables.h"
 
-1458081318 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
+1458689572 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
 
 1453812249 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/quad_bcs.cpp
 	"quad_bcs.h"
@@ -761,14 +822,14 @@
 1457027661 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/quad_bcs_plus.cpp
 	"quad_bcs_plus.h"
 
-1457628727 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
+1458655043 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
 	<stdlib.h>
 	"Solution.h"
 	<algorithm>
 	<fstream>
 	<iostream>
 
-1458578887 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1458648803 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	"Solver.h"
 	<math.h>
 	"vector_var.h"
@@ -789,7 +850,7 @@
 	"vector_var.h"
 	<math.h>
 
-1458579000 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/test_cases.cpp
+1458686495 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/test_cases.cpp
 	"test_cases.h"
 	<iostream>
 	"Uniform_Mesh.h"
@@ -803,4 +864,9 @@
 	"quad_bcs.h"
 	"external_forces.h"
 	"global_variables.h"
+	<algorithm>
+	<string>
+	<sstream>
+	<boost/algorithm/string/replace.hpp>
+	<boost/filesystem.hpp>
 
