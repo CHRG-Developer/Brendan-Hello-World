@@ -9,8 +9,16 @@
 #include "Solution.h"
 #include "Solver.h"
 #include "quad_bcs.h"
+#include "external_forces.h"
+#include "global_variables.h"
+#include <algorithm>
+#include <string>
+#include <sstream>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
+using namespace boost::filesystem;
 
 test_cases::test_cases()
 {
@@ -21,15 +29,125 @@ test_cases::~test_cases()
 {
     //dtor
 }
+
+void test_cases::west_to_east_poiseuille_flow(){
+
+    double X,Y,dx,dy,dt; // dt is streaming time step
+    double kine_viscosity,tau;
+    double reynolds, umax;
+    double simulation_length;
+    double delta_t; // time stepping step
+    quad_bcs_plus bcs;
+    double cs;
+    double pressure_grad;
+    global_variables globals;
+    std::string output_file;
+    double average_pressure;
+
+    average_pressure =1*3;
+
+
+    //vector_var pressure_gradient(-0.01,0,0), origin(1.1,0,0), origin_loc(0,0,0) ;
+    vector_var pressure_gradient(0,0,0), origin(average_pressure,0,0), origin_loc(0,0,0) ;
+
+    /// Parameters unique to test case
+
+    X= 16;
+    Y= 4.4;
+    dx= 0.1; // grid spacing
+    dy = 0.1;  // grid spacing
+    dt = 0.05;  // streaming time step -> dictates mach number -> grid spacing /2
+    /// Error :: let dt = l_dx = l_dy i.e. lattice spacing
+
+    simulation_length = 25000;
+    //kine_viscosity = U * X/ reynolds;
+    kine_viscosity = 0.0833333;
+
+    delta_t = 0.05;  // time marching step
+    cs = 1/sqrt(3);
+
+    reynolds = 33.7094;
+    umax = 0.17557;
+    // tau = 0.5 + Umax* Length / reynolds/dt  --- assumes c = 1.
+    tau = 0.5 + umax*X /reynolds /dt;
+
+    pressure_grad =0;
+
+    //tau =0.75
+    output_file = create_output_directory(globals.tolerance,dx,delta_t);
+
+
+    // set boundary conditions for this test case
+    bcs.w_rho = 1.1*3;
+    bcs.w_u = 0;
+    bcs.w_v = 0;
+    bcs.w_w = 0;
+    bcs.w_type_vel = globals.neumann;
+    bcs.w_type_rho = globals.dirichlet;
+
+    bcs.s_rho = 0;
+    bcs.s_u = 0;
+    bcs.s_v = 0;
+    bcs.s_w = 0;
+    bcs.s_type_vel= globals.dirichlet;
+    bcs.s_type_rho = globals.neumann;
+
+    bcs.e_rho = 1*3;
+    bcs.e_u = 0;
+    bcs.e_v = 0;
+    bcs.e_w = 0;
+    bcs.e_type_vel= globals.neumann;
+    bcs.e_type_rho = globals.dirichlet;
+
+    bcs.n_rho = 0;
+    bcs.n_u = 0;
+    bcs.n_v = 0;
+    bcs.n_w = 0;
+    bcs.n_type_vel= globals.dirichlet;
+    bcs.n_type_rho = globals.neumann;
+
+
+
+
+
+    /// Methods to run the test case
+    //vector_var_tests();
+
+    // create Mesh
+    Uniform_Mesh mesh(X,Y,dx,dy);
+
+    // create boundary conditions
+    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
+    bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
+
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(pressure_grad);
+
+    //create solution
+    Solution soln(mesh.get_total_nodes());
+    soln.assign_pressure_gradient(pressure_gradient,origin_loc,origin,mesh);
+    soln.set_average_rho(average_pressure);
+    // Solve
+
+    Solver solve;
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file,source_term);
+    soln.output(output_file);
+    tau = 1;
+
+}
+
+
+
 void test_cases::lid_driven_cavity_N(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
     double reynolds,kine_viscosity,tau;
     double U;
-    double simulation_length;
-    double delta_t; // time stepping step
+
+
     quad_bcs bcs;
-    double cs, tolerance;
+    double cs,delta_t;
 
     /// Parameters unique to test case
     reynolds = 1000;
@@ -46,7 +164,7 @@ void test_cases::lid_driven_cavity_N(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = 0.5;
+
 
     // set boundary conditions for this test case
     bcs.w_rho = 1;
@@ -86,7 +204,7 @@ void test_cases::lid_driven_cavity_N(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t, dx,tolerance);
+    //solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t, dx,tolerance);
 
     tau = 1;
 
@@ -94,16 +212,17 @@ void test_cases::lid_driven_cavity_N(){
 void test_cases::west_to_east_couette_flow(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
-    double reynolds,kine_viscosity,tau;
+    double kine_viscosity,tau;
     double U;
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs bcs;
     double cs;
-    double tolerance;
+
+    std::string output_file;
 
     /// Parameters unique to test case
-    reynolds = 4000;
+
     X= 0.3;
     Y=1;
     dx=0.1; // grid spacing
@@ -119,8 +238,10 @@ void test_cases::west_to_east_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
 
-    tolerance = pow(10,-5);
 
+    //output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
+
+    output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
     //tau =0.75;
 
     // set boundary conditions for this test case
@@ -160,15 +281,20 @@ void test_cases::west_to_east_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
+
 
     //create solution
     Solution soln(mesh.get_total_nodes());
+    soln.set_average_rho(1.0);
 
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,tolerance);
-
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file, source_term);
+    soln.output(output_file);
     tau = 1;
 
 }
@@ -176,16 +302,17 @@ void test_cases::west_to_east_couette_flow(){
 void test_cases::east_to_west_couette_flow(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
-    double reynolds,kine_viscosity,tau;
+    double kine_viscosity,tau;
     double U;
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs bcs;
     double cs;
-    double tolerance;
 
+    std::string output_file;
+     output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
     /// Parameters unique to test case
-    reynolds = 4000;
+
     X= 0.3;
     Y=1;
     dx=0.1; // grid spacing
@@ -201,7 +328,9 @@ void test_cases::east_to_west_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = pow(10,-5);
+
+
+    output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
     // set boundary conditions for this test case
     bcs.w_rho = 0;
@@ -240,14 +369,19 @@ void test_cases::east_to_west_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
 
     //create solution
     Solution soln(mesh.get_total_nodes());
 
     // Solve
 
+
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, tolerance);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file,source_term);
+    soln.output(output_file);
 
     tau = 1;
 
@@ -255,15 +389,17 @@ void test_cases::east_to_west_couette_flow(){
 void test_cases::north_to_south_couette_flow(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
-    double reynolds,kine_viscosity,tau;
+    double kine_viscosity,tau;
     double U;
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs bcs;
-    double cs,tolerance;
+    double cs;
+    std::string output_file;
+     output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
     /// Parameters unique to test case
-    reynolds = 4000;
+
     X= 1;
     Y=0.3;
     dx=0.1; // grid spacing
@@ -279,7 +415,7 @@ void test_cases::north_to_south_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = pow(10,-5);
+
 
 
     // set boundary conditions for this test case
@@ -319,6 +455,9 @@ void test_cases::north_to_south_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
 
     //create solution
     Solution soln(mesh.get_total_nodes());
@@ -326,7 +465,7 @@ void test_cases::north_to_south_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,tolerance);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,output_file,source_term);
 
     tau = 1;
 
@@ -335,15 +474,17 @@ void test_cases::north_to_south_couette_flow(){
 void test_cases::south_to_north_couette_flow(){
 
     double X,Y,dx,dy,dt; // dt is streaming time step
-    double reynolds,kine_viscosity,tau;
+    double kine_viscosity,tau;
     double U;
     double simulation_length;
     double delta_t; // time stepping step
     quad_bcs bcs;
-    double cs, tolerance;
+    double cs;
+    std::string output_file;
+     output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
     /// Parameters unique to test case
-    reynolds = 4000;
+
     X= 1;
     Y=0.3;
     dx=0.1; // grid spacing
@@ -359,7 +500,6 @@ void test_cases::south_to_north_couette_flow(){
     cs = 1/sqrt(3);
     tau = kine_viscosity + 0.5* pow(cs,2) *dt;
     //tau =0.75;
-    tolerance = pow(10,-5);
 
     // set boundary conditions for this test case
     bcs.w_rho = 1;
@@ -398,6 +538,9 @@ void test_cases::south_to_north_couette_flow(){
     Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
     bc.assign_boundary_conditions(mesh.get_num_x(), mesh.get_num_y(),bcs);
 
+    // assign external force terms
+    external_forces source_term(mesh.get_total_nodes());
+    source_term.set_uniform_force(0.0);
 
     //create solution
     Solution soln(mesh.get_total_nodes());
@@ -405,12 +548,33 @@ void test_cases::south_to_north_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, tolerance);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file, source_term);
 
     tau = 1;
 
 }
 
+std::string test_cases::create_output_directory(double tol, double dx, double dt){
+
+    std::string output_file;
+    std::string folder;
+    std::ostringstream s;
+    //output_file = "C:/Users/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
+
+    output_file = "/home/brendan/Dropbox/PhD/Test Cases/Poiseuille Flow/";
+    s << "tol " << tol << " x " << dx
+     << " t " << dt;
+     folder = s.str();
+    //folder.replace(folder.begin(),folder.end(), ".",  "_");
+    boost::replace_all(folder, "." , "_");
+    output_file = output_file + folder;
+
+    boost::filesystem::path dir(output_file);
+    boost::filesystem::create_directories(dir);
+
+    return output_file;
+
+}
 
 void test_cases::vector_var_tests(){
      vector_var a,b,c,d,e,f;

@@ -1,4 +1,5 @@
 #include "quad_bcs.h"
+#include "quad_bcs_plus.h"
 
 #ifndef BOUNDARY_CONDITIONS_H
 #define BOUNDARY_CONDITIONS_H
@@ -10,6 +11,7 @@ class Boundary_Conditions
         Boundary_Conditions(int num_x, int num_y);
         virtual ~Boundary_Conditions();
         void assign_boundary_conditions(int num_x, int num_y, quad_bcs);
+        void assign_boundary_conditions(int num_x, int num_y, quad_bcs_plus _bc);
         bool get_n_bc( int i) {return n_bc[i];};
         bool get_s_bc ( int i) {return s_bc [i];};
         bool get_w_bc( int i) {return w_bc[i];};
@@ -26,10 +28,14 @@ class Boundary_Conditions
         double get_e_rho( int i) {return e_rho[i];};
         double get_e_u( int i) {return e_u[i];};
         double get_e_v( int i) {return e_v[i];};
-        int get_n_type( int i) {return n_type[i];};
-        int get_e_type( int i) {return e_type[i];};
-        int get_w_type( int i) {return w_type[i];};
-        int get_s_type( int i) {return s_type[i];};
+        int get_n_type_rho( int i) {return n_type_rho[i];};
+        int get_e_type_rho( int i) {return e_type_rho[i];};
+        int get_w_type_rho( int i) {return w_type_rho[i];};
+        int get_s_type_rho( int i) {return s_type_rho[i];};
+        int get_n_type_vel( int i) {return n_type_vel[i];};
+        int get_e_type_vel( int i) {return e_type_vel[i];};
+        int get_w_type_vel( int i) {return w_type_vel[i];};
+        int get_s_type_vel( int i) {return s_type_vel[i];};
         int get_periodic_node( int i) {return periodic_node[i];};
     protected:
     private:
@@ -41,7 +47,8 @@ class Boundary_Conditions
         double * s_rho, * s_u, * s_v ;
         double * w_rho, * w_u, * w_v ;
         double * e_rho, * e_u, * e_v ;
-        int *n_type, *e_type, *w_type, *s_type;
+        int *n_type_rho, *e_type_rho, *w_type_rho, *s_type_rho;
+        int *n_type_vel, *e_type_vel, *w_type_vel, *s_type_vel;
         int *periodic_node;
 };
 

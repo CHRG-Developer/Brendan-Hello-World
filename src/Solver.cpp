@@ -5,6 +5,8 @@
 #include "Solution.h"
 #include <cmath>
 #include <fstream>
+#include <global_variables.h>
+
 using namespace std;
 Solver::Solver()
 {
@@ -17,7 +19,7 @@ Solver::~Solver()
 }
 
 void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, Solution &soln, Boundary_Conditions &boundary_conditions,
-                                  double simulation_length, double delta_t, double _dx, double tolerance)
+                                  double simulation_length, double delta_t, double _dx,  std::string output_file, external_forces &source_term)
 {
     //dtor
     dt = _dt; // timestepping for streaming
@@ -34,7 +36,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     // U is equal to max theoretical velocity in solution
 
     std::ofstream error_output ;
-    error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
+    std::string output_dir;
+    output_dir = output_file +"/error.txt";
+
+    // error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
+    error_output.open(output_dir.c_str(), ios::out);
 
 
     vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
@@ -44,7 +50,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     double rho_rms_num, u_rms_num, v_rms_num, w_rms_num, error;
     double rho_rms_den, u_rms_den, v_rms_den, w_rms_den;
     double rho_rms, u_rms, v_rms, w_rms;
-
+    global_variables globals;
     flux_var x_flux , y_flux;
     flux_var cell_flux;
 
@@ -59,6 +65,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     double lattice_weight;
     double u_magnitude;
     double u_bc, rho_bc,  v_bc;
+
     int bc_node;
     //calculate timesteps
 
@@ -69,27 +76,16 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
     // loop through each cell
     for (int t= 0; t < timesteps; t++){
 
-
-        //loop through periodic boundary conditions
-        for ( int m =0 ; m< Mesh.get_total_nodes(); m++){
-
-            if ( boundary_conditions.get_e_type(m) == 3 || boundary_conditions.get_w_type(m) == 3
-                || boundary_conditions.get_n_type(m) == 3 || boundary_conditions.get_s_type(m) == 3){
-
-
-                    u_bc = soln.get_u( boundary_conditions.get_periodic_node(m));
-                    v_bc = soln.get_v( boundary_conditions.get_periodic_node(m));
-                    rho_bc = soln.get_rho( boundary_conditions.get_periodic_node(m));
-
-                    soln.update(rho_bc,u_bc,v_bc,0.0,m);
-
-                }
-
-        }
         rho_rms = 0;
         u_rms =0;
         v_rms = 0;
         w_rms = 0;
+        u_rms_num =0;
+        v_rms_num = 0;
+        w_rms_num = 0;
+        u_rms_den = 0;
+        v_rms_den = 0;
+        w_rms_den = 0;
 
 
         for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
@@ -99,7 +95,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
             cell_1.x = Mesh.get_centroid_x(i);
             cell_1.y = Mesh.get_centroid_y(i);
-            cell_1.z =Mesh.get_centroid_z(i);
+            cell_1.z = Mesh.get_centroid_z(i);
 
             cell_flux.P =0.0;
             cell_flux.Momentum_x =0.0;
@@ -149,41 +145,54 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                     // y = mx + c
 
                     // bc present - only dirichlet and Neumann
-                    if ( bc.present && bc.type < 3){
-
+                    if ( bc.present ){
+                        cell_2.x = interface_node.x;
+                        cell_2.y = interface_node.y;
+                        cell_2.z = interface_node.z;
                         // dirichlet BC -> set correct gradient to generate correct shear stresses
-                        if(bc.type == 1){
+                        if(bc.vel_type == 1){
 
-
-                            cell_2.x = interface_node.x;
-                            cell_2.y = interface_node.y;
-                            cell_2.z = interface_node.z;
-
-                            delta_rho.Get_Gradient(soln.get_rho(i), bc.rho,cell_1,cell_2 );
                             delta_u.Get_Gradient(soln.get_u(i), bc.u,cell_1,cell_2 );
                             delta_v.Get_Gradient(soln.get_v(i), bc.v,cell_1,cell_2 );
 
                         // Neumann BC -> set constant gradient
-                        }else if(bc.type == 2){
+                        }else if(bc.vel_type == 2){
                             /// u_bc - u_node = gradient * dx/2
-
-                            cell_2.x = interface_node.x;
-                            cell_2.y = interface_node.y;
-                            cell_2.z = interface_node.z;
 
                             // temp variables need to be updated for unstructure formulation
                             u_bc = bc.u * _dx/2 + soln.get_u(i);
                             v_bc = bc.v * _dx/2 + soln.get_v(i);
-                            rho_bc = bc.rho * _dx/2 + soln.get_rho(i);
 
-
-                            delta_rho.Get_Gradient(soln.get_rho(i), rho_bc,cell_1,cell_2 );
                             delta_u.Get_Gradient(soln.get_u(i), u_bc,cell_1,cell_2 );
                             delta_v.Get_Gradient(soln.get_v(i), v_bc,cell_1,cell_2 );
 
+                        }else if (bc.vel_type == 3){
+
+                            delta_u.Get_Gradient(soln.get_u(i),
+                                soln.get_u( boundary_conditions.get_periodic_node(i)),cell_1,cell_2 );
+                            delta_v.Get_Gradient(soln.get_v(i),
+                                soln.get_v( boundary_conditions.get_periodic_node(i)),cell_1,cell_2 );
                         }
 
+                        // dirichlet BC -> set correct gradient to generate correct shear stresses
+                        if(bc.rho_type == 1){
 
+                            delta_rho.Get_Gradient(soln.get_rho(i), bc.rho,cell_1,cell_2 );
+
+                        // Neumann BC -> set constant gradient
+                        }else if(bc.rho_type == 2){
+                            /// u_bc - u_node = gradient * dx/2
+
+                            // temp variables need to be updated for unstructure formulation
+                            rho_bc = bc.rho * _dx/2 + soln.get_rho(i);
+                            delta_rho.Get_Gradient(soln.get_rho(i), rho_bc,cell_1,cell_2 );
+
+                        }else if (bc.rho_type == 3){
+
+                            delta_rho.Get_Gradient(soln.get_rho(i),
+                            soln.get_rho( boundary_conditions.get_periodic_node(i)),cell_1,cell_2 );
+
+                        }
 
                     }else{
 
@@ -213,10 +222,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
 
                     u_magnitude = u_lattice.Magnitude();
-                    feq_lattice[k] = 1 ;
-                    feq_lattice[k] = feq_lattice[k] + e_alpha.Dot_Product(u_lattice) / pow(cs,2);
-                    feq_lattice[k] = feq_lattice[k] + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
-                    feq_lattice[k] = feq_lattice[k] *lattice_weight * rho_lattice;
+                    feq_lattice[k] = 1 * rho_lattice ;
+                    feq_lattice[k] = feq_lattice[k] + e_alpha.Dot_Product(u_lattice) / pow(cs,2) * soln.get_average_rho();
+                    feq_lattice[k] = feq_lattice[k] + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )
+                    / (2 * pow(cs,4)) * soln.get_average_rho();
+                    feq_lattice[k] = feq_lattice[k] *lattice_weight ;
 
                     rho_interface = rho_interface + feq_lattice[k];
                     rho_u_interface.x = rho_u_interface.x + feq_lattice[k] * e_alpha.x;
@@ -232,9 +242,12 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                     u_interface.y = 0;
                     u_interface.z = 0;
                 }else{
-                    u_interface.x = rho_u_interface.x /rho_interface;
-                    u_interface.y = rho_u_interface.y /rho_interface;
-                    u_interface.z = rho_u_interface.z /rho_interface;
+                    //u_interface.x = rho_u_interface.x /rho_interface;
+                    //u_interface.y = rho_u_interface.y /rho_interface;
+                    //u_interface.z = rho_u_interface.z /rho_interface;
+                    u_interface.x = rho_u_interface.x /soln.get_average_rho();
+                    u_interface.y = rho_u_interface.y /soln.get_average_rho();
+                    u_interface.z = rho_u_interface.z /soln.get_average_rho();
                     u_magnitude = u_interface.Magnitude();
                 }
 
@@ -245,10 +258,11 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
     //
                     // get feq at cell interface
-                    feq_interface = 1 ;
-                    feq_interface = feq_interface  + e_alpha.Dot_Product(u_interface) / pow(cs,2);
-                    feq_interface = feq_interface  + ( pow(e_alpha.Dot_Product(u_interface),2)  - pow((u_magnitude* cs),2) )/ (2 * pow(cs,4));
-                    feq_interface = feq_interface  *lattice_weight * rho_interface;
+                    feq_interface = 1 * rho_interface;
+                    feq_interface = feq_interface  + e_alpha.Dot_Product(u_interface) / pow(cs,2) *soln.get_average_rho();
+                    feq_interface = feq_interface  + ( pow(e_alpha.Dot_Product(u_interface),2)  - pow((u_magnitude* cs),2) )
+                            / (2 * pow(cs,4))*soln.get_average_rho();
+                    feq_interface = feq_interface  *lattice_weight ;
                     feq_int_debug[k] = feq_interface;
 
                     //get fneq at cell interface
@@ -276,10 +290,10 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                     //do nothing for now
 
                 }else{
-                    cell_flux.P = 0;
-                    //cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
+                    //cell_flux.P = 0;
+                    cell_flux.P = cell_flux.P + (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
                     cell_flux.Momentum_x = cell_flux.Momentum_x + (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                    ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y );
+                                    ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y ) ;
                     cell_flux.Momentum_y = cell_flux.Momentum_y + (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                     ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
                 }
@@ -289,11 +303,14 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             }
 
             // forward euler method
-            double f1,f2,f3;
+            double f1,f2,f3,temp_force;
+            temp_force = source_term.get_force(i)* Mesh.get_cell_volume(i) * soln.get_rho(i);
             // try removing
             f1= soln.get_rho(i) + delta_t * cell_flux.P;
-            f2 =  soln.get_rho(i) * soln.get_u(i) + (delta_t * cell_flux.Momentum_x) ;
-            f3 =  soln.get_rho(i) * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) ;
+            f2 =  soln.get_average_rho()* soln.get_u(i) + (delta_t *
+                    (cell_flux.Momentum_x +
+                    source_term.get_force(i)* Mesh.get_cell_volume(i) * soln.get_average_rho()));
+            f3 =  soln.get_average_rho() * soln.get_v(i) + (delta_t * cell_flux.Momentum_y) ;
 
             if (f1 < pow(10,-5)){
 
@@ -302,8 +319,8 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
                 }else {
 
-                f2 = f2 /f1;
-                f3 = f3 /f1;
+                f2 = f2 /soln.get_average_rho();
+                f3 = f3 /soln.get_average_rho();
             }
 
             temp_soln.update(f1,f2,f3,0.0, i);
@@ -313,13 +330,17 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             rho_rms_num = rho_rms_num + pow( f1 -soln.get_rho(i) ,2.0 );
             if( f1 < pow(1,-8)){
                 rho_rms_den = rho_rms_den + pow(1,5) ;
+
             }else{
                 rho_rms_den = rho_rms_den + pow(f1,2) ;
+
             }
             u_rms_num = u_rms_num + pow( f2 -soln.get_u(i) ,2.0 );
             u_rms_den = u_rms_den + pow(f2,2) ;
+
             v_rms_num = v_rms_num + pow( f3 -soln.get_v(i) ,2.0 ) ;
             v_rms_den = v_rms_den +pow(f3,2);
+            v_rms_den = v_rms_den + 1;
 
 
         }
@@ -327,18 +348,19 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
 
         // get root of squared approximation error
 
-        if (rho_rms_den < pow(1, -8)){
+        if (rho_rms_den < globals.small_number){
             rho_rms = 0 ;
         }else{
             rho_rms = sqrt(rho_rms_num / rho_rms_den);
         }
 
-        if (u_rms_den < pow(1, -8)){
+        if (u_rms_den < globals.small_number){
             u_rms = u_rms ;
         }else{
-            u_rms =sqrt(u_rms_num / u_rms_den);
+            u_rms = sqrt(u_rms_num / u_rms_den);
         }
-        if (v_rms_den < pow(1, -8)){
+
+        if (v_rms_den < globals.small_number){
             v_rms = v_rms;
         }else{
             v_rms = sqrt(v_rms_num / v_rms_den) ;
@@ -349,7 +371,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
         error = fmax(rho_rms, u_rms);
         error = fmax(error, v_rms);
 
-        error_output << t << ", "  << error << "/n" ;
+        error_output << t << ", "  << error << endl;
 
 
 
@@ -359,18 +381,25 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
             soln.set_v(i,temp_soln.get_v(i));
             soln.set_w(i,temp_soln.get_w(i));
 
+            if (std::isnan(temp_soln.get_rho(i)) || std::isnan(temp_soln.get_u(i))) {
+                error_output.close();
+                return;
+
+
+            }
         }
 
 
         time = t*delta_t;
         cout << "time t=" << time << std::endl;
 
-        if ( error < tolerance ){
+        if ( error < globals.tolerance ){
 
-            //error_output.close();
-            //return ;
+            error_output.close();
+            return ;
 
         }
+
     }
 
     error_output.close();
@@ -424,7 +453,8 @@ void Solver::cell_interface_variables( int j, int i, vector_var &interface_node,
                     bc.rho = boundary_conditions.get_w_rho(i);
                     bc.u = boundary_conditions.get_w_u(i);
                     bc.v = boundary_conditions.get_w_v(i);
-                    bc.type = boundary_conditions.get_w_type(i);
+                    bc.vel_type = boundary_conditions.get_w_type_vel(i);
+                    bc.rho_type = boundary_conditions.get_w_type_rho(i);
                     bc.periodic_node = boundary_conditions.get_periodic_node(i);
 
                 }
@@ -443,7 +473,8 @@ void Solver::cell_interface_variables( int j, int i, vector_var &interface_node,
                     bc.rho = boundary_conditions.get_s_rho(i);
                     bc.u = boundary_conditions.get_s_u(i);
                     bc.v = boundary_conditions.get_s_v(i);
-                    bc.type = boundary_conditions.get_s_type(i);
+                    bc.vel_type = boundary_conditions.get_s_type_vel(i);
+                    bc.rho_type = boundary_conditions.get_s_type_rho(i);
                     bc.periodic_node = boundary_conditions.get_periodic_node(i);
 
 
@@ -463,7 +494,8 @@ void Solver::cell_interface_variables( int j, int i, vector_var &interface_node,
                     bc.rho = boundary_conditions.get_e_rho(i);
                     bc.u = boundary_conditions.get_e_u(i);
                     bc.v = boundary_conditions.get_e_v(i);
-                    bc.type = boundary_conditions.get_e_type(i);
+                    bc.vel_type = boundary_conditions.get_e_type_vel(i);
+                    bc.rho_type = boundary_conditions.get_e_type_rho(i);
                     bc.periodic_node = boundary_conditions.get_periodic_node(i);
 
 
@@ -483,7 +515,8 @@ void Solver::cell_interface_variables( int j, int i, vector_var &interface_node,
                     bc.rho = boundary_conditions.get_n_rho(i);
                     bc.u = boundary_conditions.get_n_u(i);
                     bc.v = boundary_conditions.get_n_v(i);
-                    bc.type = boundary_conditions.get_n_type(i);
+                    bc.vel_type = boundary_conditions.get_n_type_vel(i);
+                    bc.rho_type = boundary_conditions.get_n_type_rho(i);
                     bc.periodic_node = boundary_conditions.get_periodic_node(i);
 
 
