@@ -54,16 +54,16 @@ void test_cases::west_to_east_poiseuille_flow(){
 
     X= 16;
     Y= 4.4;
-    dx= 0.1; // grid spacing
-    dy = 0.1;  // grid spacing
-    dt = 0.05;  // streaming time step -> dictates mach number -> grid spacing /2
+    dx= 0.2; // grid spacing
+    dy = 0.2;  // grid spacing
+    dt = 0.1;  // streaming time step -> dictates mach number -> grid spacing /2
     /// Error :: let dt = l_dx = l_dy i.e. lattice spacing
 
-    simulation_length = 25000;
+    simulation_length = 1000;
     //kine_viscosity = U * X/ reynolds;
     kine_viscosity = 0.0833333;
 
-    delta_t = 0.05;  // time marching step
+    delta_t = 0.3;  // time marching step
     cs = 1/sqrt(3);
 
     reynolds = 33.7094;

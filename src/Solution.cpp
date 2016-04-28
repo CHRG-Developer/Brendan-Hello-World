@@ -104,3 +104,15 @@ void Solution::output (std::string output_location){
     v_txt.close();
 
 }
+
+void Solution::clone( Solution &soln_a){
+
+        for (int i =0; i< total_nodes; i++){
+            rho[i] = soln_a.get_rho(i);
+            u[i] = soln_a.get_u(i);
+            v[i] = soln_a.get_v(i);
+            w[i] = soln_a.get_w(i);
+
+        }
+        average_rho = soln_a.get_average_rho();
+}

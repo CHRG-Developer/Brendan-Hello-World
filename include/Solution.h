@@ -25,6 +25,7 @@ class Solution
             vector_var origin_magnitude,Uniform_Mesh &Mesh);
         void update ( double rho, double u, double v, double w , int i);
         void output (std::string output_location);
+        void clone( Solution &soln_a);
     protected:
     private:
         double *rho, *u, *v, *w;
