@@ -116,3 +116,14 @@ void Solution::clone( Solution &soln_a){
         }
         average_rho = soln_a.get_average_rho();
 }
+
+
+void Solution::post_process(double gamma){
+
+ for (int i =0; i< total_nodes; i++){
+            rho[i] = rho[i] /gamma;
+
+        }
+
+
+}

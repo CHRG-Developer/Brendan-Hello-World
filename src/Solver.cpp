@@ -19,7 +19,8 @@ Solver::~Solver()
 }
 
 void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, Solution &soln, Boundary_Conditions &boundary_conditions,
-                                  double simulation_length, double delta_t, double _dx,  std::string output_file, external_forces &source_term)
+                                  double simulation_length, double delta_t, double _dx,  std::string output_file, external_forces &source_term,
+                                  double pre_condition_gammma)
 {
     //dtor
     dt = _dt; // timestepping for streaming
@@ -232,7 +233,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                         feq_lattice[k] = 1 * rho_lattice ;
                         feq_lattice[k] = feq_lattice[k] + e_alpha.Dot_Product(u_lattice) / pow(cs,2) * temp_soln.get_average_rho();
                         feq_lattice[k] = feq_lattice[k] + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )
-                        / (2 * pow(cs,4)) * temp_soln.get_average_rho();
+                        / (2 * pow(cs,4)* pre_condition_gammma) * temp_soln.get_average_rho();
                         feq_lattice[k] = feq_lattice[k] *lattice_weight ;
 
                         rho_interface = rho_interface + feq_lattice[k];
@@ -268,7 +269,7 @@ void Solver::Uniform_Mesh_Solver(double _dt, double _dtau, Uniform_Mesh &Mesh, S
                         feq_interface = 1 * rho_interface;
                         feq_interface = feq_interface  + e_alpha.Dot_Product(u_interface) / pow(cs,2) *temp_soln.get_average_rho();
                         feq_interface = feq_interface  + ( pow(e_alpha.Dot_Product(u_interface),2)  - pow((u_magnitude* cs),2) )
-                                / (2 * pow(cs,4))*temp_soln.get_average_rho();
+                                / (2 * pow(cs,4) * pre_condition_gammma)*temp_soln.get_average_rho();
                         feq_interface = feq_interface  *lattice_weight ;
                         feq_int_debug[k] = feq_interface;
 

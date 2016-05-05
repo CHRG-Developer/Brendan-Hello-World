@@ -43,9 +43,11 @@ void test_cases::west_to_east_poiseuille_flow(){
     global_variables globals;
     std::string output_file;
     double average_pressure;
+    double pre_condition_gammma;
 
+    pre_condition_gammma = 1;
+    //average_pressure =1*3*pre_condition_gammma;
     average_pressure =1*3;
-
 
     //vector_var pressure_gradient(-0.01,0,0), origin(1.1,0,0), origin_loc(0,0,0) ;
     vector_var pressure_gradient(0,0,0), origin(average_pressure,0,0), origin_loc(0,0,0) ;
@@ -54,12 +56,14 @@ void test_cases::west_to_east_poiseuille_flow(){
 
     X= 16;
     Y= 4.4;
-    dx= 0.2; // grid spacing
-    dy = 0.2;  // grid spacing
-    dt = 0.1;  // streaming time step -> dictates mach number -> grid spacing /2
+    dx= 0.4; // grid spacing
+    dy = 0.4;  // grid spacing
+    dt = 0.2;  // streaming time step -> dictates mach number -> grid spacing /2
+
+
     /// Error :: let dt = l_dx = l_dy i.e. lattice spacing
 
-    simulation_length = 1000;
+    simulation_length = 2500;
     //kine_viscosity = U * X/ reynolds;
     kine_viscosity = 0.0833333;
 
@@ -69,7 +73,12 @@ void test_cases::west_to_east_poiseuille_flow(){
     reynolds = 33.7094;
     umax = 0.17557;
     // tau = 0.5 + Umax* Length / reynolds/dt  --- assumes c = 1.
+
     tau = 0.5 + umax*X /reynolds /dt;
+    tau = 0.5 + umax*X /reynolds /dt *pre_condition_gammma;
+    //tau = 1/pre_condition_gammma*(tau-0.5) + 0.5;
+
+
 
     pressure_grad =0;
 
@@ -78,7 +87,8 @@ void test_cases::west_to_east_poiseuille_flow(){
 
 
     // set boundary conditions for this test case
-    bcs.w_rho = 1.1*3;
+    //bcs.w_rho = 1.1*3*pre_condition_gammma;
+    bcs.w_rho = 1.1*3*pre_condition_gammma;
     bcs.w_u = 0;
     bcs.w_v = 0;
     bcs.w_w = 0;
@@ -92,7 +102,8 @@ void test_cases::west_to_east_poiseuille_flow(){
     bcs.s_type_vel= globals.dirichlet;
     bcs.s_type_rho = globals.neumann;
 
-    bcs.e_rho = 1*3;
+    //bcs.e_rho = 1*3*pre_condition_gammma;
+    bcs.e_rho = 1*3*pre_condition_gammma;
     bcs.e_u = 0;
     bcs.e_v = 0;
     bcs.e_w = 0;
@@ -128,10 +139,12 @@ void test_cases::west_to_east_poiseuille_flow(){
     Solution soln(mesh.get_total_nodes());
     soln.assign_pressure_gradient(pressure_gradient,origin_loc,origin,mesh);
     soln.set_average_rho(average_pressure);
-    // Solve
+    // Solvec
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file,source_term);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file,source_term,
+                              pre_condition_gammma);
+    soln.post_process(pre_condition_gammma);
     soln.output(output_file);
     tau = 1;
 
@@ -218,7 +231,8 @@ void test_cases::west_to_east_couette_flow(){
     double delta_t; // time stepping step
     quad_bcs bcs;
     double cs;
-
+    double pre_conditioned_gamma;
+    pre_conditioned_gamma = 1.0;
     std::string output_file;
 
     /// Parameters unique to test case
@@ -293,7 +307,7 @@ void test_cases::west_to_east_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file, source_term);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file, source_term,pre_conditioned_gamma);
     soln.output(output_file);
     tau = 1;
 
@@ -308,6 +322,9 @@ void test_cases::east_to_west_couette_flow(){
     double delta_t; // time stepping step
     quad_bcs bcs;
     double cs;
+
+    double pre_conditioned_gamma;
+    pre_conditioned_gamma = 1.0;
 
     std::string output_file;
      output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
@@ -380,7 +397,7 @@ void test_cases::east_to_west_couette_flow(){
 
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file,source_term);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file,source_term,pre_conditioned_gamma);
     soln.output(output_file);
 
     tau = 1;
@@ -396,6 +413,9 @@ void test_cases::north_to_south_couette_flow(){
     quad_bcs bcs;
     double cs;
     std::string output_file;
+
+    double pre_conditioned_gamma;
+    pre_conditioned_gamma = 1.0;
      output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
     /// Parameters unique to test case
@@ -465,7 +485,7 @@ void test_cases::north_to_south_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,output_file,source_term);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,output_file,source_term,pre_conditioned_gamma);
 
     tau = 1;
 
@@ -481,6 +501,9 @@ void test_cases::south_to_north_couette_flow(){
     quad_bcs bcs;
     double cs;
     std::string output_file;
+
+    double pre_conditioned_gamma;
+    pre_conditioned_gamma = 1.0;
      output_file = "/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/";
 
     /// Parameters unique to test case
@@ -548,7 +571,7 @@ void test_cases::south_to_north_couette_flow(){
     // Solve
 
     Solver solve;
-    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file, source_term);
+    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file, source_term,pre_conditioned_gamma);
 
     tau = 1;
 

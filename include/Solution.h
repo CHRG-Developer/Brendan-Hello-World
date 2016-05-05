@@ -26,6 +26,7 @@ class Solution
         void update ( double rho, double u, double v, double w , int i);
         void output (std::string output_location);
         void clone( Solution &soln_a);
+        void post_process(double pre_condition_gamma);
     protected:
     private:
         double *rho, *u, *v, *w;
