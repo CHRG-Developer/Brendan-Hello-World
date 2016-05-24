@@ -1,11 +1,12 @@
 #ifndef UNIFORM_MESH_H
 #define UNIFORM_MESH_H
 
+#include "domain_geometry.h"
 
 class Uniform_Mesh
 {
     public:
-        Uniform_Mesh(double X, double Y, double dx, double dy);
+        Uniform_Mesh(domain_geometry domain);
         virtual ~Uniform_Mesh();
         double get_node_x(int node_num);
         int get_num_x() { return num_x_nodes; };
@@ -85,7 +86,7 @@ class Uniform_Mesh
         //neighbouring nodes
         int * n_node, * s_node, * e_node, * w_node;
 
-
+        double cs;   //speed of sound in medium
 
 };
 

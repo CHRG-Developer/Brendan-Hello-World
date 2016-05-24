@@ -3,6 +3,7 @@
 #include "Solution.h"
 #include "vector_var.h"
 #include "external_forces.h"
+#include "global_variables.h"
 
 #ifndef SOLVER_H
 #define SOLVER_H
@@ -13,9 +14,10 @@ class Solver
     public:
         Solver();
         virtual ~Solver();
-         void Uniform_Mesh_Solver(double _dt,double _vis, Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
-                                   double simulation_length,double delta_t, double dx,  std::string output_file,
-                                   external_forces &source, double pre_condition_gammma);
+         void Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
+                                   external_forces &source,global_variables &globals, domain_geometry &domain);
+
+
     protected:
     private:
 

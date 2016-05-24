@@ -8,17 +8,22 @@
 #include "Solution.h"
 #include "Solver.h"
 #include "test_cases.h"
+#include "program.h"
 
 using namespace std;
 
 
-int main()
+int main(int argc, char *argv[])
 {
+    // Xml input file from command line argument
+    char *xml_input;
+    xml_input = argv[1] ;
 
-    test_cases couette_flow;
+    program LBFS;
 
-    test_cases poiseuille_flow;
-   poiseuille_flow.west_to_east_poiseuille_flow();
+    LBFS.run(xml_input);
+
+
 
 
 
@@ -31,5 +36,4 @@ int main()
 
     return 0;
 }
-
 

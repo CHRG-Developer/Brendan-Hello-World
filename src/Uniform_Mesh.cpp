@@ -3,13 +3,13 @@
 #include <stdio.h>      /* printf, scanf, NULL */
 #include <stdlib.h>
 #include <algorithm>
-Uniform_Mesh::Uniform_Mesh(double c_X, double c_Y, double c_dx, double c_dy)
+Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
 {
     //ctor
-    X = c_X;
-    Y = c_Y;
-    dx = c_dx;
-    dy = c_dy;
+    X = domain.X;
+    Y = domain.Y;
+    dx = domain.dx;
+    dy = domain.dy;
 
 	num_x_nodes = ceil(X/dx);
 	num_y_nodes = ceil(Y/dy);
