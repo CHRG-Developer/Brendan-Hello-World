@@ -3,8 +3,12 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <math.h>
 using namespace std;
 
+Solution::Solution(){
+
+}
 Solution::Solution(int _total_nodes)
 {
     //ctor
@@ -38,7 +42,7 @@ Solution::~Solution()
 
 void Solution::Initialise() {
 
-    std::fill_n(rho, total_nodes , 1.00);
+    std::fill_n(rho, total_nodes , 0.00);
     std::fill_n(u, total_nodes, 0.0);
     std::fill_n(v, total_nodes , 0.0);
     std::fill_n(w, total_nodes , 0.0);
@@ -126,4 +130,145 @@ void Solution::post_process(double gamma){
         }
 
 
+}
+
+
+void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
+                           Uniform_Mesh &fine_mesh){
+
+    int coarse_x, coarse_y;
+    int coarse_i;
+
+    double coarse_rho,coarse_u,coarse_v,coarse_w;
+
+    coarse_soln.set_average_rho( average_rho);
+
+    //may need to swap the approach here around for parrelisation
+    // i.e. loop through coarse mesh
+    for (int i =0; i< total_nodes; i++){
+
+
+            // get index in terms of x and y
+            coarse_x = floor(i/ fine_mesh.get_num_y()/2.0);
+            coarse_y = floor(fmod(i, fine_mesh.get_num_y())/2.0);
+
+            coarse_i = coarse_mesh.get_num_y()* coarse_x + coarse_y;
+
+            // Uniform Mesh -> get area is not needed-> just divide by 4
+
+
+            // add area_fine/area_coarse * var to coarse_i
+
+
+            coarse_soln.add_rho(coarse_i, rho[i]/4.0);
+            coarse_soln.add_u(coarse_i, u[i]/4.0);
+            coarse_soln.add_v(coarse_i, v[i]/4.0);
+            coarse_soln.add_w(coarse_i,w[i]/4.0);
+
+    }
+
+
+}
+void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution &soln,
+                            Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh){
+        double mg_delta_rho, mg_delta_u, mg_delta_v, mg_delta_w;
+            //loop through the finer mesh as this will enable parrelisation later
+
+        int edge_cell_x,edge_cell_y,vertex_cell,coarse_i,coarse_x,coarse_y;
+        int fine_x, fine_y;
+
+        double mg_factor[4] = {9.0/16.0 ,3.0/16.0, 3.0/16.0, 1./16.0 };
+        double edge_factor;
+        bool calculate;
+
+       for(int i =0; i< total_nodes; i++){
+
+
+
+            // get index in terms of x and y
+            coarse_x = floor(i/ fine_mesh.get_num_y()/2.0);
+            coarse_y = floor(fmod(i, fine_mesh.get_num_y())/2.0);
+
+            // for finer cells within a coarse cell
+
+            for(int j = 0; j <4; j++){
+                    calculate = true;
+                 switch(j) {
+
+                    case 0: // West
+                        coarse_i = coarse_mesh.get_num_y()* coarse_x + coarse_y;
+                        break;
+
+                    case 1:
+                        //North/South edge contribution
+                        edge_cell_y = coarse_y + pow(-1.0,1+ floor(fmod(fmod(i, fine_mesh.get_num_y()),2.0)));
+                        coarse_i = coarse_mesh.get_num_y() * coarse_x + edge_cell_y;
+                        if( edge_cell_y < 0 || edge_cell_y > (coarse_mesh.get_num_y()-1)){
+                            calculate = false;
+                        }
+                        break;
+                    case 2:
+                        //East/West edge contribution
+                        edge_cell_x = coarse_x + pow(-1.0 ,1 + floor(fmod(floor(i/ fine_mesh.get_num_y()),2.0)));
+                        coarse_i = coarse_mesh.get_num_y()* edge_cell_x + coarse_y;
+                        if( edge_cell_x< 0 || edge_cell_x > (coarse_mesh.get_num_x()-1)){
+                            calculate = false;
+                        }
+                        break;
+                    case 3:
+                        // Vertex Contribution
+                        coarse_i = coarse_mesh.get_num_y()* edge_cell_x + edge_cell_y;
+
+                        if( edge_cell_x< 0 || edge_cell_x > (coarse_mesh.get_num_x()-1) ||
+                            edge_cell_y< 0 || edge_cell_y > (coarse_mesh.get_num_y()-1)){
+                            calculate = false;
+                        }
+
+                        break;
+                }
+
+                // check if fine cell is on corner or edge
+
+                // get index in terms of x and y
+                fine_x = floor(i/ fine_mesh.get_num_y());
+                fine_y = floor(fmod(i, fine_mesh.get_num_y()));
+                // West Edge
+                edge_factor = 1.0;
+//                if (fine_x == 0) {
+//                    //both corners on west edge
+//                    if (fine_y == 0 || fine_y == (fine_mesh.get_num_y()-1)){
+//                        edge_factor = 16.0/9.0;
+//                    }else {
+//                        edge_factor = 4.0/3.0;
+//                    }
+//                }else if(fine_x = (fine_mesh.get_num_x()-1)){
+//                    //both corners on west edge
+//                    if (fine_y == 0 || fine_y == (fine_mesh.get_num_y()-1)){
+//                        edge_factor = 16.0/9.0;
+//                    }else {
+//                        edge_factor = 4.0/3.0;
+//                    }
+//                }else if ( fine_y == 0){
+//                    edge_factor = 4.0/3.0;
+//                }else if ( fine_y == (fine_mesh.get_num_y()-1)){
+//                    edge_factor = 4.0/3.0;
+//                }
+//
+
+                if (calculate == true){
+                    mg_delta_rho = 1*mg_factor[j]* edge_factor;
+                    mg_delta_rho = (coarse_soln.get_rho(coarse_i) - temp_soln.get_rho(coarse_i)) *mg_factor[j]* edge_factor;
+                    mg_delta_u = (coarse_soln.get_u(coarse_i) - temp_soln.get_u(coarse_i))*mg_factor[j]* edge_factor;
+                    mg_delta_v = (coarse_soln.get_v(coarse_i) - temp_soln.get_v(coarse_i)) *mg_factor[j]* edge_factor;
+                    mg_delta_w = (coarse_soln.get_w(coarse_i) - temp_soln.get_w(coarse_i))*mg_factor[j]* edge_factor;
+
+
+                    soln.add_rho(i, mg_delta_rho ) ;
+                    soln.add_u(i, mg_delta_u);
+                    soln.add_v(i,mg_delta_v);
+                    soln.add_w(i,mg_delta_v);
+                }
+    }
+
+       }
 }

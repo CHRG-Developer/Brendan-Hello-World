@@ -2,6 +2,7 @@
 #define GLOBAL_VARIABLES_H
 #include <string>
 #include "domain_geometry.h"
+#include <math.h>
 
 class global_variables
 {
@@ -9,6 +10,7 @@ class global_variables
         global_variables();
         virtual ~global_variables();
         void initialise(domain_geometry domain);
+        void update_tau(domain_geometry domain);
         std::string create_output_directory();
 
         //BC constants
@@ -19,6 +21,8 @@ class global_variables
         //small number constant
         const double small_number = 0.00000000001;
 
+        //PI
+        const double PI = acos(-1.0);
 
         //tolerance in final solution
         double tolerance = 0.000001;
@@ -29,6 +33,8 @@ class global_variables
         double reynolds_number;
         double max_velocity;
         double tau;
+
+        int max_mg_levels ; // number of coarse grids to enter
 
 
         std::string output_file_dir;

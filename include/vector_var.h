@@ -16,6 +16,7 @@ class vector_var
         double Angle_Between_Vectors( vector_var b);
         void Get_Gradient(double y1, double y2, vector_var x1, vector_var x2 );
         void add(vector_var b);
+        void factor(double a);
         vector_var line_magnitude(vector_var intercept, vector_var slope, vector_var displacement);
     protected:
     private:

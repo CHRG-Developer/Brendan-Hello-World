@@ -20,7 +20,7 @@ preprocessor::~preprocessor()
 }
 
 void preprocessor::initialise_program_variables(char* xmltest, global_variables &globals, domain_geometry &geometry,
-                                                initial_conditions &initial_conds, quad_bcs_plus bcs ) {
+                                                initial_conditions &initial_conds, quad_bcs_plus &bcs ) {
 
     XMLDocument xmlDoc;
 
@@ -193,7 +193,7 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.max_velocity = get_xml_double(parent, "max_velocity", xmlDoc);
     globals.simulation_name = get_xml_text(parent,"simulation_name",xmlDoc);
     globals.output_file_dir = get_xml_text(parent, "output_directory", xmlDoc);
-
+    globals.max_mg_levels = get_xml_double(parent,"max_multi_grid_levels",xmlDoc);
 
 
 }

@@ -4,6 +4,7 @@
 #include "vector_var.h"
 #include "external_forces.h"
 #include "global_variables.h"
+#include "initial_conditions.h"
 
 #ifndef SOLVER_H
 #define SOLVER_H
@@ -15,9 +16,14 @@ class Solver
         Solver();
         virtual ~Solver();
          void Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
-                                   external_forces &source,global_variables &globals, domain_geometry &domain);
+                                   external_forces &source,global_variables &globals, domain_geometry &domain,
+                                   initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
+                                   Solution &residual);
 
-
+        void multi_grid_agglomoration( Solution &residuals , Solution &soln,
+                                         int cycle_no, Uniform_Mesh &fine_mesh,  quad_bcs_plus &bcs,
+                                         initial_conditions &init_conds, int &mg, global_variables globals,
+                                         domain_geometry &fine_domain);
     protected:
     private:
 
@@ -31,7 +37,7 @@ class Solver
 //            double y;
 //            double z;
 //        };
-        vector_var get_e_alpha(int k, double &lattice_weight, double c );
+        vector_var get_e_alpha(int k, double &lattice_weight, double c,double PI );
 
         struct flux_var {
             double P;

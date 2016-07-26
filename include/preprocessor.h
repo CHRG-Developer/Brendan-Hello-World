@@ -15,7 +15,7 @@ class preprocessor
         virtual ~preprocessor();
         void initialise_program_variables(char* xml_input, global_variables &globals,
                                           domain_geometry &geometry,initial_conditions &initial_conds,
-                                           quad_bcs_plus bcs  );
+                                           quad_bcs_plus &bcs  );
 
     protected:
     private:

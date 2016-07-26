@@ -57,6 +57,12 @@ double  vector_var::Angle_Between_Vectors(vector_var b){
 
 }
 
+void vector_var::factor(double a){
+
+    x = x/a;
+    y= y/a;
+    z= z/a;
+}
 
 void vector_var::Get_Gradient(double y1, double y2, vector_var x1, vector_var x2 ){
 

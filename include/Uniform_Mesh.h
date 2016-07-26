@@ -52,6 +52,8 @@ class Uniform_Mesh
         int get_w_node( int i) {return w_node[i];};
         double get_cell_volume( int i) {return cell_volume[i];};
 
+        domain_geometry create_coarse_mesh_domain( );
+
 
     protected:
     private:
@@ -59,7 +61,7 @@ class Uniform_Mesh
 
         void create_mesh();
         int num_x_nodes, num_y_nodes, total_nodes;
-        double X,Y,dx,dy;
+        double X,Y,dx,dy,multi_grid_dt;
         //centroid and cell interface locations
         double * centroid_x, * centroid_y, * centroid_z;
         double * north_x, * north_y, * north_z;

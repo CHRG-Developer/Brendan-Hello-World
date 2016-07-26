@@ -10,14 +10,18 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
     Y = domain.Y;
     dx = domain.dx;
     dy = domain.dy;
+    multi_grid_dt = domain.dt;
 
 	num_x_nodes = ceil(X/dx);
 	num_y_nodes = ceil(Y/dy);
 	total_nodes  = num_x_nodes * num_y_nodes;
 
+    /// need error check here to see if grid divisible by multigrid criteria
+    //Uniform only
+
 	dx = X/num_x_nodes; // reset dx/dy t0 allow for ceiling
     dy = Y/num_y_nodes;
-
+    cs = domain.cs;
     // allocate memory to arrays
 
     centroid_x = new double [total_nodes +1];
@@ -279,4 +283,22 @@ double  Uniform_Mesh::get_node_x(int node_num){
     result = centroid_x[node_num];
 
     return result ;
+}
+
+
+domain_geometry Uniform_Mesh::create_coarse_mesh_domain(){
+
+    domain_geometry coarse_domain;
+
+    coarse_domain.X = X;
+    coarse_domain.Y = Y;
+    coarse_domain.dx = dx*2;
+    coarse_domain.dy = dy*2;
+    coarse_domain.dt = multi_grid_dt*2; //streaming time step
+    coarse_domain.cs = cs;
+
+
+    return coarse_domain;
+
+
 }

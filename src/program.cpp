@@ -10,6 +10,7 @@
 #include "external_forces.h"
 #include "Solution.h"
 #include "Solver.h"
+#include <fstream>
 
 program::program()
 {
@@ -29,7 +30,7 @@ void program::run(char* xml_input){
     global_variables globals;
     domain_geometry domain;
     initial_conditions initial_conds;
-
+    int mg =0; // first multigrid cycle
     std::clock_t start;
     double duration;
 
@@ -37,6 +38,7 @@ void program::run(char* xml_input){
 
     pre_processor.initialise_program_variables(xml_input, globals, domain,initial_conds,bcs);
 
+    copyfile(xml_input,globals.output_file);
      // create Mesh
     Uniform_Mesh mesh(domain);
 
@@ -50,6 +52,7 @@ void program::run(char* xml_input){
 
     //create solution
     Solution soln(mesh.get_total_nodes());
+    Solution residual(mesh.get_total_nodes());
     soln.assign_pressure_gradient(initial_conds.rho_gradient, initial_conds.rho_origin_mag,
                                   initial_conds.origin_loc,mesh);
     soln.set_average_rho(initial_conds.average_rho);
@@ -57,7 +60,8 @@ void program::run(char* xml_input){
 
     Solver solve;
 
-    solve.Uniform_Mesh_Solver(mesh,soln,bc,source_term,globals,domain);
+    solve.Uniform_Mesh_Solver(mesh,soln,bc,source_term,globals,domain,initial_conds,bcs,
+                              mg,residual);
 
     soln.post_process(globals.pre_conditioned_gamma);
     soln.output(globals.output_file);
@@ -65,3 +69,15 @@ void program::run(char* xml_input){
 
 
 }
+
+    // copy in binary mode
+void program::copyfile( char* SRC,  std::string  DEST)
+{
+    DEST.append("/input.xml");
+
+    std::ifstream src(SRC, std::ios::binary);
+    std::ofstream dest(DEST, std::ios::binary);
+    dest << src.rdbuf();
+
+}
+

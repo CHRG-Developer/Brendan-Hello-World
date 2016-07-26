@@ -10,6 +10,7 @@ class Solution
 {
     public:
         Solution(int _total_nodes);
+        Solution();
         virtual ~Solution();
         double get_rho( int i) {return rho[i];};
         double get_u( int i) {return u[i];};
@@ -27,6 +28,14 @@ class Solution
         void output (std::string output_location);
         void clone( Solution &soln_a);
         void post_process(double pre_condition_gamma);
+        void add_rho(int i, double arg) { rho[i] = rho[i] + arg;};
+        void add_u(int i, double arg) { u[i] = u[i] + arg;}
+        void add_v (int i , double arg) {v[i] = v[i] + arg;}
+        void add_w (int i, double arg) {w[i] = w[i] + arg;}
+        void restriction(Solution &soln, Uniform_Mesh &coarse_mesh,
+                           Uniform_Mesh &fine_mesh);
+        void prolongation(Solution &coarse_soln, Solution &temp_soln, Solution &soln,
+                            Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh);
     protected:
     private:
         double *rho, *u, *v, *w;

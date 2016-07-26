@@ -12,7 +12,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters='&quot;/home/brendan/Dropbox/PhD/Code/XML Schema/template.xml&quot;' />
+				<Option parameters='&quot;/home/brendan/Dropbox/PhD/Code/XML Schema/uniform flow.xml&quot;' />
 				<Compiler>
 					<Add option="-g" />
 					<Add directory="include" />
@@ -139,9 +139,16 @@
 		<Unit filename="src/xmltest.cpp">
 			<Option virtualFolder="archive/" />
 		</Unit>
+		<Unit filename="version.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />
+			<AutoVersioning>
+				<Scheme minor_max="10" build_max="0" rev_max="0" rev_rand_max="10" build_times_to_increment_minor="100" />
+				<Settings autoincrement="1" date_declarations="1" use_define="0" update_manifest="184" do_auto_increment="0" ask_to_increment="0" language="C++" svn="0" svn_directory="" header_path="version.h" />
+				<Changes_Log show_changes_editor="0" app_title="released version %M.%m.%b of %p" changeslog_path="ChangesLog.txt" />
+				<Code header_guard="VERSION_H" namespace="AutoVersion" prefix="" />
+			</AutoVersioning>
 			<debugger />
 			<lib_finder disable_auto="1" />
 		</Extensions>
