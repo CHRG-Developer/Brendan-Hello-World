@@ -165,6 +165,13 @@ void preprocessor::parse_initial_conditions(XMLDocument &xmlDoc, initial_conditi
     initials.origin_loc.x = get_xml_double(parent,"origin_location","x",xmlDoc);
     initials.origin_loc.y = get_xml_double(parent,"origin_location","y",xmlDoc);
     initials.origin_loc.z = get_xml_double(parent,"origin_location","z",xmlDoc);
+    initials.vel_gradient.x = get_xml_double(parent,"vel","gradient","x",xmlDoc);
+    initials.vel_gradient.y = get_xml_double(parent,"vel","gradient","y",xmlDoc);
+    initials.vel_gradient.z = get_xml_double(parent,"vel","gradient","z",xmlDoc);
+    initials.vel_origin_mag.x = get_xml_double(parent,"vel","origin_magnitude","x",xmlDoc);
+    initials.vel_origin_mag.y = get_xml_double(parent,"vel","origin_magnitude","y",xmlDoc);
+    initials.vel_origin_mag.z = get_xml_double(parent,"vel","origin_magnitude","z",xmlDoc);
+
     initials.velocity.x = get_xml_double(parent, "u", xmlDoc);
     initials.velocity.y = get_xml_double(parent, "v", xmlDoc);
     initials.velocity.z = get_xml_double(parent, "w", xmlDoc);

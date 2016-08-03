@@ -78,8 +78,8 @@ double residuals::max_error (){
 
     double temp;
     temp = fmax(rho_rms, u_rms);
-    return fmax(temp, v_rms);
-
+    //return fmax(temp, v_rms);
+    return temp;
 }
 
 void residuals::add_ansys_l2_norm_residuals(double f1, double rho, double f2, double u, double f3, double v){

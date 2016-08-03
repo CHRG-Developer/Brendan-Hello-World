@@ -72,7 +72,26 @@ void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradie
 
    }
 
+void Solution::assign_velocity_gradient( vector_var _gradient, vector_var gradient_origin,
+    vector_var origin_magnitude, Uniform_Mesh &Mesh){
 
+   vector_var displacement;
+   vector_var vel_temp;
+
+   for( int t =0 ; t< Mesh.get_total_nodes(); t++){
+
+
+            displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
+            displacement.y = Mesh.get_centroid_y(t)- gradient_origin.y;
+            displacement.z = Mesh.get_centroid_z(t) - gradient_origin.z;
+
+            vel_temp = vel_temp.line_magnitude(origin_magnitude,_gradient,displacement);
+            u[t] = vel_temp.Magnitude();
+
+        }
+    displacement.add(vel_temp) ;
+
+   }
 
 void Solution::update ( double _rho, double _u, double _v, double _w , int i){
 
@@ -180,6 +199,7 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
         double mg_factor[4] = {9.0/16.0 ,3.0/16.0, 3.0/16.0, 1./16.0 };
         double edge_factor;
         bool calculate;
+        Solution debug_correction(total_nodes);
 
        for(int i =0; i< total_nodes; i++){
 
@@ -254,7 +274,9 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
 //                    edge_factor = 4.0/3.0;
 //                }
 //
-
+                /// coarse_soln = Q2h
+                /// temp_soln = Q2h_(0)
+                /// soln = Qh
                 if (calculate == true){
                     mg_delta_rho = 1*mg_factor[j]* edge_factor;
                     mg_delta_rho = (coarse_soln.get_rho(coarse_i) - temp_soln.get_rho(coarse_i)) *mg_factor[j]* edge_factor;
@@ -267,6 +289,9 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
                     soln.add_u(i, mg_delta_u);
                     soln.add_v(i,mg_delta_v);
                     soln.add_w(i,mg_delta_v);
+                    debug_correction.set_rho(i,mg_delta_rho);
+                    debug_correction.set_u(i,mg_delta_u);
+                    debug_correction.set_v(i,mg_delta_v);
                 }
     }
 

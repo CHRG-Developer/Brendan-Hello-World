@@ -13,7 +13,7 @@ domain_geometry::~domain_geometry()
 
 void domain_geometry::initialise(){
 
-    cs = dx/dt/sqrt(3);
+    cs = dx/2.0/dt/sqrt(3);
 
 
 }

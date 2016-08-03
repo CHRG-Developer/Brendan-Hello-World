@@ -69,7 +69,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     residuals convergence_residual;
     flux_var x_flux , y_flux;
     flux_var cell_flux , mg_forcing_term;
-
+    flux_var debug [4];
 
     double interface_area;
 
@@ -88,8 +88,11 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
     int timesteps;
     double time;
-    timesteps = ceil( globals.simulation_length/delta_t);
-
+    if( mg ==0){
+        timesteps = ceil( globals.simulation_length/delta_t);
+    }else{
+        timesteps = 1;
+    }
     // loop through each cell
     for (int t= 0; t < timesteps; t++){
 
@@ -174,9 +177,9 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         }else if (bc.vel_type == 3){
 
                             delta_u.Get_Gradient(temp_soln.get_u(i),
-                                temp_soln.get_u( bcs.get_periodic_node(i)),cell_1,cell_2 );
+                                soln.get_u( bcs.get_periodic_node(i)),cell_1,cell_2 );
                             delta_v.Get_Gradient(temp_soln.get_v(i),
-                                temp_soln.get_v( bcs.get_periodic_node(i)),cell_1,cell_2 );
+                                soln.get_v( bcs.get_periodic_node(i)),cell_1,cell_2 );
                         }
 
                         // dirichlet BC -> set correct gradient to generate correct shear stresses
@@ -200,7 +203,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         }else if (bc.rho_type == 3){
 
                             delta_rho.Get_Gradient(temp_soln.get_rho(i),
-                            temp_soln.get_rho( bcs.get_periodic_node(i)),cell_1,cell_2 );
+                            soln.get_rho( bcs.get_periodic_node(i)),cell_1,cell_2 );
 
                         }
 
@@ -241,12 +244,12 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
 
                         rho_lattice = delta_rho.Dot_Product(lattice_node)
-                                        + temp_soln.get_rho(i) ;
+                                        + soln.get_rho(i) ;
 
                         u_lattice.x = delta_u.Dot_Product(lattice_node)
-                                        + temp_soln.get_u(i) ;
+                                        + soln.get_u(i) ;
                         u_lattice.y = delta_v.Dot_Product(lattice_node)
-                                        + temp_soln.get_v(i) ;
+                                        + soln.get_v(i) ;
                         u_lattice.z = 0;
 
 
@@ -325,6 +328,15 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                                         ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y ) ;
                         cell_flux.Momentum_y = cell_flux.Momentum_y + (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                         ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
+
+                        /// debug
+
+                            debug[j].P = (-1)*interface_area/ Mesh.get_cell_volume(i)* ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
+                            debug[j].Momentum_x = (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                        ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y ) ;
+                            debug[j].Momentum_y =  (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                        ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
+
                     }
 
 
@@ -375,14 +387,14 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                 }else{
                     // runge kutta parametes
-                    R1=(RK1.P + 2.0* RK2.P + 2.0* RK3.P + RK4.P)/6.0 *delta_t;
+                    R1=(RK1.P + 2.0* RK2.P + 2.0* RK3.P + RK4.P)/6.0 ;
                     R2 = (RK1.Momentum_x + 2.0* RK2.Momentum_x
-                                             + 2.0* RK3.Momentum_x + RK4.Momentum_x)/6.0 *delta_t;
+                                             + 2.0* RK3.Momentum_x + RK4.Momentum_x)/6.0 ;
                     R3 = (RK1.Momentum_y + 2.0* RK2.Momentum_y
-                                           + 2.0* RK3.Momentum_y + RK4.Momentum_y)/6.0 *delta_t;
-                    f1 = soln.get_rho(i) + R1;
-                    f2 = soln.get_average_rho()* soln.get_u(i) + R2;
-                    f3 = soln.get_average_rho() * soln.get_v(i) + R3;
+                                           + 2.0* RK3.Momentum_y + RK4.Momentum_y)/6.0 ;
+                    f1 = soln.get_rho(i) + R1 * delta_t;
+                    f2 = soln.get_average_rho()* soln.get_u(i) + R2 *  delta_t;
+                    f3 = soln.get_average_rho() * soln.get_v(i) + R3 * delta_t;
 
 
                     //residuals set for multigrid
@@ -436,9 +448,15 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
         convergence_residual.ansys_5_iter_rms(t);
 
         if( mg == 0){
-            error_output << t << ", "  << convergence_residual.max_error() << endl;
+            error_output << t << ", "  << convergence_residual.max_error()   << ", " <<
+            convergence_residual.rho_rms << ", " << convergence_residual.u_rms << ", " <<
+            convergence_residual.v_rms << endl;
         }
         soln.clone(temp_soln);
+
+        //Give the program 5 iterations to find residuals
+        //without MG and also perform MG cycle every 3 iterations
+
 
         ///Multigrid Agglomeration/Prolongation
         if( mg < globals.max_mg_levels){

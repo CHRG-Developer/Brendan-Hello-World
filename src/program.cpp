@@ -53,8 +53,10 @@ void program::run(char* xml_input){
     //create solution
     Solution soln(mesh.get_total_nodes());
     Solution residual(mesh.get_total_nodes());
-    soln.assign_pressure_gradient(initial_conds.rho_gradient, initial_conds.rho_origin_mag,
-                                  initial_conds.origin_loc,mesh);
+    soln.assign_pressure_gradient(initial_conds.rho_gradient,initial_conds.origin_loc,
+                            initial_conds.rho_origin_mag,mesh);
+    soln.assign_velocity_gradient(initial_conds.vel_gradient,initial_conds.origin_loc,
+                            initial_conds.vel_origin_mag,mesh);
     soln.set_average_rho(initial_conds.average_rho);
     // Solvec
 
