@@ -35,7 +35,8 @@ class global_variables
         double tau;
 
         int max_mg_levels ; // number of coarse grids to enter
-
+        int fmg_levels;
+        double fmg_tolerance;
 
         std::string output_file_dir;
         std::string simulation_name;

@@ -201,7 +201,8 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.simulation_name = get_xml_text(parent,"simulation_name",xmlDoc);
     globals.output_file_dir = get_xml_text(parent, "output_directory", xmlDoc);
     globals.max_mg_levels = get_xml_double(parent,"max_multi_grid_levels",xmlDoc);
-
+    globals.fmg_levels =  get_xml_double(parent,"FMG_levels",xmlDoc);
+    globals.fmg_tolerance = get_xml_double(parent,"FMG_tolerance",xmlDoc);
 
 }
 

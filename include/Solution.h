@@ -1,7 +1,7 @@
 #include "Uniform_Mesh.h"
 #include "vector_var.h"
 #include <string>
-
+#include <Boundary_Conditions.h>
 #ifndef SOLUTION_H
 #define SOLUTION_H
 
@@ -37,7 +37,8 @@ class Solution
         void restriction(Solution &soln, Uniform_Mesh &coarse_mesh,
                            Uniform_Mesh &fine_mesh);
         void prolongation(Solution &coarse_soln, Solution &temp_soln, Solution &soln,
-                            Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh);
+                            Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh,
+                            Boundary_Conditions &bc);
     protected:
     private:
         double *rho, *u, *v, *w;

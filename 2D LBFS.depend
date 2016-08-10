@@ -1308,12 +1308,13 @@
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/quad_bcs_plus.h
 
-1469717250 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solution.h
+1470838557 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solution.h
 	"Uniform_Mesh.h"
 	"vector_var.h"
 	<string>
+	<Boundary_Conditions.h>
 
-1469530720 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
+1470830355 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
 	"Uniform_Mesh.h"
 	"Boundary_Conditions.h"
 	"Solution.h"
@@ -1324,7 +1325,7 @@
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/external_forces.h
 
-1469530691 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
+1470827193 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
 	<string>
 	"domain_geometry.h"
 	<math.h>
@@ -1335,8 +1336,14 @@
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/test_cases.h
 	<string>
 
-1468510300 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/program.h
+1470829701 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/program.h
 	<string>
+	<Solution.h>
+	<Uniform_Mesh.h>
+	<quad_bcs_plus.h>
+	<initial_conditions.h>
+	<global_variables.h>
+	<domain_geometry.h>
 
 1460549164 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
 	"Boundary_Conditions.h"
@@ -1360,7 +1367,7 @@
 1464023837 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/initial_conditions.cpp
 	"initial_conditions.h"
 
-1469717214 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
+1470827193 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
 	"preprocessor.h"
 	"global_variables.h"
 	<fstream>
@@ -1390,7 +1397,7 @@
 	<android/log.h>
 	<assert.h>
 
-1469717214 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/program.cpp
+1470838538 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/program.cpp
 	"program.h"
 	"quad_bcs.h"
 	"global_variables.h"
@@ -1418,7 +1425,7 @@
 
 1469535870 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/residuals.h
 
-1470234540 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
+1470842373 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
 	<stdlib.h>
 	"Solution.h"
 	<algorithm>
@@ -1426,7 +1433,7 @@
 	<iostream>
 	<math.h>
 
-1469721096 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1470840453 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	<math.h>
 	<cmath>
 	"Solver.h"
