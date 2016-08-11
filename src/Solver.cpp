@@ -26,7 +26,7 @@ Solver::~Solver()
 void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bcs,
                                    external_forces &source,global_variables &globals, domain_geometry &domain,
                                    initial_conditions &init_conds, quad_bcs_plus &quad_bcs_orig, int mg,
-                                   Solution &residual)
+                                   Solution &residual, int fmg)
 {
     //dtor
     dt = domain.dt; // timestepping for streaming
@@ -46,6 +46,15 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     std::clock_t start;
     double duration;
 
+    // separate toelrances for convergence for FMG and normal solver
+    double local_tolerance;
+    if(fmg > 0){
+        local_tolerance = globals.fmg_tolerance;
+
+
+    }else{
+        local_tolerance = globals.tolerance;
+    }
 
     //time increment on runge kutta must satisfy CFL condition
     //U delta_t/delta_x  < 1  ->> delta_t < 1/ U
@@ -450,16 +459,32 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
         if( mg == 0){
             error_output << t << ", "  << convergence_residual.max_error()   << ", " <<
             convergence_residual.rho_rms << ", " << convergence_residual.u_rms << ", " <<
-            convergence_residual.v_rms << endl;
+            convergence_residual.v_rms << " , FMG cycle: " << fmg << endl;
         }
         soln.clone(temp_soln);
+
+        time = t*delta_t;
+
+
+        cout << "time t=" << time << std::endl;
+
+
+        if ( convergence_residual.max_error() < local_tolerance){
+            if( mg == 0){
+                error_output.close();
+            }
+            return ;
+
+        }
+
+
 
         //Give the program 5 iterations to find residuals
         //without MG and also perform MG cycle every 3 iterations
 
 
         ///Multigrid Agglomeration/Prolongation
-        if( mg < globals.max_mg_levels){
+        if( mg < globals.max_mg_levels && fmg == 0){
                 multi_grid_agglomoration(residual,soln,cycle_no,Mesh,quad_bcs_orig,
                                          init_conds,mg,globals,domain);
         }else if( mg ==0){
@@ -469,18 +494,6 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
             return;
         }
 
-        time = t*delta_t;
-
-
-        cout << "time t=" << time << std::endl;
-
-        if ( convergence_residual.max_error() < globals.tolerance ){
-            if( mg == 0){
-                error_output.close();
-            }
-            return ;
-
-        }
 
     }
 
@@ -495,7 +508,7 @@ void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int 
 
 
     mg = mg +1; // increase multigrid levels by 1
-
+    int fmg = 0;
     // create new coarse Mesh with double up dimensions
     domain_geometry coarse_domain = fine_mesh.create_coarse_mesh_domain();
 
@@ -524,10 +537,10 @@ void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int 
     temp_soln.clone(coarse_soln);
 
     solve_coarse.Uniform_Mesh_Solver(coarse_mesh,coarse_soln,bc,source_term,globals,
-                                     coarse_domain,initial_conds,bcs,mg,coarse_residual_0);
+                                     coarse_domain,initial_conds,bcs,mg,coarse_residual_0,fmg);
 
     // prolongation occurs here
-    soln.prolongation(coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh);
+    soln.prolongation(coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,bc);
     globals.update_tau(fine_domain);
     mg = mg -1;
 

@@ -188,8 +188,12 @@ void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
 
 
 }
+
+
+
 void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution &soln,
-                            Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh){
+                            Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh,
+                    Boundary_Conditions &bc ){
         double mg_delta_rho, mg_delta_u, mg_delta_v, mg_delta_w;
             //loop through the finer mesh as this will enable parrelisation later
 
@@ -197,7 +201,8 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
         int fine_x, fine_y;
 
         double mg_factor[4] = {9.0/16.0 ,3.0/16.0, 3.0/16.0, 1./16.0 };
-        double edge_factor;
+        double rho_edge_factor, vel_edge_factor;
+        double rho_bc_contribution,u_bc_contribution,v_bc_contribution,w_bc_contribution;
         bool calculate;
         Solution debug_correction(total_nodes);
 
@@ -213,14 +218,20 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
 
             for(int j = 0; j <4; j++){
                     calculate = true;
+                    rho_bc_contribution = 0.0;
+                    u_bc_contribution = 0.0;
+                    v_bc_contribution = 0.0;
+                    w_bc_contribution = 0.0;
+                    rho_edge_factor = 1.0;
+                    vel_edge_factor = 1.0;
                  switch(j) {
 
-                    case 0: // West
+                    case 0: // nearest coarse cell
                         coarse_i = coarse_mesh.get_num_y()* coarse_x + coarse_y;
                         break;
 
                     case 1:
-                        //North/South edge contribution
+                        //North/South edge cell contribution
                         edge_cell_y = coarse_y + pow(-1.0,1+ floor(fmod(fmod(i, fine_mesh.get_num_y()),2.0)));
                         coarse_i = coarse_mesh.get_num_y() * coarse_x + edge_cell_y;
                         if( edge_cell_y < 0 || edge_cell_y > (coarse_mesh.get_num_y()-1)){
@@ -228,7 +239,7 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
                         }
                         break;
                     case 2:
-                        //East/West edge contribution
+                        //East/West edge cell contribution
                         edge_cell_x = coarse_x + pow(-1.0 ,1 + floor(fmod(floor(i/ fine_mesh.get_num_y()),2.0)));
                         coarse_i = coarse_mesh.get_num_y()* edge_cell_x + coarse_y;
                         if( edge_cell_x< 0 || edge_cell_x > (coarse_mesh.get_num_x()-1)){
@@ -236,7 +247,7 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
                         }
                         break;
                     case 3:
-                        // Vertex Contribution
+                        // Vertex coarse cell Contribution
                         coarse_i = coarse_mesh.get_num_y()* edge_cell_x + edge_cell_y;
 
                         if( edge_cell_x< 0 || edge_cell_x > (coarse_mesh.get_num_x()-1) ||
@@ -252,38 +263,255 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
                 // get index in terms of x and y
                 fine_x = floor(i/ fine_mesh.get_num_y());
                 fine_y = floor(fmod(i, fine_mesh.get_num_y()));
+
                 // West Edge
-                edge_factor = 1.0;
-//                if (fine_x == 0) {
-//                    //both corners on west edge
-//                    if (fine_y == 0 || fine_y == (fine_mesh.get_num_y()-1)){
-//                        edge_factor = 16.0/9.0;
-//                    }else {
-//                        edge_factor = 4.0/3.0;
-//                    }
-//                }else if(fine_x = (fine_mesh.get_num_x()-1)){
-//                    //both corners on west edge
-//                    if (fine_y == 0 || fine_y == (fine_mesh.get_num_y()-1)){
-//                        edge_factor = 16.0/9.0;
-//                    }else {
-//                        edge_factor = 4.0/3.0;
-//                    }
-//                }else if ( fine_y == 0){
-//                    edge_factor = 4.0/3.0;
-//                }else if ( fine_y == (fine_mesh.get_num_y()-1)){
-//                    edge_factor = 4.0/3.0;
-//                }
-//
+
+
+
+
+                if (fine_x == 0) {
+                    //both corners on west edge
+
+                        //south corner
+                    if (fine_y == 0){
+                                                //using barycentric interpolation
+                        // coarse node provides 0.75 of contribution
+                        rho_edge_factor = 4.0/3.0;
+                        vel_edge_factor = 4.0/3.0;
+
+                        if( bc.get_s_type_rho(i)  == 1){
+                            rho_bc_contribution = 1.0/8.0 * bc.get_s_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = 1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+                        if( bc.get_w_type_rho(i)  == 1){
+                            rho_bc_contribution = rho_bc_contribution + 1.0/8.0 * bc.get_w_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = rho_bc_contribution +1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+
+                        if( bc.get_s_type_vel(i)  == 1){
+                            u_bc_contribution = 1.0/8.0 * bc.get_s_u(i);
+                            v_bc_contribution = 1.0/8.0 * bc.get_s_v(i);
+                            //w_bc_contribution = 1.0/8.0 * bc.get_n_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution = 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution = 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution = 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+                        if( bc.get_w_type_vel(i)  == 1){
+                            u_bc_contribution = u_bc_contribution + 1.0/8.0 * bc.get_w_u(i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * bc.get_w_v(i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * bc.get_w_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution =  u_bc_contribution + 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+
+                        //north corner
+                    }else if( fine_y == (fine_mesh.get_num_y()-1)){
+
+                        //using barycentric interpolation
+                        // coarse node provides 0.75 of contribution
+                        rho_edge_factor = 4.0/3.0;
+                        vel_edge_factor = 4.0/3.0;
+
+                        if( bc.get_n_type_rho(i)  == 1){
+                            rho_bc_contribution = 1.0/8.0 * bc.get_n_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = 1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+                        if( bc.get_w_type_rho(i)  == 1){
+                            rho_bc_contribution = rho_bc_contribution + 1.0/8.0 * bc.get_w_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = rho_bc_contribution +1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+
+                        if( bc.get_n_type_vel(i)  == 1){
+                            u_bc_contribution = 1.0/8.0 * bc.get_n_u(i);
+                            v_bc_contribution = 1.0/8.0 * bc.get_n_v(i);
+                            //w_bc_contribution = 1.0/8.0 * bc.get_n_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution = 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution = 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution = 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+                        if( bc.get_w_type_vel(i)  == 1){
+                            u_bc_contribution = u_bc_contribution + 1.0/8.0 * bc.get_w_u(i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * bc.get_w_v(i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * bc.get_w_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution =  u_bc_contribution + 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+
+
+
+                    }else {
+
+                        if( bc.get_w_type_rho(i)  == 1){
+                            rho_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_edge_factor = 4.0/3.0;
+                        }
+                        if( bc.get_w_type_vel(i)  == 1){
+                            vel_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            vel_edge_factor = 4.0/3.0;
+                        }
+
+                    }
+                }else if(fine_x == (fine_mesh.get_num_x()-1)){
+                    //both corners on east edge
+
+                        //south corner
+                    if (fine_y == 0){
+                                               //using barycentric interpolation
+                        // coarse node provides 0.75 of contribution
+                        rho_edge_factor = 4.0/3.0;
+                        vel_edge_factor = 4.0/3.0;
+
+                        if( bc.get_s_type_rho(i)  == 1){
+                            rho_bc_contribution = 1.0/8.0 * bc.get_s_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = 1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+                        if( bc.get_e_type_rho(i)  == 1){
+                            rho_bc_contribution = rho_bc_contribution + 1.0/8.0 * bc.get_e_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = rho_bc_contribution +1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+
+                        if( bc.get_s_type_vel(i)  == 1){
+                            u_bc_contribution = 1.0/8.0 * bc.get_s_u(i);
+                            v_bc_contribution = 1.0/8.0 * bc.get_s_v(i);
+                            //w_bc_contribution = 1.0/8.0 * bc.get_n_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution = 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution = 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution = 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+                        if( bc.get_e_type_vel(i)  == 1){
+                            u_bc_contribution = u_bc_contribution + 1.0/8.0 * bc.get_e_u(i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * bc.get_e_v(i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * bc.get_w_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution =  u_bc_contribution + 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+
+                    }else if( fine_y == (fine_mesh.get_num_y()-1)){
+                                                                       //using barycentric interpolation
+                        // coarse node provides 0.75 of contribution
+                        rho_edge_factor = 4.0/3.0;
+                        vel_edge_factor = 4.0/3.0;
+
+                        if( bc.get_n_type_rho(i)  == 1){
+                            rho_bc_contribution = 1.0/8.0 * bc.get_n_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = 1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+                        if( bc.get_e_type_rho(i)  == 1){
+                            rho_bc_contribution = rho_bc_contribution + 1.0/8.0 * bc.get_e_rho(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_bc_contribution = rho_bc_contribution +1.0/8.0 * coarse_soln.get_rho(coarse_i);
+                        }
+
+                        if( bc.get_n_type_vel(i)  == 1){
+                            u_bc_contribution = 1.0/8.0 * bc.get_n_u(i);
+                            v_bc_contribution = 1.0/8.0 * bc.get_n_v(i);
+                            //w_bc_contribution = 1.0/8.0 * bc.get_n_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution = 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution = 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution = 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+                        if( bc.get_e_type_vel(i)  == 1){
+                            u_bc_contribution = u_bc_contribution + 1.0/8.0 * bc.get_e_u(i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * bc.get_e_v(i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * bc.get_w_w(i);
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            u_bc_contribution =  u_bc_contribution + 1.0/8.0 * coarse_soln.get_u(coarse_i);
+                            v_bc_contribution =  v_bc_contribution + 1.0/8.0 * coarse_soln.get_v(coarse_i);
+                            //w_bc_contribution =  w_bc_contribution + 1.0/8.0 * coarse_soln.get_w(coarse_i);
+                        }
+
+
+                    }else {
+                        if( bc.get_e_type_rho(i)  == 1){
+                            rho_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_edge_factor = 4.0/3.0;
+                        }
+                        if( bc.get_e_type_vel(i)  == 1){
+                            vel_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            vel_edge_factor = 4.0/3.0;
+                        }
+                    }
+                }else if ( fine_y == 0){
+                        if( bc.get_s_type_rho(i)  == 1){
+                            rho_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_edge_factor = 4.0/3.0;
+                        }
+                        if( bc.get_s_type_vel(i)  == 1){
+                            vel_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            vel_edge_factor = 4.0/3.0;
+                        }
+                }else if ( fine_y == (fine_mesh.get_num_y()-1)){
+                        if( bc.get_n_type_rho(i)  == 1){
+                            rho_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            rho_edge_factor = 4.0/3.0;
+                        }
+                        if( bc.get_n_type_vel(i)  == 1){
+                            vel_edge_factor = 2.0/3.0;
+
+                        }else{  //Neumann and periodic give constant value in x- direction
+                            vel_edge_factor = 4.0/3.0;
+                        }
+                }
+
                 /// coarse_soln = Q2h
                 /// temp_soln = Q2h_(0)
                 /// soln = Qh
                 if (calculate == true){
-                    mg_delta_rho = 1*mg_factor[j]* edge_factor;
-                    mg_delta_rho = (coarse_soln.get_rho(coarse_i) - temp_soln.get_rho(coarse_i)) *mg_factor[j]* edge_factor;
-                    mg_delta_u = (coarse_soln.get_u(coarse_i) - temp_soln.get_u(coarse_i))*mg_factor[j]* edge_factor;
-                    mg_delta_v = (coarse_soln.get_v(coarse_i) - temp_soln.get_v(coarse_i)) *mg_factor[j]* edge_factor;
-                    mg_delta_w = (coarse_soln.get_w(coarse_i) - temp_soln.get_w(coarse_i))*mg_factor[j]* edge_factor;
-
+                    //_delta_rho = 1*mg_factor[j]* edge_factor;
+                    mg_delta_rho = (coarse_soln.get_rho(coarse_i) - temp_soln.get_rho(coarse_i)) *mg_factor[j]* rho_edge_factor
+                            + rho_bc_contribution;
+                    mg_delta_u = (coarse_soln.get_u(coarse_i) - temp_soln.get_u(coarse_i))*mg_factor[j]* vel_edge_factor
+                            + u_bc_contribution;
+                    mg_delta_v = (coarse_soln.get_v(coarse_i) - temp_soln.get_v(coarse_i)) *mg_factor[j]* vel_edge_factor
+                            + v_bc_contribution;
+                    mg_delta_w = (coarse_soln.get_w(coarse_i) - temp_soln.get_w(coarse_i))*mg_factor[j]* vel_edge_factor;
 
                     soln.add_rho(i, mg_delta_rho ) ;
                     soln.add_u(i, mg_delta_u);
