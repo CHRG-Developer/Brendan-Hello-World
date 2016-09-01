@@ -106,7 +106,7 @@ void residuals::ansys_5_iter_rms(int timestep){
      global_variables globals;
 
     if (max_rho < globals.small_number){
-        rho_rms = 0 ;
+        rho_rms = rho_rms ;
     }else{
         rho_rms = sqrt(rho_rms_num / max_rho);
     }

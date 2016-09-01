@@ -24,6 +24,8 @@ class Solver
                                          int cycle_no, Uniform_Mesh &fine_mesh,  quad_bcs_plus &bcs,
                                          initial_conditions &init_conds, int &mg, global_variables globals,
                                          domain_geometry &fine_domain);
+
+
     protected:
     private:
 
@@ -59,6 +61,10 @@ class Solver
         };
         void cell_interface_variables( int j,int i ,vector_var &interface_node, int &neighbour, double &interface_area,
                               vector_var &cell_normal, Boundary_Conditions &boundary_conditions,  bc_var &bc ,Uniform_Mesh &Mesh) ;
+
+        void truncate_flux(flux_var &flux);
+        void truncate_flux(double &val);
+
 };
 
 #endif // SOLVER_H

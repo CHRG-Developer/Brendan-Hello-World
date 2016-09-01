@@ -38,13 +38,18 @@ class Solution
                            Uniform_Mesh &fine_mesh);
         void prolongation(Solution &coarse_soln, Solution &temp_soln, Solution &soln,
                             Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh,
-                            Boundary_Conditions &bc);
+                            Boundary_Conditions &bc, bool fmg);
+
     protected:
     private:
         double *rho, *u, *v, *w;
         int total_nodes;
         double average_rho;
         void Initialise();
+        void corner_interpolation(int type_1, int type_2, double &factor, double value1, double value2,
+                          double &edge_contribution, double coarse_value,double d1,double d2,
+                          int coarse_i, Boundary_Conditions &bc, Solution &coarse_soln,int var ,
+                          bool fmg);
 };
 
 #endif // SOLUTION_H

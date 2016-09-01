@@ -145,7 +145,8 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
 
     Solution temp_soln(coarse_mesh.get_total_nodes());
     // prolongation occurs here
-    soln.prolongation( coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,bc);
+    soln.prolongation( coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,bc,true);
+    soln.set_average_rho(initial_conds.average_rho);
     globals.update_tau(fine_domain);
     fmg = fmg -1;
 
