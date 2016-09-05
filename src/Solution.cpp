@@ -152,8 +152,50 @@ void Solution::post_process(double gamma){
 }
 
 
+// update bc nodes to allow for changes in solution
+void Solution::update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geometry &domain){
+
+    for(int i =0; i< mesh.get_total_nodes();i++){
+
+        // if bc present
+        if (bcs.get_bc(i)){
+
+            ///NEEDS to be modified for non-uniform solver
+            // 1 = dirichlet, 2 = neumann, 3 = periodic
+            if(bcs.get_rho_type(i) == 1){
+                soln.rho[i] = bcs.rho[i] - (soln.rho[bcs.neighbour[i] -bcs.rho[i]);
+
+            }else if(bcs.get_rho_type(i) == 2){
+                soln.rho[i] = soln.rho[bcs.neighbour[i]] + domain.dx*bcs.rho[i]
+
+            }else if(bs.get_rho_type(i) == 3){
+                soln.rho[i] = soln.rho[bcs.periodic_node[i]];
+
+            }
+
+
+            if(bcs.get_vel_type(i) == 1){
+                soln.u[i] = bcs.u[i] - (soln.u[bcs.neighbour[i] -bcs.u[i]);
+                soln.v[i] = bcs.v[i] - (soln.v[bcs.neighbour[i] -bcs.v[i]);
+            }else if(bcs.get_vel_type(i) == 2){
+                soln.u[i] = soln.u[bcs.neighbour[i]] + domain.dx*bcs.u[i]
+                soln.v[i] = soln.v[bcs.neighbour[i]] + domain.dx*bcs.v[i]
+            }else if(bs.get_vel_type(i) == 3){
+                soln.u[i] = soln.u[bcs.periodic_node[i]];
+                 soln.v[i] = soln.v[bcs.periodic_node[i]];
+            }
+
+
+
+
+        }
+
+    }
+
+
+}
 void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
-                           Uniform_Mesh &fine_mesh){
+                           Uniform_Mesh &fine_mesh, Boundary_Conditions &bc){
 
     int coarse_x, coarse_y;
     int coarse_i;
@@ -166,23 +208,27 @@ void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
     // i.e. loop through coarse mesh
     for (int i =0; i< total_nodes; i++){
 
+            if(!bc.get_bc(i)){
+                // get index in terms of x and y
 
-            // get index in terms of x and y
-            coarse_x = floor(i/ fine_mesh.get_num_y()/2.0);
-            coarse_y = floor(fmod(i, fine_mesh.get_num_y())/2.0);
+                // 0.5 allows for ghost cells
+                coarse_x = floor( (i/ fine_mesh.get_num_y()+0.5)/2.0);
+                coarse_y = floor((fmod(i, fine_mesh.get_num_y()) +0.5)/2.0);
 
-            coarse_i = coarse_mesh.get_num_y()* coarse_x + coarse_y;
+                coarse_i = coarse_mesh.get_num_y()* coarse_x + coarse_y;
 
-            // Uniform Mesh -> get area is not needed-> just divide by 4
-
-
-            // add area_fine/area_coarse * var to coarse_i
+                // Uniform Mesh -> get area is not needed-> just divide by 4
 
 
-            coarse_soln.add_rho(coarse_i, rho[i]/4.0);
-            coarse_soln.add_u(coarse_i, u[i]/4.0);
-            coarse_soln.add_v(coarse_i, v[i]/4.0);
-            coarse_soln.add_w(coarse_i,w[i]/4.0);
+                // add area_fine/area_coarse * var to coarse_i
+
+
+                coarse_soln.add_rho(coarse_i, rho[i]/4.0);
+                coarse_soln.add_u(coarse_i, u[i]/4.0);
+                coarse_soln.add_v(coarse_i, v[i]/4.0);
+                coarse_soln.add_w(coarse_i,w[i]/4.0);
+            }
+
 
     }
 

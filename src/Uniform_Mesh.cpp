@@ -12,9 +12,10 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
     dy = domain.dy;
     multi_grid_dt = domain.dt;
 
-	num_x_nodes = ceil(X/dx);
-	num_y_nodes = ceil(Y/dy);
-	total_nodes  = num_x_nodes * num_y_nodes;
+	num_x_nodes = ceil(X/dx) + 2;
+	num_y_nodes = ceil(Y/dy) + 2;
+	// plus twos account for ghost nodes
+	total_nodes  = (num_x_nodes ) * (num_y_nodes);
 
     /// need error check here to see if grid divisible by multigrid criteria
     //Uniform only
@@ -201,20 +202,20 @@ void Uniform_Mesh::create_mesh(){
     int counter =0;
     for( int i=0; i < num_x_nodes; i++){
         for( int j=0; j < num_y_nodes; j++){
-            centroid_x[counter] = dx/2 + i*dx;
-            centroid_y[counter] = dy/2 + j*dy;
+            centroid_x[counter] = dx/2 + (i-1)*dx;
+            centroid_y[counter] = dy/2 + (j-1)*dy;
             centroid_z[counter] = 0; //temporary
-            north_x[counter] = dx/2 + i*dx;
-            north_y[counter] = dy + j*dy;
+            north_x[counter] = dx/2 + (i-1)*dx;
+            north_y[counter] = dy + (j-1)*dy;
             north_z[counter] = 0; //temporary
-            south_x[counter] = dx/2 + i*dx;
-            south_y[counter] = j*dy;
+            south_x[counter] = dx/2 + (i-1)*dx;
+            south_y[counter] = (j-1)*dy;
             south_z[counter] = 0; //temporary
-            west_x[counter] = i*dx;
-            west_y[counter] = dy/2 + j*dy;
+            west_x[counter] = (i-1)*dx;
+            west_y[counter] = dy/2 + (j-1)*dy;
             west_z[counter] = 0; //temporary
-            east_x[counter] = dx + i*dx;
-            east_y[counter] = dy/2 + j*dy;
+            east_x[counter] = dx + (i-1)*dx;
+            east_y[counter] = dy/2 + (j-1)*dy;
             east_z[counter] = 0; //temporary
 
             n_area[counter] = dx;
