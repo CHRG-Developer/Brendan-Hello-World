@@ -2,44 +2,82 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="src/program.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/Boundary_Conditions.cpp" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1995" topLine="75" />
+			<Cursor1 position="385" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="src/preprocessor.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7766" topLine="198" />
-		</Cursor>
-	</File>
-	<File name="include/Solution.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1995" topLine="0" />
+			<Cursor1 position="295" topLine="6" />
 		</Cursor>
 	</File>
 	<File name="src/Solution.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="18512" topLine="444" />
+			<Cursor1 position="11932" topLine="260" />
 		</Cursor>
-	</File>
-	<File name="src/Solver.cpp" open="1" top="1" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="20888" topLine="500" />
-		</Cursor>
+		<Folding>
+			<Collapse line="155" />
+		</Folding>
 	</File>
 	<File name="src/tinyxml2.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="24096" topLine="857" />
 		</Cursor>
 	</File>
+	<File name="include/Solver.h" open="1" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="src/vector_var.cpp" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="876" topLine="26" />
+		</Cursor>
+	</File>
+	<File name="include/Uniform_Mesh.h" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="339" topLine="3" />
+		</Cursor>
+	</File>
+	<File name="src/program.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4378" topLine="121" />
+		</Cursor>
+	</File>
+	<File name="main.cpp" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="541" topLine="8" />
+		</Cursor>
+	</File>
+	<File name="src/residuals.cpp" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2033" topLine="63" />
+		</Cursor>
+	</File>
+	<File name="src/global_variables.cpp" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1488" topLine="29" />
+		</Cursor>
+	</File>
+	<File name="include/Solution.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="267" topLine="14" />
+		</Cursor>
+	</File>
 	<File name="include/Boundary_Conditions.h" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="23" topLine="0" />
+			<Cursor1 position="125" topLine="4" />
 		</Cursor>
 	</File>
 	<File name="include/tinyxml2.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1444" topLine="32" />
+			<Cursor1 position="1444" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="src/Solver.cpp" open="1" top="1" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="23828" topLine="576" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

@@ -2167,7 +2167,7 @@
 
 1469535870 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/residuals.h
 
-1472742157 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
+1472743194 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
 	<stdlib.h>
 	"Solution.h"
 	<algorithm>
@@ -2175,7 +2175,7 @@
 	<iostream>
 	<math.h>
 
-1472742467 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1473086111 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	<math.h>
 	<cmath>
 	"Solver.h"
@@ -2187,6 +2187,7 @@
 	"residuals.h"
 	<cstdio>
 	<ctime>
+	"artificial_dissipation.h"
 	<boost/math/special_functions/sign.hpp>
 
 1464107726 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/test_cases.cpp
@@ -2211,4 +2212,13 @@
 	<math.h>
 
 1464005120 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/xmltest.cpp
+
+1473086103 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/artificial_dissipation.cpp
+	"artificial_dissipation.h"
+	<stdlib.h>
+	<math.h>
+
+1473086093 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/artificial_dissipation.h
+	"Solution.h"
+	"Boundary_Conditions.h"
 

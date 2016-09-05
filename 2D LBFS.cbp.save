@@ -49,6 +49,9 @@
 		<Unit filename="include/Uniform_Mesh.h">
 			<Option virtualFolder="Data Objects/Include/" />
 		</Unit>
+		<Unit filename="include/artificial_dissipation.h">
+			<Option virtualFolder="Data Objects/Include/" />
+		</Unit>
 		<Unit filename="include/domain_geometry.h">
 			<Option virtualFolder="Data Objects/Include/" />
 		</Unit>
@@ -98,6 +101,9 @@
 			<Option virtualFolder="workflow objects/" />
 		</Unit>
 		<Unit filename="src/Uniform_Mesh.cpp">
+			<Option virtualFolder="Data Objects/src/" />
+		</Unit>
+		<Unit filename="src/artificial_dissipation.cpp">
 			<Option virtualFolder="Data Objects/src/" />
 		</Unit>
 		<Unit filename="src/domain_geometry.cpp">

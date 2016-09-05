@@ -10,6 +10,7 @@
 #include "residuals.h"
 #include <cstdio>
 #include <ctime>
+#include "artificial_dissipation.h"
 #include <boost/math/special_functions/sign.hpp>
 
 using namespace std;
@@ -36,6 +37,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
     tau = globals.tau;
     Solution temp_soln(Mesh.get_total_nodes());
+    artificial_dissipation arti_dis(Mesh.get_total_nodes());
 
     temp_soln.clone(soln);
 //    Solution RK1(Mesh.get_total_nodes()), RK2(Mesh.get_total_nodes()), RK3(Mesh.get_total_nodes())
@@ -112,10 +114,12 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     for (int t= 0; t < timesteps; t++){
 
         convergence_residual.reset();
+        arti_dis.get_global_jst(soln,bcs, Mesh,domain);
 
 
         for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
             for( int rk=0; rk< 4; rk++){
+                arti_dis.reset_local_jst_switch();
 
                 interface_area = 0.0;
 
