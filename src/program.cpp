@@ -79,7 +79,7 @@ void program::run(char* xml_input){
                               mg,residual,fmg);
 
     soln.post_process(globals.pre_conditioned_gamma);
-    soln.output(globals.output_file);
+    soln.output(globals.output_file );
 
 
 
@@ -145,6 +145,9 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
 
     Solution temp_soln(coarse_mesh.get_total_nodes());
     // prolongation occurs here
+
+    coarse_soln.update_bcs(bc,coarse_mesh,coarse_domain);
+
     soln.prolongation( coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,bc,true);
     soln.set_average_rho(initial_conds.average_rho);
     globals.update_tau(fine_domain);

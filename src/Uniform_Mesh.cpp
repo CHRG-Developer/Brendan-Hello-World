@@ -20,8 +20,8 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
     /// need error check here to see if grid divisible by multigrid criteria
     //Uniform only
 
-	dx = X/num_x_nodes; // reset dx/dy t0 allow for ceiling
-    dy = Y/num_y_nodes;
+	dx = X/(num_x_nodes-2); // reset dx/dy t0 allow for ceiling
+    dy = Y/(num_y_nodes -2);
     cs = domain.cs;
     // allocate memory to arrays
 

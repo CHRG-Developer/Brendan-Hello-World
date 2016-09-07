@@ -35,10 +35,11 @@ class Solution
         void add_v (int i , double arg) {v[i] = v[i] + arg;}
         void add_w (int i, double arg) {w[i] = w[i] + arg;}
         void restriction(Solution &soln, Uniform_Mesh &coarse_mesh,
-                           Uniform_Mesh &fine_mesh);
+                           Uniform_Mesh &fine_mesh, Boundary_Conditions &bc);
         void prolongation(Solution &coarse_soln, Solution &temp_soln, Solution &soln,
                             Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh,
                             Boundary_Conditions &bc, bool fmg);
+        void update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geometry &domain);
 
     protected:
     private:
@@ -46,10 +47,7 @@ class Solution
         int total_nodes;
         double average_rho;
         void Initialise();
-        void corner_interpolation(int type_1, int type_2, double &factor, double value1, double value2,
-                          double &edge_contribution, double coarse_value,double d1,double d2,
-                          int coarse_i, Boundary_Conditions &bc, Solution &coarse_soln,int var ,
-                          bool fmg);
+
 };
 
 #endif // SOLUTION_H

@@ -23,7 +23,7 @@ class Solver
         void multi_grid_agglomoration( Solution &residuals , Solution &soln,
                                          int cycle_no, Uniform_Mesh &fine_mesh,  quad_bcs_plus &bcs,
                                          initial_conditions &init_conds, int &mg, global_variables globals,
-                                         domain_geometry &fine_domain);
+                                         domain_geometry &fine_domain,Boundary_Conditions &fine_bc);
 
 
     protected:

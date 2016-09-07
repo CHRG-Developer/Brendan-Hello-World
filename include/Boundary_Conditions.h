@@ -23,7 +23,7 @@ class Boundary_Conditions
         int get_vel_type( int i) {return type_vel[i];};
 
         int get_periodic_node( int i) {return periodic_node[i];};
-        int get_nighbour(int i){return neighbour[i];};
+        int get_neighbour(int i){return neighbour[i];};
     protected:
     private:
 

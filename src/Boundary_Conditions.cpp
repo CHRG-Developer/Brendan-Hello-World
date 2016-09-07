@@ -11,16 +11,16 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
 
       // if boundary condition is present for this cell face
       bc = new bool [total_nodes +1];
-        if (n_bc==NULL) exit (1);
+        if (bc==NULL) exit (1);
 
       rho = new double [total_nodes +1];
-        if (n_rho==NULL) exit (1);
+        if (rho==NULL) exit (1);
 
 
       u = new double [total_nodes +1];
-
+        if (u==NULL) exit (1);
       v = new double [total_nodes +1];
-        if (n_v==NULL) exit (1);
+        if (v==NULL) exit (1);
 
 
         /// integer describing the boundary condition type
@@ -30,16 +30,16 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
         // 3: Periodic Boundary Condition
 
      type_rho = new int [total_nodes +1];
-        if (n_type_rho==NULL) exit (1);
+        if (type_rho==NULL) exit (1);
 
      type_vel = new int [total_nodes +1];
-        if (n_type_vel==NULL) exit (1);
+        if (type_vel==NULL) exit (1);
 
 
      // node u[n] which will source u[0]
      periodic_node = new int [total_nodes +1];
-        if (e_v==NULL) exit (1);
-    neighbour = new int[total_nodes +1]
+        if (periodic_node==NULL) exit (1);
+    neighbour = new int[total_nodes +1];
         if(neighbour == NULL) exit (1);
 }
 
@@ -91,15 +91,10 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.w_type_vel;
                 type_rho[t] = _bc.w_type_rho;
 
-                periodic_node[t] = (num_x-1) * (num_y ) + t;
+                periodic_node[t] = (num_x-2) * (num_y ) + t;
                 neighbour[t] = t + num_y;
-
-            }else{
-                bc[t] =false;
-            }
-
-            // east boundary
-            if ( i == (num_x -1)){
+                /// east boundary
+            }else if( i == (num_x -1)){
                 bc[t] = true;
                 rho[t] = _bc.e_rho;
                 u[t] = _bc.e_u;
@@ -108,16 +103,11 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_rho[t] = _bc.e_type_rho;
 
 
-                periodic_node[t] = t - (num_x-1) * (num_y );
+                periodic_node[t] = t - (num_x-2) * (num_y );
                 neighbour[t] = t - num_y;
 
-
-            }else {
-                    bc[t] = false;
-            }
-
             // south boundary
-            if(j == 0){
+            }else if(j == 0){
                 bc[t] = true;
                 rho[t] = _bc.s_rho;
                 u[t] = _bc.s_u;
@@ -125,18 +115,13 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.s_type_vel;
                 type_rho[t] = _bc.s_type_rho;
 
-                periodic_node[t] = t + (num_y-1);
+                periodic_node[t] = t + (num_y-2);
                 neighbour[t] = t + 1;
 
 
+            //north boundary
 
-
-            }else{
-                bc[t] = false;
-            }
-
-            // north boundary
-            if( j == (num_y-1)){
+            }else if( j == (num_y-1)){
                 bc[t] = true;
                 rho[t] = _bc.n_rho;
                 u[t] = _bc.n_u;
@@ -144,7 +129,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.n_type_vel;
                 type_rho[t] = _bc.n_type_rho;
 
-                periodic_node[t] = t - (num_y-1);
+                periodic_node[t] = t - (num_y-2);
                 neighbour[t] = t - 1;
 
 
