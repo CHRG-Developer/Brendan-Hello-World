@@ -143,9 +143,9 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                     cell_1.z = Mesh.get_centroid_z(i);
                     // add in reset function
                     cell_flux.P =0.0;
-                    cell_flux.Momentum_x =0.0;
-                    cell_flux.Momentum_y = 0.0;
-                    cell_flux.Momentum_z = 0.0;
+                    cell_flux.momentum_x =0.0;
+                    cell_flux.momentum_y = 0.0;
+                    cell_flux.momentum_z = 0.0;
                     // loop through cell interfaces
                     for (int j= 0; j <4; j++ ){
                         bc.present = false;
@@ -161,14 +161,14 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         rho_u_interface.z = 0;
 
                         x_flux.P = 0;
-                        x_flux.Momentum_x =0;
-                        x_flux.Momentum_y =0;
-                        x_flux.Momentum_z =0;
+                        x_flux.momentum_x =0;
+                        x_flux.momentum_y =0;
+                        x_flux.momentum_z =0;
 
                         y_flux.P = 0;
-                        y_flux.Momentum_x =0;
-                        y_flux.Momentum_y =0;
-                        y_flux.Momentum_z =0;
+                        y_flux.momentum_x =0;
+                        y_flux.momentum_y =0;
+                        y_flux.momentum_z =0;
 
                         // include w in 3d
 
@@ -190,8 +190,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
 
                         dbug[j].P = delta_rho.x;
-                        dbug[j].Momentum_x = delta_u.x;
-                        dbug[j].Momentum_y = delta_u.y;
+                        dbug[j].momentum_x = delta_u.x;
+                        dbug[j].momentum_y = delta_u.y;
 
                         // cell vertex dependent artificial dissipiation work
                         arti_dis.add_local_jst(j,temp_soln.get_rho(i),soln.get_rho(neighbour));
@@ -264,8 +264,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         u_magnitude = u_interface.Magnitude();
 
 
-                        int_debug[j].Momentum_x =u_interface.x;
-                        int_debug[j].Momentum_y = u_interface.y;
+                        int_debug[j].momentum_x =u_interface.x;
+                        int_debug[j].momentum_y = u_interface.y;
                         int_debug[j].P = rho_interface;
 
                         for (int k =0 ; k<9; k++){
@@ -298,20 +298,20 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                             x_flux.P = x_flux.P + e_alpha.x* feq_interface*cell_normal.x;
                             y_flux.P = y_flux.P +  e_alpha.y * feq_interface*cell_normal.y;
-                            //x_flux.Momentum_x = x_flux.Momentum_x + pow(e_alpha.x,2) *( feq_interface +
+                            //x_flux.momentum_x = x_flux.momentum_x + pow(e_alpha.x,2) *( feq_interface +
                                                                              //(1-1/(2*tau))*fneq_interface);
 
-                            x_flux.Momentum_x = x_flux.Momentum_x + e_alpha.x * (e_alpha.x) *( feq_interface
+                            x_flux.momentum_x = x_flux.momentum_x + e_alpha.x * (e_alpha.x) *( feq_interface
                                                                           + (1-1/(2*tau))*fneq_interface);
-                            x_flux.Momentum_y = x_flux.Momentum_y + e_alpha.x*(e_alpha.y) *( feq_interface
+                            x_flux.momentum_y = x_flux.momentum_y + e_alpha.x*(e_alpha.y) *( feq_interface
                                                                             + (1-1/(2*tau))*fneq_interface);
 
 
-                            y_flux.Momentum_x = y_flux.Momentum_x + e_alpha.y*(e_alpha.x) *( feq_interface
+                            y_flux.momentum_x = y_flux.momentum_x + e_alpha.y*(e_alpha.x) *( feq_interface
                                                                              + (1-1/(2*tau))*fneq_interface);
-                            //y_flux.Momentum_y = y_flux.Momentum_y + pow(e_alpha.y,2) *( feq_interface
+                            //y_flux.momentum_y = y_flux.momentum_y + pow(e_alpha.y,2) *( feq_interface
                                                                              //+ (1-1/(2*tau))*fneq_interface);
-                            y_flux.Momentum_y = y_flux.Momentum_y + e_alpha.y * (e_alpha.y) *( feq_interface
+                            y_flux.momentum_y = y_flux.momentum_y + e_alpha.y * (e_alpha.y) *( feq_interface
                                                                               + (1-1/(2*tau))*fneq_interface);
 
 
@@ -322,9 +322,9 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             //truncate_flux(y_flux);
 
                             debug_flux[j].P = x_flux.P  ;
-                            debug_flux[j].Momentum_x = x_flux.Momentum_x* cell_normal.x ;
-                            debug_flux[j].Momentum_y = x_flux.Momentum_y* cell_normal.x ;
-                            debug_flux[j].Momentum_z = x_flux.P* cell_normal.x ;
+                            debug_flux[j].momentum_x = x_flux.momentum_x* cell_normal.x ;
+                            debug_flux[j].momentum_y = x_flux.momentum_y* cell_normal.x ;
+                            debug_flux[j].momentum_z = x_flux.P* cell_normal.x ;
 
                        // account for rounding errors
 
@@ -337,33 +337,35 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             cell_flux.P = cell_flux.P
                                 + (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                 ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
-                            cell_flux.Momentum_x = cell_flux.Momentum_x
+                            cell_flux.momentum_x = cell_flux.momentum_x
                                 + (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                    ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y ) ;
-                            cell_flux.Momentum_y = cell_flux.Momentum_y
+                                    ( x_flux.momentum_x * cell_normal.x + y_flux.momentum_x *cell_normal.y ) ;
+                            cell_flux.momentum_y = cell_flux.momentum_y
                                 + (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                    ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
+                                    ( x_flux.momentum_y * cell_normal.x + y_flux.momentum_y *cell_normal.y );
 
                             /// debug
 
                                 debug[j].P = (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                          ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
-                                debug[j].Momentum_x = (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                        ( x_flux.Momentum_x * cell_normal.x + y_flux.Momentum_x *cell_normal.y ) ;
-                                debug[j].Momentum_y =  (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                        ( x_flux.Momentum_y * cell_normal.x + y_flux.Momentum_y *cell_normal.y );
+                                debug[j].momentum_x = (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                        ( x_flux.momentum_x * cell_normal.x + y_flux.momentum_x *cell_normal.y ) ;
+                                debug[j].momentum_y =  (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                        ( x_flux.momentum_y * cell_normal.x + y_flux.momentum_y *cell_normal.y );
 
                         }
+
+                        //artificial dissipation calcs
+
+                        arti_dis.get_local_coeffs( soln,bcs,Mesh,temp_soln,domain,j,i);
+
 
 
 
                     }
 
 
-                    // artificial dissipation calcs
-
-                    arti_dis.get_local_coeffs( soln,bcs,Mesh,temp_soln.get_rho(i));
-
+                    //
 
                     // account for rounding errors
 
@@ -374,16 +376,16 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         RK1 = cell_flux;
                         if( mg > 0){
                             mg_forcing_term.P = residual.get_rho(i) - cell_flux.P;
-                            mg_forcing_term.Momentum_x = residual.get_u(i) - cell_flux.Momentum_x;
-                            mg_forcing_term.Momentum_y = residual.get_v(i) - cell_flux.Momentum_y;
+                            mg_forcing_term.momentum_x = residual.get_u(i) - cell_flux.momentum_x;
+                            mg_forcing_term.momentum_y = residual.get_v(i) - cell_flux.momentum_y;
 
                             //add momentum z later
 
 
                         }else{
                             mg_forcing_term.P = 0;
-                            mg_forcing_term.Momentum_x = 0;
-                            mg_forcing_term.Momentum_y = 0;
+                            mg_forcing_term.momentum_x = 0;
+                            mg_forcing_term.momentum_y = 0;
 
                         }
                         // timestep for calculating second step
@@ -405,25 +407,25 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         // try removing
                         f1= soln.get_rho(i) + RK_delta_t * (cell_flux.P + mg_forcing_term.P);
                         f2 =  soln.get_average_rho()* soln.get_u(i) + (RK_delta_t *
-                                (cell_flux.Momentum_x + mg_forcing_term.Momentum_x +
+                                (cell_flux.momentum_x + mg_forcing_term.momentum_x +
                                 source.get_force(i)* Mesh.get_cell_volume(i) * soln.get_average_rho()));
                         f3 =  soln.get_average_rho() * soln.get_v(i) + (RK_delta_t *
-                                                    (cell_flux.Momentum_y + mg_forcing_term.Momentum_y)) ;
+                                                    (cell_flux.momentum_y + mg_forcing_term.momentum_y)) ;
 
 
                     }else{
                         // runge kutta parametes
                         R1=(RK1.P + 2.0* RK2.P + 2.0* RK3.P + RK4.P)/6.0 ;
                         truncate_flux(R1);
-                        R2 = (RK1.Momentum_x + 2.0* RK2.Momentum_x
-                                                 + 2.0* RK3.Momentum_x + RK4.Momentum_x)/6.0 ;
+                        R2 = (RK1.momentum_x + 2.0* RK2.momentum_x
+                                                 + 2.0* RK3.momentum_x + RK4.momentum_x)/6.0 ;
 
                         truncate_flux(R2);
 
 
 
-                        R3 = (RK1.Momentum_y + 2.0* RK2.Momentum_y
-                                               + 2.0* RK3.Momentum_y + RK4.Momentum_y)/6.0 ;
+                        R3 = (RK1.momentum_y + 2.0* RK2.momentum_y
+                                               + 2.0* RK3.momentum_y + RK4.momentum_y)/6.0 ;
 
                        truncate_flux(R3);
                        //R3 =0.0;
@@ -435,8 +437,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                         //residuals set for multigrid
                         residual.set_rho(i,(R1 + mg_forcing_term.P));
-                        residual.set_u(i,(R2 + mg_forcing_term.Momentum_x));
-                        residual.set_v(i,(R3 + mg_forcing_term.Momentum_z));
+                        residual.set_u(i,(R2 + mg_forcing_term.momentum_x));
+                        residual.set_v(i,(R3 + mg_forcing_term.momentum_z));
 
 
                     }
@@ -586,23 +588,23 @@ void Solver::truncate_flux(flux_var &flux){
     }else{
         flux.P = temp;
     }
-    temp = floor(fabs(flux.Momentum_x *f))/f;
-    if (flux.Momentum_x < 0.0){
-        flux.Momentum_x = -temp;
+    temp = floor(fabs(flux.momentum_x *f))/f;
+    if (flux.momentum_x < 0.0){
+        flux.momentum_x = -temp;
     }else{
-        flux.Momentum_x = temp;
+        flux.momentum_x = temp;
     }
-    temp = floor(fabs(flux.Momentum_y *f))/f;
-    if (flux.Momentum_y < 0.0){
-        flux.Momentum_y = -temp;
+    temp = floor(fabs(flux.momentum_y *f))/f;
+    if (flux.momentum_y < 0.0){
+        flux.momentum_y = -temp;
     }else{
-        flux.Momentum_y = temp;
+        flux.momentum_y = temp;
     }
-    temp = floor(fabs(flux.Momentum_z *f))/f;
-    if (flux.Momentum_z < 0.0){
-        flux.Momentum_z = -temp;
+    temp = floor(fabs(flux.momentum_z *f))/f;
+    if (flux.momentum_z < 0.0){
+        flux.momentum_z = -temp;
     }else{
-        flux.Momentum_z = temp;
+        flux.momentum_z = temp;
     }
 
 }

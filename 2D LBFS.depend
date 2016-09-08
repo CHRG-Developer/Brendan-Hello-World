@@ -2056,7 +2056,7 @@
 	<string>
 	<Boundary_Conditions.h>
 
-1473163206 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
+1473349935 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
 	"Uniform_Mesh.h"
 	"Boundary_Conditions.h"
 	"Solution.h"
@@ -2064,6 +2064,7 @@
 	"external_forces.h"
 	"global_variables.h"
 	"initial_conditions.h"
+	"flux_var.h"
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/external_forces.h
 
@@ -2213,14 +2214,20 @@
 
 1464005120 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/xmltest.cpp
 
-1473261104 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/artificial_dissipation.cpp
+1473351506 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/artificial_dissipation.cpp
 	"artificial_dissipation.h"
 	<stdlib.h>
 	<math.h>
 	<vector>
 	<algorithm>
 
-1473261386 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/artificial_dissipation.h
+1473351427 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/artificial_dissipation.h
 	"Solution.h"
 	"Boundary_Conditions.h"
+	"flux_var.h"
+
+1473351269 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/flux_var.h
+
+1473342838 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/flux_var.cpp
+	"flux_var.h"
 
