@@ -4,17 +4,22 @@
 #include <vector>
 #include <algorithm>
 
+
 artificial_dissipation::artificial_dissipation()
 {
     //ctor
 }
-artificial_dissipation::artificial_dissipation(int total_nodes)
+artificial_dissipation::artificial_dissipation(int total_nodes, global_variables &globals)
 {
     //ctor
      global_JST_switch_x = new double [total_nodes +1];
         if (global_JST_switch_x==NULL) exit (1);
     global_JST_switch_y = new double [total_nodes +1];
     if (global_JST_switch_y==NULL) exit (1);
+
+    martinelli_exponent = globals.martinelli;
+    kappa_2 = globals.arti_disp_kappa_2;
+    kappa_4 = globals.arti_disp_kappa_4;
 
 }
 
@@ -90,27 +95,40 @@ void artificial_dissipation::get_local_coeffs(Solution &soln, Boundary_Condition
 
         /// Get dissipation coefficients
         double m1,p1,zero,p2;
-
+        jst_num = -2*local_soln.get_rho(i);
+        jst_den = 2*local_soln.get_rho(i);
         if( j == 0 || j == 2){
-            zero = local_jst_switch_x;
+           
+          
             neighbour = Mesh.get_w_node(i);
             m1 = global_JST_switch_x[neighbour];
+            jst_num = jst_num + soln.get_rho(neighbour);
+            jst_den = jst_den  + soln.get_rho(neighbour);
             neighbour = Mesh.get_e_node(i);
             p1 = global_JST_switch_x[neighbour];
+            jst_num = jst_num + soln.get_rho(neighbour);
+            jst_den = jst_den + soln.get_rho(neighbour);
+            
             neighbour = Mesh.get_e_node(neighbour);
             p2 = global_JST_switch_x[neighbour];
 
         }else{
-            zero = local_jst_switch_y;
+          
             neighbour = Mesh.get_s_node(i);
             m1 = global_JST_switch_y[neighbour];
+            jst_num = jst_num + soln.get_rho(neighbour);
+            jst_den = jst_den  + soln.get_rho(neighbour);
             neighbour = Mesh.get_n_node(i);
             p1 = global_JST_switch_y[neighbour];
+            jst_num = jst_num + soln.get_rho(neighbour);
+            jst_den = jst_den + soln.get_rho(neighbour);
             neighbour = Mesh.get_n_node(neighbour);
             p2 = global_JST_switch_y[neighbour];
 
         }
-
+        
+        zero = jst_num/jst_den;
+         
         global_2nd_order = std::max(m1,std::max(zero,std::max(p1,p2))) * kappa_2;
         global_4th_order = std::max(0.0,(kappa_4 - global_2nd_order));
 
@@ -179,15 +197,15 @@ void artificial_dissipation::get_local_coeffs(Solution &soln, Boundary_Condition
             }
 
 
-        local_flux.P = local_flux.P + lambda_flux *global_2nd_order
+        local_flux.P =  lambda_flux *global_2nd_order
                     * second_order_difference(1,neighbour,i,soln,local_soln)
                 - lambda_flux  * global_4th_order
                 * _4th_order_difference(1,neighbour,i,soln,bcs,Mesh,local_soln,domain,j);
-        local_flux.momentum_x = local_flux.momentum_x + lambda_flux *global_2nd_order
+        local_flux.momentum_x =  lambda_flux *global_2nd_order
                 * second_order_difference(2,neighbour,i,soln,local_soln)
                 - lambda_flux  * global_4th_order
                 * _4th_order_difference(2,neighbour,i,soln,bcs,Mesh,local_soln,domain,j);
-        local_flux.momentum_y = local_flux.momentum_y + lambda_flux *global_2nd_order
+        local_flux.momentum_y = lambda_flux *global_2nd_order
                 * second_order_difference(3,neighbour,i,soln,local_soln)
                 - lambda_flux  * global_4th_order
                 * _4th_order_difference(3,neighbour,i,soln,bcs,Mesh,local_soln,domain,j);
@@ -202,26 +220,13 @@ void artificial_dissipation::get_local_coeffs(Solution &soln, Boundary_Condition
 
 }
 
-void artificial_dissipation::add_local_jst(int j, double rho_local, double rho_neighbour){
 
-    if( fmod(j,2) < 1){
-            jst_x_num = jst_x_num + rho_neighbour - rho_local;
-            jst_x_den = jst_x_den + rho_neighbour + rho_local;
-    }else{
-            jst_y_num = jst_y_num + rho_neighbour - rho_local;
-            jst_y_den = jst_y_den + rho_neighbour + rho_local;
-
-    }
-
-}
 
 void artificial_dissipation::reset_local_jst_switch(){
     local_jst_switch_x = 0.0;
     local_jst_switch_y = 0.0;
-    jst_x_num = 0.0;
-    jst_x_den = 0.0;
-    jst_y_num = 0.0;
-    jst_y_den = 0.0;
+    jst_num = 0.0;
+    jst_den = 0.0;
 
     local_flux.P = 0.0;
     local_flux.momentum_x = 0.0;

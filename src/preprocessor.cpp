@@ -203,6 +203,10 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.max_mg_levels = get_xml_double(parent,"max_multi_grid_levels",xmlDoc);
     globals.fmg_levels =  get_xml_double(parent,"FMG_levels",xmlDoc);
     globals.fmg_tolerance = get_xml_double(parent,"FMG_tolerance",xmlDoc);
+    globals.arti_disp_kappa_2 = get_xml_double(parent,"dissipation_kappa_2",xmlDoc);
+    globals.arti_disp_kappa_4 = get_xml_double(parent,"dissipation_kappa_4",xmlDoc);
+    globals.martinelli = get_xml_double(parent,"martinelli_exponent",xmlDoc);
+
 
 }
 

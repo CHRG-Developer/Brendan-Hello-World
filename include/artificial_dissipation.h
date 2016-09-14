@@ -1,6 +1,7 @@
 #include "Solution.h"
 #include "Boundary_Conditions.h"
 #include "flux_var.h"
+#include "global_variables.h"
 #ifndef ARTIFICIAL_DISSIPATION_H
 #define ARTIFICIAL_DISSIPATION_H
 
@@ -9,7 +10,7 @@ class artificial_dissipation
 {
     public:
         artificial_dissipation();
-        artificial_dissipation(int nodes);
+        artificial_dissipation(int nodes,global_variables &globals);
         virtual ~artificial_dissipation();
         double * global_JST_switch_x,* global_JST_switch_y;
         void get_global_jst(Solution &soln, Boundary_Conditions &bcs,
@@ -21,7 +22,7 @@ class artificial_dissipation
         void get_local_coeffs(Solution &soln, Boundary_Conditions &bcs,
                                             Uniform_Mesh &Mesh, Solution &local_soln,domain_geometry &domain,
                                             int j, int i);
-        void add_local_jst(int j, double rho_local, double rho_neighbour);
+       
         double global_2nd_order,global_4th_order;
         double spectral_radii[4] ; // 1 and 2 = i+ 1;  3 + 4 = j+1
         double martinelli_exponent;
@@ -30,7 +31,7 @@ class artificial_dissipation
     protected:
 
     private:
-        double jst_x_num,jst_x_den, jst_y_num, jst_y_den;
+        double jst_num,jst_den;
 
         double maximum( double m1, double zero, double p1, double p2);
         double second_order_difference (int var, int neighbour, int i,Solution &soln, Solution &local_soln);

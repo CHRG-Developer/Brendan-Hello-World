@@ -37,7 +37,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
     tau = globals.tau;
     Solution temp_soln(Mesh.get_total_nodes());
-    artificial_dissipation arti_dis(Mesh.get_total_nodes());
+    artificial_dissipation arti_dis(Mesh.get_total_nodes(),globals);
 
     temp_soln.clone(soln);
 //    Solution RK1(Mesh.get_total_nodes()), RK2(Mesh.get_total_nodes()), RK3(Mesh.get_total_nodes())
@@ -84,7 +84,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     residuals convergence_residual;
     flux_var x_flux , y_flux;
     flux_var cell_flux , mg_forcing_term;
-    flux_var debug [4] ,debug_flux[4];
+    flux_var debug [4] ,debug_flux[4],arti_debug [4];
     flux_var dbug [4];
     flux_var int_debug[4];
     double interface_area;
@@ -193,14 +193,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         dbug[j].momentum_x = delta_u.x;
                         dbug[j].momentum_y = delta_u.y;
 
-                        // cell vertex dependent artificial dissipiation work
-                        arti_dis.add_local_jst(j,temp_soln.get_rho(i),soln.get_rho(neighbour));
-                        if( j == 2){
-
-
-                        }else if( j ==3){
-
-                        }
+                 
 
                         // using D2Q9 , loop through each lattice node
                         for (int k =0 ; k<9; k++){
@@ -328,6 +321,9 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                        // account for rounding errors
 
+                        //artificial dissipation calcs
+
+                        arti_dis.get_local_coeffs( soln,bcs,Mesh,temp_soln,domain,j,i);
 
                         if( Mesh.get_cell_volume(i) < pow(10,-5)){
                             //do nothing for now
@@ -336,13 +332,16 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             //cell_flux.P = 0;
                             cell_flux.P = cell_flux.P
                                 + (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
+                                ( (x_flux.P +arti_dis.local_flux.P) * cell_normal.x
+                                 + (y_flux.P +arti_dis.local_flux.P) *cell_normal.y );
                             cell_flux.momentum_x = cell_flux.momentum_x
                                 + (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                    ( x_flux.momentum_x * cell_normal.x + y_flux.momentum_x *cell_normal.y ) ;
+                                    ( (x_flux.momentum_x + arti_dis.local_flux.momentum_x)* cell_normal.x
+                                     + (y_flux.momentum_x + arti_dis.local_flux.momentum_x) *cell_normal.y ) ;
                             cell_flux.momentum_y = cell_flux.momentum_y
                                 + (-1)*interface_area/ Mesh.get_cell_volume(i)*
-                                    ( x_flux.momentum_y * cell_normal.x + y_flux.momentum_y *cell_normal.y );
+                                    ( (x_flux.momentum_y +arti_dis.local_flux.momentum_y ) * cell_normal.x
+                                       + ( y_flux.momentum_y +arti_dis.local_flux.momentum_y) *cell_normal.y );
 
                             /// debug
 
@@ -353,11 +352,17 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                                 debug[j].momentum_y =  (-1)*interface_area/ Mesh.get_cell_volume(i)*
                                         ( x_flux.momentum_y * cell_normal.x + y_flux.momentum_y *cell_normal.y );
 
+                                arti_debug[j].P =  arti_dis.local_flux.P * cell_normal.x
+                                 + arti_dis.local_flux.P *cell_normal.y ;
+                                 arti_debug[j].momentum_x =  arti_dis.local_flux.momentum_x * cell_normal.x
+                                 + arti_dis.local_flux.momentum_x *cell_normal.y ;
+                                 arti_debug[j].momentum_x =  arti_dis.local_flux.momentum_x * cell_normal.x
+                                 + arti_dis.local_flux.momentum_x *cell_normal.y ;
+
+
                         }
 
-                        //artificial dissipation calcs
 
-                        arti_dis.get_local_coeffs( soln,bcs,Mesh,temp_soln,domain,j,i);
 
 
 

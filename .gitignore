@@ -46,3 +46,5 @@ Network Trash Folder
 Temporary Items
 .apdisk
 bin/Debug/2D LBFS
+/2D LBFS/build/
+/build/

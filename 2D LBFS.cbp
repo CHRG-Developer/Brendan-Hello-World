@@ -58,6 +58,9 @@
 		<Unit filename="include/external_forces.h">
 			<Option virtualFolder="Data Objects/Include/" />
 		</Unit>
+		<Unit filename="include/flux_var.h">
+			<Option virtualFolder="Data Objects/Include/" />
+		</Unit>
 		<Unit filename="include/global_variables.h">
 			<Option virtualFolder="Data Objects/Include/" />
 		</Unit>
@@ -110,6 +113,9 @@
 			<Option virtualFolder="Data Objects/src/" />
 		</Unit>
 		<Unit filename="src/external_forces.cpp">
+			<Option virtualFolder="Data Objects/src/" />
+		</Unit>
+		<Unit filename="src/flux_var.cpp">
 			<Option virtualFolder="Data Objects/src/" />
 		</Unit>
 		<Unit filename="src/global_variables.cpp">

@@ -2068,7 +2068,7 @@
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/external_forces.h
 
-1473244443 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
+1473766972 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
 	<string>
 	"domain_geometry.h"
 	<math.h>
@@ -2088,7 +2088,7 @@
 	<global_variables.h>
 	<domain_geometry.h>
 
-1473173700 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
+1473773801 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
 	"Boundary_Conditions.h"
 	<stdlib.h>
 
@@ -2110,7 +2110,7 @@
 1464023837 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/initial_conditions.cpp
 	"initial_conditions.h"
 
-1470827193 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
+1473766998 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
 	"preprocessor.h"
 	"global_variables.h"
 	<fstream>
@@ -2176,7 +2176,7 @@
 	<iostream>
 	<math.h>
 
-1473261170 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1473767007 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	<math.h>
 	<cmath>
 	"Solver.h"
@@ -2214,17 +2214,18 @@
 
 1464005120 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/xmltest.cpp
 
-1473351506 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/artificial_dissipation.cpp
+1473766984 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/artificial_dissipation.cpp
 	"artificial_dissipation.h"
 	<stdlib.h>
 	<math.h>
 	<vector>
 	<algorithm>
 
-1473351427 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/artificial_dissipation.h
+1473766929 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/artificial_dissipation.h
 	"Solution.h"
 	"Boundary_Conditions.h"
 	"flux_var.h"
+	"global_variables.h"
 
 1473351269 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/flux_var.h
 

@@ -35,6 +35,7 @@ class global_variables
         double tau;
         double arti_disp_kappa_2; // artiifical dissipation constant 2nd order
         double arti_disp_kappa_4;
+        double martinelli;
 
         int max_mg_levels ; // number of coarse grids to enter
         int fmg_levels;
