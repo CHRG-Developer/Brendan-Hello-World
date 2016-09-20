@@ -37,13 +37,18 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
     tau = globals.tau;
     Solution temp_soln(Mesh.get_total_nodes());
+    Solution soln_t0(Mesh.get_total_nodes());
+    
+    
     artificial_dissipation arti_dis(Mesh.get_total_nodes(),globals);
 
     temp_soln.clone(soln);
+    soln_t0.clone(soln);
+    
 //    Solution RK1(Mesh.get_total_nodes()), RK2(Mesh.get_total_nodes()), RK3(Mesh.get_total_nodes())
 //        RK4(Mesh.get_total_nodes());
-    flux_var RK1, RK2, RK3, RK4;
-    double RK_delta_t;
+    flux_var RK;
+    double RK_delta_t,RK_weight;
     double delta_t = globals.time_marching_step;
     std::clock_t start;
     double duration;
@@ -83,7 +88,11 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     double rho_interface,feq_interface,fneq_interface;
     residuals convergence_residual;
     flux_var x_flux , y_flux;
-    flux_var cell_flux , mg_forcing_term;
+    flux_var cell_flux ;
+    flux_var *mg_forcing_term;
+    
+    mg_forcing_term= new flux_var [Mesh.get_total_nodes() +1 ];
+    if (mg_forcing_term==NULL) exit (1);
     flux_var debug [4] ,debug_flux[4],arti_debug [4];
     flux_var dbug [4];
     flux_var int_debug[4];
@@ -114,25 +123,30 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
     // loop through each cell
     for (int t= 0; t < timesteps; t++){
-        soln.update_bcs(bcs,Mesh,domain);
-        //temp_soln.update_bcs(bcs,Mesh,domain);
+       
+        soln.clone(temp_soln); // soln is the solution at the start of every 
+                                // RK step.(rk = n) Temp_soln holds the values at end of
+                                // step.(rk = n+1)
+        soln_t0.clone(soln);    // soln_t0 holds solution at start of time step
+                                // t= 0, rk = 0
 
-        convergence_residual.reset();
-        arti_dis.get_global_jst(soln,bcs, Mesh,domain);
+        for( int rk=0; rk< 4; rk++){
+            
+            //update temp_soln boundary conditions
+             temp_soln.update_bcs(bcs,Mesh,domain);
+             soln.clone(temp_soln);
+             
+            //temp_soln.update_bcs(bcs,Mesh,domain);
+
+            convergence_residual.reset();
+            arti_dis.get_global_jst(soln,bcs, Mesh,domain);
+            for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
 
 
+                // skip if a boundary node
+                if(! bcs.get_bc(i)){
 
 
-        for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
-
-
-              // skip if a boundary node
-            if(! bcs.get_bc(i)){
-
-
-
-
-                for( int rk=0; rk< 4; rk++){
                     arti_dis.reset_local_jst_switch();
 
                     interface_area = 0.0;
@@ -182,7 +196,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         cell_2.y = Mesh.get_centroid_y((neighbour));
                         cell_2.z = Mesh.get_centroid_z(neighbour);
 
-                        // use soln for neighbour values as these remain constant
+                        // use temp soln for neighbour values as these refelct real boundary conditions
                         // temp_soln should update continuously through RK stepping
                         delta_rho.Get_Gradient(temp_soln.get_rho(i), soln.get_rho(neighbour),cell_1,cell_2 );
                         delta_u.Get_Gradient(temp_soln.get_u(i), soln.get_u(neighbour),cell_1,cell_2 );
@@ -362,11 +376,6 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                         }
 
-
-
-
-
-
                     }
 
 
@@ -378,81 +387,90 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                     // store RK fluxes
                     if (rk == 0){
-                        RK1 = cell_flux;
+                        RK = cell_flux;
                         if( mg > 0){
-                            mg_forcing_term.P = residual.get_rho(i) - cell_flux.P;
-                            mg_forcing_term.momentum_x = residual.get_u(i) - cell_flux.momentum_x;
-                            mg_forcing_term.momentum_y = residual.get_v(i) - cell_flux.momentum_y;
+                            mg_forcing_term[i].P = residual.get_rho(i) - cell_flux.P;
+                            mg_forcing_term[i].momentum_x = residual.get_u(i) - cell_flux.momentum_x;
+                            mg_forcing_term[i].momentum_y = residual.get_v(i) - cell_flux.momentum_y;
 
                             //add momentum z later
 
 
                         }else{
-                            mg_forcing_term.P = 0;
-                            mg_forcing_term.momentum_x = 0;
-                            mg_forcing_term.momentum_y = 0;
+                            mg_forcing_term[i].P = 0;
+                            mg_forcing_term[i].momentum_x = 0;
+                            mg_forcing_term[i].momentum_y = 0;
 
                         }
                         // timestep for calculating second step
                         RK_delta_t = delta_t/2;
+                        RK_weight = 1.0/6.0;
+                        
                     }else if (rk == 1){
-                        RK2 = cell_flux;
+                        RK = cell_flux;
                         RK_delta_t = delta_t/2;
+                        RK_weight = 2.0/6.0;
+                    
+                    
                     }else if (rk == 2){
-                        RK3 = cell_flux;
+                        RK = cell_flux;
                         RK_delta_t = delta_t;
+                        RK_weight = 2.0/6.0;
                     }else{
-                        RK4 = cell_flux;
+                        RK = cell_flux;
                     }
                     double f1,f2,f3,temp_force, R1,R2,R3;
-                   if(rk <3 ){
-                        // old forward euler method adapted to RK4
+                   
+                    // old forward euler method adapted to RK4
 
-                        temp_force = source.get_force(i)* Mesh.get_cell_volume(i) * soln.get_rho(i);
-                        // try removing
-                        f1= soln.get_rho(i) + RK_delta_t * (cell_flux.P + mg_forcing_term.P);
-                        f2 =  soln.get_average_rho()* soln.get_u(i) + (RK_delta_t *
-                                (cell_flux.momentum_x + mg_forcing_term.momentum_x +
-                                source.get_force(i)* Mesh.get_cell_volume(i) * soln.get_average_rho()));
-                        f3 =  soln.get_average_rho() * soln.get_v(i) + (RK_delta_t *
-                                                    (cell_flux.momentum_y + mg_forcing_term.momentum_y)) ;
+                    temp_force = source.get_force(i)* Mesh.get_cell_volume(i) * temp_soln.get_rho(i);
+                    // try removing
+                    f1= soln_t0.get_rho(i) + RK_delta_t * (RK.P + mg_forcing_term[i].P);
+                    f2 =  soln_t0.get_average_rho()* soln_t0.get_u(i) + (RK_delta_t *
+                            (RK.momentum_x + mg_forcing_term[i].momentum_x +
+                            source.get_force(i)* Mesh.get_cell_volume(i) * temp_soln.get_average_rho()));
+                    //f3 =  soln_t0.get_average_rho() * soln_t0.get_v(i) + (RK_delta_t *
+                    //                            (RK.momentum_y + mg_forcing_term[i].momentum_y)) ;
+                    f3 = 0.0;
+                    switch (rk){
 
+                        case 0:
+                            residual.set_rho(i,((RK.P + mg_forcing_term[i].P)*(RK_weight)));
+                            residual.set_u(i,((RK.momentum_x + mg_forcing_term[i].momentum_x)*RK_weight));
+                            residual.set_v(i,((RK.momentum_y + mg_forcing_term[i].momentum_z)*RK_weight));
 
-                    }else{
-                        // runge kutta parametes
-                        R1=(RK1.P + 2.0* RK2.P + 2.0* RK3.P + RK4.P)/6.0 ;
-                        truncate_flux(R1);
-                        R2 = (RK1.momentum_x + 2.0* RK2.momentum_x
-                                                 + 2.0* RK3.momentum_x + RK4.momentum_x)/6.0 ;
+                            break;
 
-                        truncate_flux(R2);
-
-
-
-                        R3 = (RK1.momentum_y + 2.0* RK2.momentum_y
-                                               + 2.0* RK3.momentum_y + RK4.momentum_y)/6.0 ;
-
-                       truncate_flux(R3);
-                       //R3 =0.0;
-
-                        f1 = soln.get_rho(i) + R1 * delta_t;
-                        f2 = soln.get_average_rho()* soln.get_u(i) + R2 *  delta_t;
-                        f3 = soln.get_average_rho() * soln.get_v(i) + R3 * delta_t;
+                        case 1:
+                        case 2:  
+                        case 3:
+                            residual.add_rho(i,((RK.P + mg_forcing_term[i].P)*(RK_weight)));
+                            residual.add_u(i,((RK.momentum_x + mg_forcing_term[i].momentum_x)*RK_weight));
+                            residual.add_v(i,((RK.momentum_y + mg_forcing_term[i].momentum_z)*RK_weight));
 
 
-                        //residuals set for multigrid
-                        residual.set_rho(i,(R1 + mg_forcing_term.P));
-                        residual.set_u(i,(R2 + mg_forcing_term.momentum_x));
-                        residual.set_v(i,(R3 + mg_forcing_term.momentum_z));
+                            break;
 
+                    }
+                        
+                    // on final loop get Runge Kutta integration
+                    if( rk == 3){
+                       
+
+                        f1 = soln_t0.get_rho(i) + residual.get_rho(i)* delta_t;
+                        f2 = soln_t0.get_average_rho()* soln_t0.get_u(i) 
+                                + residual.get_u(i) *  delta_t;
+                        //f3 = soln_t0.get_average_rho() * soln_t0.get_v(i) 
+                        //        + residual.get_v(i) * delta_t;
+                        f3 = 0.0;
 
                     }
 
 
 
 
-                    f2 = f2 /soln.get_average_rho();
-                    f3 = f3 /soln.get_average_rho();
+                    f2 = f2 /soln_t0.get_average_rho();
+                    f3 = f3 /soln_t0.get_average_rho();
 
 
                     temp_soln.update(f1,f2,f3,0.0, i);
@@ -529,6 +547,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     }
 
     error_output.close();
+    delete []((mg_forcing_term));
+    mg_forcing_term = NULL;
 }
 
 
