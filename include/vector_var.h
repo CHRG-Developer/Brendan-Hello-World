@@ -17,6 +17,7 @@ class vector_var
         void Get_Gradient(double y1, double y2, vector_var x1, vector_var x2 );
         void add(vector_var b);
         void factor(double a);
+        void round(int precision);
         vector_var line_magnitude(vector_var intercept, vector_var slope, vector_var displacement);
     protected:
     private:

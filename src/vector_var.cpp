@@ -63,7 +63,34 @@ void vector_var::factor(double a){
     y= y/a;
     z= z/a;
 }
+void vector_var::round(int precision){
+    
+     
 
+    double f = pow(10,precision);
+    double temp;
+
+    
+    temp = floor(fabs(x *f))/f;
+    if (x < 0.0){
+        x = -temp;
+    }else{
+        x = temp;
+    }
+    temp = floor(fabs(y *f))/f;
+    if (y < 0.0){
+        y = -temp;
+    }else{
+        y = temp;
+    }
+    temp = floor(fabs(z *f))/f;
+    if (z < 0.0){
+        z = -temp;
+    }else{
+        z = temp;
+    }
+    
+}
 void vector_var::Get_Gradient(double y1, double y2, vector_var x1, vector_var x2 ){
 
         x = y2 -y1 ;

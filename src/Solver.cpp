@@ -82,6 +82,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     }
 
     vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
+    vector_var relative_interface;
     vector_var e_alpha, u_lattice,  rho_u_interface , u_interface;
     vector_var flux_e_alpha;
     vector_var cell_normal;
@@ -124,7 +125,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     // loop through each cell
     for (int t= 0; t < timesteps; t++){
        
-        soln.clone(temp_soln); // soln is the solution at the start of every 
+                                   // soln is the solution at the start of every 
                                 // RK step.(rk = n) Temp_soln holds the values at end of
                                 // step.(rk = n+1)
         soln_t0.clone(soln);    // soln_t0 holds solution at start of time step
@@ -223,12 +224,14 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             lattice_node.y = interface_node.y -cell_1.y - e_alpha.y * dt;
                             lattice_node.z = 0; // update in 3d
                             // y = mx + c
+                            relative_interface.x = interface_node.x -cell_1.x;
+                            relative_interface.y = interface_node.y -cell_1.y;
 
+                            // lattice densities are scalars but need to have gradients relative to cell normal
 
-
-
-                            rho_lattice = delta_rho.Dot_Product(lattice_node)
-                                            + temp_soln.get_rho(i) ;
+                            rho_lattice = temp_soln.get_rho(i) + delta_rho.Dot_Product(relative_interface) // rho at interface
+                                +   pow(-1.0,signbit(cell_normal.x))*-1 *delta_rho.Dot_Product(e_alpha)*dt;
+                                            
 
                             // lattice velocities are relative to the cell_normal
                             // fluxes are then calculated in the global reference from density distribution
@@ -258,7 +261,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             rho_u_interface.y = rho_u_interface.y + feq_lattice[k] * e_alpha.y;
                             rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha.z;
                         }
-
+                        
 
                         // divide rho * u to get u but only after complete summation
 
@@ -269,12 +272,13 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         u_interface.y = rho_u_interface.y /temp_soln.get_average_rho();
                         u_interface.z = rho_u_interface.z /temp_soln.get_average_rho();
                         u_magnitude = u_interface.Magnitude();
-
+                        
+                   
 
                         int_debug[j].momentum_x =u_interface.x;
                         int_debug[j].momentum_y = u_interface.y;
                         int_debug[j].P = rho_interface;
-
+                           
                         for (int k =0 ; k<9; k++){
 
 
@@ -325,8 +329,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
 
                         }
-                            //truncate_flux(x_flux);
-                            //truncate_flux(y_flux);
+                            truncate_flux(x_flux);
+                            truncate_flux(y_flux);
 
                             debug_flux[j].P = x_flux.P  ;
                             debug_flux[j].momentum_x = x_flux.momentum_x* cell_normal.x ;
@@ -382,8 +386,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                     //
 
                     // account for rounding errors
-
-                    //truncate_flux(cell_flux);
+                    truncate_flux(cell_flux);
+                    //(cell_flux);
 
                     // store RK fluxes
                     if (rk == 0){
@@ -429,9 +433,9 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                     f2 =  soln_t0.get_average_rho()* soln_t0.get_u(i) + (RK_delta_t *
                             (RK.momentum_x + mg_forcing_term[i].momentum_x +
                             source.get_force(i)* Mesh.get_cell_volume(i) * temp_soln.get_average_rho()));
-                    //f3 =  soln_t0.get_average_rho() * soln_t0.get_v(i) + (RK_delta_t *
-                    //                            (RK.momentum_y + mg_forcing_term[i].momentum_y)) ;
-                    f3 = 0.0;
+                    f3 =  soln_t0.get_average_rho() * soln_t0.get_v(i) + (RK_delta_t *
+                                                (RK.momentum_y + mg_forcing_term[i].momentum_y)) ;
+                    //f3 = 0.0;
                     switch (rk){
 
                         case 0:
@@ -460,9 +464,9 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                         f1 = soln_t0.get_rho(i) + residual.get_rho(i)* delta_t;
                         f2 = soln_t0.get_average_rho()* soln_t0.get_u(i) 
                                 + residual.get_u(i) *  delta_t;
-                        //f3 = soln_t0.get_average_rho() * soln_t0.get_v(i) 
-                        //        + residual.get_v(i) * delta_t;
-                        f3 = 0.0;
+                        f3 = soln_t0.get_average_rho() * soln_t0.get_v(i) 
+                                + residual.get_v(i) * delta_t;
+                        //f3 = 0.0;
 
                     }
 
@@ -656,26 +660,31 @@ void Solver::truncate_flux(double &val){
 vector_var Solver::get_e_alpha(int k, double &lattice_weight, double c, double PI ){
 
         vector_var temp;
+        int x ,y,z;
         //get e_alpha again
         if (k >0 && k< 5){ //
 
-            temp.x = round(cos((k-1)*PI/2 ) * c );
-            temp.y = round(sin((k-1)*PI/2 )* c);
-            temp.z = 0; //update in 3D
+            x = round(cos((k-1)*PI/2 ) * c );
+            y = round(sin((k-1)*PI/2 )* c);
+            z = 0; //update in 3D
             lattice_weight = 1.0/9.0;
         }else if( k >4){
 
-            temp.x = round(sqrt(2) * cos((k-5)*PI/2 + PI/4 ) * c );
-            temp.y = round(sqrt(2) * sin((k-5)*PI/2 + PI/4 ) * c);
-            temp.z = 0; //update in 3D
+            x = round(sqrt(2) * cos((k-5)*PI/2 + PI/4 ) * c );
+            y = round(sqrt(2) * sin((k-5)*PI/2 + PI/4 ) * c);
+            z = 0; //update in 3D
             lattice_weight = 1.0/36.0;
 
         }else{
-            temp.x = 0 ;
-            temp.y = 0;
-            temp.z = 0;
+            x = 0 ;
+            y = 0;
+            z = 0;
             lattice_weight = 4.0/9.0;
         }
+        temp.x = x;
+        temp.y = y;
+        temp.z = z;
+        
 
     return temp;
 }
