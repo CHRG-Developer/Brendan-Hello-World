@@ -212,8 +212,8 @@ void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
                 // get index in terms of x and y
 
                 // 0.5 allows for ghost cells
-                coarse_x = floor( (i/ fine_mesh.get_num_y()+0.5)/2.0);
-                coarse_y = floor((fmod(i, fine_mesh.get_num_y()) +0.5)/2.0);
+                coarse_x = floor( (i/ fine_mesh.get_num_y())/2.0 + 0.5);
+                coarse_y = floor((fmod(i, fine_mesh.get_num_y()) )/2.0 +0.5);
 
                 coarse_i = coarse_mesh.get_num_y()* coarse_x + coarse_y;
 
@@ -243,22 +243,21 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
         double mg_delta_rho, mg_delta_u, mg_delta_v, mg_delta_w;
             //loop through the finer mesh as this will enable parrelisation later
 
-        int edge_cell_x,edge_cell_y,vertex_cell,coarse_i,coarse_x,coarse_y;
-        int fine_x, fine_y;
+        int edge_cell_x,edge_cell_y,coarse_i,coarse_x,coarse_y;
+   
 
         double mg_factor[4] = {9.0/16.0 ,3.0/16.0, 3.0/16.0, 1./16.0 };
-        double rho_edge_factor, vel_edge_factor;
-        double rho_bc_contribution,u_bc_contribution,v_bc_contribution,w_bc_contribution;
+        
         bool calculate;
         Solution debug_correction(total_nodes);
 
        for(int i =0; i< total_nodes; i++){
 
-
-
+            if(! bc.get_bc(i)){
+          
             // get index in terms of x and y
-            coarse_x = floor(i/ fine_mesh.get_num_y()/2.0);
-            coarse_y = floor(fmod(i, fine_mesh.get_num_y())/2.0);
+            coarse_x = floor(i/ fine_mesh.get_num_y()/2.0 +0.5);
+            coarse_y = floor(fmod(i, fine_mesh.get_num_y())/2.0+ 0.5);
 
             // for finer cells within a coarse cell
 
@@ -273,13 +272,13 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
 
                     case 1:
                         //North/South edge cell contribution
-                        edge_cell_y = coarse_y + pow(-1.0,1+ floor(fmod(fmod(i, fine_mesh.get_num_y()),2.0)));
+                        edge_cell_y = coarse_y + pow(-1.0,floor(fmod(fmod(i, fine_mesh.get_num_y()),2.0)));
                         coarse_i = coarse_mesh.get_num_y() * coarse_x + edge_cell_y;
 
                         break;
                     case 2:
                         //East/West edge cell contribution
-                        edge_cell_x = coarse_x + pow(-1.0 ,1 + floor(fmod(floor(i/ fine_mesh.get_num_y()),2.0)));
+                        edge_cell_x = coarse_x + pow(-1.0 , floor(fmod(floor(i/ fine_mesh.get_num_y()),2.0)));
                         coarse_i = coarse_mesh.get_num_y()* edge_cell_x + coarse_y;
 
                         break;
@@ -313,9 +312,9 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
                     debug_correction.set_u(i,mg_delta_u);
                     debug_correction.set_v(i,mg_delta_v);
                 }
+            }
+        }
     }
-
-       }
 }
 
 

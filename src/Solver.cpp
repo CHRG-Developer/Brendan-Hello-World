@@ -12,6 +12,7 @@
 #include <ctime>
 #include "artificial_dissipation.h"
 #include <boost/math/special_functions/sign.hpp>
+#include <limits>
 
 using namespace std;
 Solver::Solver()
@@ -248,8 +249,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             v_lattice[k] = u_lattice.y;
 
                             u_magnitude = u_lattice.Magnitude();
-                            feq_lattice[k] = 1.0 * rho_lattice ;
-                            feq_lattice[k] = feq_lattice[k]
+                            // feq_lattice[k] = 1.0 * rho_lattice ;
+                            feq_lattice[k] = 0.0
                                 + e_alpha.Dot_Product(u_lattice) / pow(cs,2) * temp_soln.get_average_rho();
                             feq_lattice[k] = feq_lattice[k]
                                 + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )
@@ -262,7 +263,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha.z;
                         }
                         
-
+                        rho_interface = rho_interface + temp_soln.get_rho(i);
+                        
                         // divide rho * u to get u but only after complete summation
 
                             //u_interface.x = rho_u_interface.x /rho_interface;
@@ -286,13 +288,15 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
             //
                             // get feq at cell interface
-                            feq_interface = 1 * rho_interface;
-                            feq_interface = feq_interface
-                                + e_alpha.Dot_Product(u_interface) / pow(cs,2) *temp_soln.get_average_rho();
+                            
+                            // different order of adding may aid rounding errors
+                            
+                            feq_interface = e_alpha.Dot_Product(u_interface) / pow(cs,2) *temp_soln.get_average_rho();
                             feq_interface = feq_interface
                                 + ( pow(e_alpha.Dot_Product(u_interface),2)  - pow((u_magnitude* cs),2) )
                                     / (2 * pow(cs,4) * globals.pre_conditioned_gamma)
                                     *temp_soln.get_average_rho();
+                            feq_interface = feq_interface + 1 * rho_interface;
                             feq_interface = feq_interface  *lattice_weight ;
                             feq_int_debug[k] = feq_interface;
 
@@ -329,8 +333,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
 
                         }
-                            truncate_flux(x_flux);
-                            truncate_flux(y_flux);
+                           // truncate_flux(x_flux);
+                            // truncate_flux(y_flux);
 
                             debug_flux[j].P = x_flux.P  ;
                             debug_flux[j].momentum_x = x_flux.momentum_x* cell_normal.x ;
@@ -363,11 +367,11 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                             /// debug
 
-                                debug[j].P = (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                debug[j].P = (-1)*interface_area/ 1*
                                          ( x_flux.P * cell_normal.x + y_flux.P *cell_normal.y );
-                                debug[j].momentum_x = (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                debug[j].momentum_x = (-1)*interface_area/ 1*
                                         ( x_flux.momentum_x * cell_normal.x + y_flux.momentum_x *cell_normal.y ) ;
-                                debug[j].momentum_y =  (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                debug[j].momentum_y =  (-1)*interface_area/ 1*
                                         ( x_flux.momentum_y * cell_normal.x + y_flux.momentum_y *cell_normal.y );
 
                                 arti_debug[j].P =  arti_dis.local_flux.P * cell_normal.x
@@ -386,7 +390,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                     //
 
                     // account for rounding errors
-                    truncate_flux(cell_flux);
+                    //truncate_flux(cell_flux);
                     //(cell_flux);
 
                     // store RK fluxes
@@ -590,26 +594,36 @@ void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int 
 
     Solver solve_coarse;
     Solution temp_soln(coarse_mesh.get_total_nodes());
+    coarse_soln.update_bcs(bc,coarse_mesh,coarse_domain);
     temp_soln.clone(coarse_soln);
 
     solve_coarse.Uniform_Mesh_Solver(coarse_mesh,coarse_soln,bc,source_term,globals,
                                      coarse_domain,initial_conds,bcs,mg,coarse_residual_0,fmg);
 
     coarse_soln.update_bcs(bc,coarse_mesh,coarse_domain);
+    temp_soln.update_bcs(bc,coarse_mesh,coarse_domain);
     // prolongation occurs here
-    soln.prolongation(coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,bc,false);
+    soln.prolongation(coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,fine_bc,false);
+    soln.set_average_rho(initial_conds.average_rho);
     globals.update_tau(fine_domain);
     mg = mg -1;
 
 }
 
 void Solver::truncate_flux(flux_var &flux){
-
+    
+    double temp = std::numeric_limits<double>::epsilon();
     int digits;
     digits = 10;
 
+    if(fabs(flux.P -0.0) < temp){
+        flux.P  = 0.0;
+    }
+    
+    
+
     double f = pow(10,digits);
-    double temp;
+   
 
     temp = floor(fabs(flux.P *f))/f;
     if (flux.P < 0.0){
@@ -639,13 +653,19 @@ void Solver::truncate_flux(flux_var &flux){
 }
 
 void Solver::truncate_flux(double &val){
-
+    
+    double temp = std::numeric_limits<double>::epsilon();
     int digits;
     digits = 10;
 
+    if(fabs(val-0.0) < temp){
+        val = 0.0;
+    }
+    
+    
     double f = pow(10,digits);
-    double temp;
-
+   
+    
     temp = floor(fabs(val*f))/f;
     if (val < 0.0){
         val = -temp;

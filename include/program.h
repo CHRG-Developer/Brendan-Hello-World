@@ -22,7 +22,8 @@ class program
         void fmg_cycle(int &fmg,Solution &residual , Solution &soln,
                                       Uniform_Mesh &fine_mesh, quad_bcs_plus &bcs,
                                       initial_conditions &initial_conds,
-                                      global_variables globals, domain_geometry &fine_domain );
+                                      global_variables globals, domain_geometry &fine_domain,
+                                      Boundary_Conditions &fine_bcs);
     protected:
     private:
 };

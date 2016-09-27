@@ -57,7 +57,7 @@ void program::run(char* xml_input){
     Solution residual(mesh.get_total_nodes());
     if ( globals.fmg_levels > 0 ){
 
-        fmg_cycle(fmg,soln,soln,mesh,bcs,initial_conds,globals,domain);
+        fmg_cycle(fmg,soln,soln,mesh,bcs,initial_conds,globals,domain, bc);
 
 
 
@@ -99,7 +99,8 @@ void program::copyfile( char* SRC,  std::string  DEST)
 void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
                                       Uniform_Mesh &fine_mesh, quad_bcs_plus &bcs,
                                       initial_conditions &initial_conds,
-                                      global_variables globals, domain_geometry &fine_domain ){
+                                      global_variables globals, domain_geometry &fine_domain,
+                                        Boundary_Conditions &fine_bcs){
 
     fmg = fmg +1;
 
@@ -121,7 +122,7 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
     // goto coarsest level
     if( fmg < globals.fmg_levels){
             fmg_cycle(fmg,coarse_residual,coarse_soln,coarse_mesh,bcs,initial_conds,globals,
-                      coarse_domain);
+                      coarse_domain,bc);
 
     }else{
 
@@ -148,8 +149,9 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
 
     coarse_soln.update_bcs(bc,coarse_mesh,coarse_domain);
 
-    soln.prolongation( coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,bc,true);
+    soln.prolongation( coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,fine_bcs,true);
     soln.set_average_rho(initial_conds.average_rho);
+    soln.update_bcs(fine_bcs,fine_mesh,fine_domain);
     globals.update_tau(fine_domain);
     fmg = fmg -1;
 
