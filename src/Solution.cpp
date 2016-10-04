@@ -249,8 +249,10 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
         double mg_factor[4] = {9.0/16.0 ,3.0/16.0, 3.0/16.0, 1./16.0 };
         
         bool calculate;
-        Solution debug_correction(total_nodes);
-
+        Solution debug(fine_mesh.get_total_nodes());
+        
+        debug.Initialise();
+        
        for(int i =0; i< total_nodes; i++){
 
             if(! bc.get_bc(i)){
@@ -308,13 +310,14 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
                     soln.add_u(i, mg_delta_u);
                     soln.add_v(i,mg_delta_v);
                     soln.add_w(i,mg_delta_v);
-                    debug_correction.set_rho(i,mg_delta_rho);
-                    debug_correction.set_u(i,mg_delta_u);
-                    debug_correction.set_v(i,mg_delta_v);
+                    debug.add_rho(i, mg_delta_rho);
+                    debug.add_u(i,mg_delta_u);
+                    debug.add_v(i,mg_delta_v);
                 }
             }
         }
     }
+      calculate = true;  
 }
 
 

@@ -11,6 +11,8 @@ class global_variables
         virtual ~global_variables();
         void initialise(domain_geometry domain);
         void update_tau(domain_geometry domain);
+        void update_fine_tau();
+        void update_coarse_tau();
         std::string create_output_directory();
 
         //BC constants

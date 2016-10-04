@@ -296,6 +296,7 @@ domain_geometry Uniform_Mesh::create_coarse_mesh_domain(){
     coarse_domain.dx = dx*2;
     coarse_domain.dy = dy*2;
     coarse_domain.dt = multi_grid_dt*2; //streaming time step
+    //coarse_domain.dt = multi_grid_dt;
     coarse_domain.cs = cs;
 
 

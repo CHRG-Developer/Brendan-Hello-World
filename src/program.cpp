@@ -11,6 +11,7 @@
 #include "Solution.h"
 #include "Solver.h"
 #include <fstream>
+#include <iostream>
 
 program::program()
 {
@@ -32,7 +33,7 @@ void program::run(char* xml_input){
     initial_conditions initial_conds;
     int mg =0; // first multigrid cycle
     int fmg =0; // first full multigrid cycle
-    std::clock_t start;
+    std::clock_t start = clock();
     double duration;
 
     preprocessor pre_processor;
@@ -80,10 +81,35 @@ void program::run(char* xml_input){
 
     soln.post_process(globals.pre_conditioned_gamma);
     soln.output(globals.output_file );
-
+    std::clock_t end = clock();
+    
+    duration = double(end-start)/ CLOCKS_PER_SEC;
+    
+    output_runtime(globals.output_file,duration,globals.simulation_name);
+    
+    std::cout << duration << std::endl;
+    
 
 
 }
+
+void program::output_runtime (std::string output_location,double duration,std::string filename){
+
+    std::ofstream time_txt ;
+    std::string time_file; 
+    time_file = output_location + "/time.txt";
+    
+
+    time_txt.open(time_file.c_str(), ios::out);
+    
+    time_txt << "Runtime:" << duration << "s" << endl;
+    time_txt << "File:" << filename.c_str()  << endl;
+
+    time_txt.close();
+   
+
+}
+
 
     // copy in binary mode
 void program::copyfile( char* SRC,  std::string  DEST)

@@ -24,6 +24,7 @@ class program
                                       initial_conditions &initial_conds,
                                       global_variables globals, domain_geometry &fine_domain,
                                       Boundary_Conditions &fine_bcs);
+        void output_runtime (std::string output_location,double duration,std::string filename);
     protected:
     private:
 };

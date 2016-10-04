@@ -24,8 +24,19 @@ void global_variables::initialise(domain_geometry domain){
     output_file = create_output_directory();
 }
 
+void global_variables::update_coarse_tau(){
+    
+    tau = tau/2.0;
+}
+
+void global_variables::update_fine_tau(){
+    
+    tau = tau*2.0;
+}
+
 void global_variables::update_tau( domain_geometry domain){
     tau = 0.5 + max_velocity*domain.X /reynolds_number /domain.dt *pre_conditioned_gamma;
+    tau = tau/2;
 
 }
 
