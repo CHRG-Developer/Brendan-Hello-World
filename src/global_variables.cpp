@@ -18,8 +18,9 @@ global_variables::~global_variables()
 }
 
 void global_variables::initialise(domain_geometry domain){
-
-    tau = 0.5 + max_velocity*domain.X /reynolds_number /domain.dt *pre_conditioned_gamma;
+    //tau = 0.5 + viscosity / dt/ gamma
+    // viscosity = MA/root(3) /Re
+    tau = 0.5 + mach_number * sqrt(3)/reynolds_number /domain.dt *pre_conditioned_gamma;
 
     output_file = create_output_directory();
 }
@@ -35,7 +36,7 @@ void global_variables::update_fine_tau(){
 }
 
 void global_variables::update_tau( domain_geometry domain){
-    tau = 0.5 + max_velocity*domain.X /reynolds_number /domain.dt *pre_conditioned_gamma;
+    tau = 0.5 + mach_number / sqrt(3)/reynolds_number /domain.dt *pre_conditioned_gamma;
     tau = tau/2;
 
 }

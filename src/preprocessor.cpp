@@ -25,18 +25,47 @@ void preprocessor::initialise_program_variables(char* xmltest, global_variables 
     XMLDocument xmlDoc;
 
     XMLError eResult = xmlDoc.LoadFile(xmltest);
-
+    
 
     parse_global_variables(xmlDoc,  globals);
     parse_geometry_variables(xmlDoc,  geometry);
     parse_initial_conditions(xmlDoc, initial_conds);
     parse_boundary_conditions(xmlDoc, bcs);
-
+    
+    mach_number_factor(globals,bcs,initial_conds,geometry);
+    
     globals.initialise(geometry);
 
 
 }
+void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &bcs,
+        initial_conditions &initials,domain_geometry &geometry ){
+    
+    
+    double factor = globals.mach_number * geometry.cs;
+    
+    bcs.e_u = bcs.e_u * factor;
+    bcs.w_u = bcs.w_u * factor;
+    bcs.n_u = bcs.n_u * factor;
+    bcs.s_u = bcs.s_u *factor;
+    
+    bcs.e_v = bcs.e_v * factor;
+    bcs.w_v = bcs.w_v * factor;
+    bcs.n_v = bcs.n_v * factor;
+    bcs.s_v = bcs.s_v *factor;
+    
+    initials.vel_gradient.x = initials.vel_gradient.x * factor;
+    initials.vel_gradient.y = initials.vel_gradient.y * factor;
+    initials.vel_gradient.z = initials.vel_gradient.z * factor;
+    initials.vel_origin_mag.x = initials.vel_origin_mag.x * factor;
+    initials.vel_origin_mag.y = initials.vel_origin_mag.y * factor;
+    initials.vel_origin_mag.z = initials.vel_origin_mag.z * factor;
 
+    initials.velocity.x = initials.velocity.x * factor;
+    initials.velocity.y = initials.velocity.y * factor;
+    initials.velocity.z = initials.velocity.z * factor;
+    
+}
 void preprocessor::parse_boundary_conditions(XMLDocument &xmlDoc, quad_bcs_plus &bcs){
 
     const char* parent = "boundary_conditions";
@@ -56,6 +85,10 @@ void preprocessor::parse_boundary_conditions(XMLDocument &xmlDoc, quad_bcs_plus 
         bcs.w_type_vel = 2;
     }else if ( temp.compare("periodic") == 0){
         bcs.w_type_vel = 3;
+    }else if ( temp.compare("parabolic-N") == 0){
+        bcs.w_type_vel = 4;
+    }else if ( temp.compare("parabolic-W") == 0){
+        bcs.w_type_vel = 5;
     }
 
 
@@ -82,6 +115,10 @@ void preprocessor::parse_boundary_conditions(XMLDocument &xmlDoc, quad_bcs_plus 
         bcs.e_type_vel = 2;
     }else if ( temp.compare("periodic") == 0){
         bcs.e_type_vel = 3;
+    }else if ( temp.compare("parabolic-N") == 0){
+        bcs.w_type_vel = 4;
+    }else if ( temp.compare("parabolic-W") == 0){
+        bcs.w_type_vel = 5;
     }
 
 
@@ -108,6 +145,10 @@ void preprocessor::parse_boundary_conditions(XMLDocument &xmlDoc, quad_bcs_plus 
         bcs.n_type_vel = 2;
     }else if ( temp.compare("periodic") == 0){
         bcs.n_type_vel = 3;
+    }else if ( temp.compare("parabolic-N") == 0){
+        bcs.w_type_vel = 4;
+    }else if ( temp.compare("parabolic-W") == 0){
+        bcs.w_type_vel = 5;
     }
 
 
@@ -134,6 +175,10 @@ void preprocessor::parse_boundary_conditions(XMLDocument &xmlDoc, quad_bcs_plus 
         bcs.s_type_vel = 2;
     }else if ( temp.compare("periodic") == 0){
         bcs.s_type_vel = 3;
+    }else if ( temp.compare("parabolic-N") == 0){
+        bcs.w_type_vel = 4;
+    }else if ( temp.compare("parabolic-W") == 0){
+        bcs.w_type_vel = 5;
     }
 
 
@@ -197,7 +242,7 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.simulation_length = get_xml_double(parent, "simulation_length", xmlDoc);
     globals.time_marching_step = get_xml_double(parent, "time_marching_step", xmlDoc);
     globals.reynolds_number = get_xml_double(parent, "reynolds_no", xmlDoc);
-    globals.max_velocity = get_xml_double(parent, "max_velocity", xmlDoc);
+    globals.mach_number = get_xml_double(parent, "mach_no", xmlDoc);
     globals.simulation_name = get_xml_text(parent,"simulation_name",xmlDoc);
     globals.output_file_dir = get_xml_text(parent, "output_directory", xmlDoc);
     globals.max_mg_levels = get_xml_double(parent,"max_multi_grid_levels",xmlDoc);

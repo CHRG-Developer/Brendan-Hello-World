@@ -80,7 +80,7 @@ void program::run(char* xml_input){
                               mg,residual,fmg);
 
     soln.post_process(globals.pre_conditioned_gamma);
-    soln.output(globals.output_file );
+    soln.output(globals.output_file, globals, domain);
     std::clock_t end = clock();
     
     duration = double(end-start)/ CLOCKS_PER_SEC;

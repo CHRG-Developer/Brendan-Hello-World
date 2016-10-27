@@ -1,6 +1,8 @@
 #include "Uniform_Mesh.h"
 #include "vector_var.h"
 #include <string>
+#include "global_variables.h"
+#include "domain_geometry.h"
 #include <Boundary_Conditions.h>
 #ifndef SOLUTION_H
 #define SOLUTION_H
@@ -27,7 +29,9 @@ class Solution
         void assign_velocity_gradient( vector_var _gradient, vector_var gradient_origin,
             vector_var origin_magnitude,Uniform_Mesh &Mesh);
         void update ( double rho, double u, double v, double w , int i);
-        void output (std::string output_location);
+        
+        void output (std::string output_location, global_variables &globals,
+        domain_geometry &geometry) ;
         void clone( Solution &soln_a);
         void post_process(double pre_condition_gamma);
         void add_rho(int i, double arg) { rho[i] = rho[i] + arg;};

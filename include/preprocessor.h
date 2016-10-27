@@ -32,6 +32,8 @@ class preprocessor
         const char * get_xml_text(const char* parent, const char* child, XMLDocument &doc);
         const char * get_xml_text(const char* parent, const char* child, const char* child2
                                         , XMLDocument &doc);
+        void mach_number_factor( global_variables &globals,quad_bcs_plus &bcs,
+        initial_conditions &initials,domain_geometry &geometry );
 
 };
 

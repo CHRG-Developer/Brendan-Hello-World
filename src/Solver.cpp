@@ -141,7 +141,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
             //temp_soln.update_bcs(bcs,Mesh,domain);
 
             convergence_residual.reset();
-            arti_dis.get_global_jst(soln,bcs, Mesh,domain);
+            //arti_dis.get_global_jst(soln,bcs, Mesh,domain);
             for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
 
 
@@ -149,7 +149,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                 if(! bcs.get_bc(i)){
 
 
-                    arti_dis.reset_local_jst_switch();
+                    //arti_dis.reset_local_jst_switch();
 
                     interface_area = 0.0;
 
@@ -249,8 +249,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                             v_lattice[k] = u_lattice.y;
 
                             u_magnitude = u_lattice.Magnitude();
-                            // feq_lattice[k] = 1.0 * rho_lattice ;
-                            feq_lattice[k] = 0.0
+                            feq_lattice[k] = 1.0 * rho_lattice ;
+                            feq_lattice[k] = feq_lattice[k]
                                 + e_alpha.Dot_Product(u_lattice) / pow(cs,2) * temp_soln.get_average_rho();
                             feq_lattice[k] = feq_lattice[k]
                                 + ( pow(e_alpha.Dot_Product(u_lattice),2)  - pow((u_magnitude* cs),2) )
@@ -333,8 +333,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
 
                         }
-                           // truncate_flux(x_flux);
-                            // truncate_flux(y_flux);
+                            //truncate_flux(x_flux);
+                            //truncate_flux(y_flux);
 
                             debug_flux[j].P = x_flux.P  ;
                             debug_flux[j].momentum_x = x_flux.momentum_x* cell_normal.x ;
@@ -345,7 +345,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                         //artificial dissipation calcs
 
-                        arti_dis.get_local_coeffs( soln,bcs,Mesh,temp_soln,domain,j,i);
+                        //arti_dis.get_local_coeffs( soln,bcs,Mesh,temp_soln,domain,j,i);
 
                         if( Mesh.get_cell_volume(i) < pow(10,-5)){
                             //do nothing for now
@@ -397,10 +397,11 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                     if (rk == 0){
                         RK = cell_flux;
                         if( mg > 0){
-                            mg_forcing_term[i].P = residual.get_rho(i) - cell_flux.P;
-                            mg_forcing_term[i].momentum_x = residual.get_u(i) - cell_flux.momentum_x;
-                            mg_forcing_term[i].momentum_y = residual.get_v(i) - cell_flux.momentum_y;
-
+                            if(t == 0){
+                                mg_forcing_term[i].P =  -2 *residual.get_rho(i) + cell_flux.P;
+                                mg_forcing_term[i].momentum_x = -2* residual.get_u(i) + cell_flux.momentum_x;
+                                mg_forcing_term[i].momentum_y =  -2 *residual.get_v(i) + cell_flux.momentum_y;
+                            }
                             //add momentum z later
 
 
@@ -541,23 +542,19 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
 
         ///Multigrid Agglomeration/Prolongation
-        if( mg < globals.max_mg_levels && fmg == 0){
+        if( mg < globals.max_mg_levels && fmg == 0 && t > 3){
                 multi_grid_agglomoration(residual,soln,cycle_no,Mesh,quad_bcs_orig,
                                          init_conds,mg,globals,domain,bcs);
         }else if( mg ==0){
 
-        }else{
-            //recursion returns to multi_grid_agglomoration call of Uniform_Mesh_Solver
-            return;
         }
-
 
     }
 
     error_output.close();
     delete []((mg_forcing_term));
     mg_forcing_term = NULL;
-}
+} 
 
 
 void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int cycle_no,
@@ -574,7 +571,8 @@ void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int 
 
     Uniform_Mesh coarse_mesh (coarse_domain);
 
-    globals.update_tau(coarse_domain);
+    //globals.update_tau(coarse_domain);
+    //globals.update_coarse_tau();
     //Apply Boundary Conditions to new Mesh
 
     Boundary_Conditions bc(coarse_mesh.get_num_x(), coarse_mesh.get_num_y());
@@ -605,7 +603,7 @@ void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int 
     // prolongation occurs here
     soln.prolongation(coarse_soln, temp_soln, soln,coarse_mesh, fine_mesh,fine_bc,false);
     soln.set_average_rho(initial_conds.average_rho);
-    globals.update_tau(fine_domain);
+    //globals.update_fine_tau();
     mg = mg -1;
 
 }

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+
 #include <math.h>
 using namespace std;
 
@@ -101,7 +102,8 @@ void Solution::update ( double _rho, double _u, double _v, double _w , int i){
     w[i] = _w;
 }
 
-void Solution::output (std::string output_location){
+void Solution::output (std::string output_location, global_variables &globals,
+        domain_geometry &geometry){
 
     std::ofstream rho_txt,u_txt,v_txt ;
     std::string rho_file, u_file, v_file;
@@ -112,12 +114,13 @@ void Solution::output (std::string output_location){
     rho_txt.open(rho_file.c_str(), ios::out);
     u_txt.open(u_file.c_str(), ios::out);
     v_txt.open(v_file.c_str(), ios::out);
-
+    double factor = globals.mach_number * geometry.cs;
+    
     for( int i = 0; i < total_nodes; i++){
 
         rho_txt << i << " ,"  << rho[i] << endl;
-        u_txt << i << " ,"  << u[i] << endl;
-        v_txt << i << " ,"  << v[i] << endl;
+        u_txt << i << " ,"  << u[i]/factor << endl;
+        v_txt << i << " ,"  << v[i]/factor << endl;
 
 
     }
@@ -183,6 +186,16 @@ void Solution::update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geo
             }else if(bcs.get_vel_type(i) == 3){
                 u[i] = u[bcs.get_periodic_node(i)];
                  v[i] = v[bcs.get_periodic_node(i)];
+            }else if(bcs.get_vel_type(i) == 4){
+                u[i] = 4*bcs.get_u(i)/pow(domain.Y,2) * mesh.get_centroid_y(i)*
+                        (domain.Y - mesh.get_centroid_y(i))   ;
+                v[i] = 4*bcs.get_v(i)/pow(domain.Y,2) * mesh.get_centroid_y(i)*
+                        (domain.Y - mesh.get_centroid_y(i)) ;
+            }else if(bcs.get_vel_type(i) == 5){
+                u[i] = 4*bcs.get_u(i)/pow(domain.X,2) * mesh.get_centroid_x(i)*
+                        (domain.X - mesh.get_centroid_y(i))   ;
+                v[i] = 4*bcs.get_v(i)/pow(domain.X,2) * mesh.get_centroid_x(i)*
+                        (domain.X - mesh.get_centroid_x(i)) ;
             }
 
 
