@@ -50,7 +50,7 @@
 
 1453812249 h"
 
-1475003804 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\solution.cpp
+1477581039 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\solution.cpp
 	<stdlib.h>
 	"Solution.h"
 	<algorithm>
@@ -58,10 +58,12 @@
 	<iostream>
 	<math.h>
 
-1473166669 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\solution.h
+1477581039 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\solution.h
 	"Uniform_Mesh.h"
 	"vector_var.h"
 	<string>
+	"global_variables.h"
+	"domain_geometry.h"
 	<Boundary_Conditions.h>
 
 1471031986 Conditions.h>
@@ -1434,7 +1436,7 @@
 	"domain_geometry.h"
 	<math.h>
 
-1475083273 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\global_variables.h
+1477752267 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\global_variables.h
 	<string>
 	"domain_geometry.h"
 	<math.h>
@@ -1445,7 +1447,7 @@
 
 1460552764 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\external_forces.h
 
-1475083218 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\global_variables.cpp
+1477591759 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\global_variables.cpp
 	"global_variables.h"
 	"domain_geometry.h"
 	<boost/algorithm/string/replace.hpp>
@@ -2087,7 +2089,7 @@
 1464027437 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\initial_conditions.cpp
 	"initial_conditions.h"
 
-1473770598 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\preprocessor.cpp
+1477752280 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\preprocessor.cpp
 	"preprocessor.h"
 	"global_variables.h"
 	<fstream>
@@ -2096,7 +2098,7 @@
 	"initial_conditions.h"
 	"quad_bcs_plus.h"
 
-1464174688 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\preprocessor.h
+1477420157 c:\users\brend\dropbox\phd\code\lbm\2d lbfs\include\preprocessor.h
 	"global_variables.h"
 	"tinyxml2.h"
 	"domain_geometry.h"
@@ -2117,7 +2119,7 @@
 	<android/log.h>
 	<assert.h>
 
-1475599342 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\program.cpp
+1477581239 source:c:\users\brend\dropbox\phd\code\lbm\2d lbfs\src\program.cpp
 	"program.h"
 	"quad_bcs.h"
 	"global_variables.h"

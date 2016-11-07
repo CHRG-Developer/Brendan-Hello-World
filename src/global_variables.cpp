@@ -36,7 +36,7 @@ void global_variables::update_fine_tau(){
 }
 
 void global_variables::update_tau( domain_geometry domain){
-    tau = 0.5 + mach_number / sqrt(3)/reynolds_number /domain.dt *pre_conditioned_gamma;
+    tau = 0.5 + mach_number * sqrt(3)/reynolds_number /domain.dt *pre_conditioned_gamma;
     tau = tau/2;
 
 }
