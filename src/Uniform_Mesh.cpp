@@ -8,7 +8,7 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
     //ctor
     X = domain.X;
     Y = domain.Y;
-    dx = domain.dx;
+    dx = domain.dx; //dimensional form
     dy = domain.dy;
     multi_grid_dt = domain.dt;
 
@@ -20,8 +20,11 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
     /// need error check here to see if grid divisible by multigrid criteria
     //Uniform only
 
-	dx = X/(num_x_nodes-2); // reset dx/dy t0 allow for ceiling
-    dy = Y/(num_y_nodes -2);
+	//dx = X/(num_x_nodes-2); // reset dx/dy t0 allow for ceiling
+    //dy = Y/(num_y_nodes -2);
+        dx =2.0; // turn into non-dimensional form
+        dy =2.0;
+        // 2.0 as cell is 2 LBM nodes in length
     cs = domain.cs;
     // allocate memory to arrays
 

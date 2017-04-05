@@ -31,7 +31,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                                    Solution &residual, int fmg)
 {
     //dtor
-    dt = domain.dt; // timestepping for streaming
+    dt = 1.0; // timestepping for streaming // non-dim equals 1
 
     c = 1; // assume lattice spacing is equal to streaming timestep
     cs = domain.cs;
@@ -48,6 +48,8 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     
 //    Solution RK1(Mesh.get_total_nodes()), RK2(Mesh.get_total_nodes()), RK3(Mesh.get_total_nodes())
 //        RK4(Mesh.get_total_nodes());
+    
+    
     flux_var RK;
     double RK_delta_t,RK_weight;
     double delta_t = globals.time_marching_step;
@@ -82,6 +84,24 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
         error_output.open(output_dir.c_str(), ios::out);
     }
 
+    
+     std::ofstream mesh_output ;
+
+       
+    output_dir = globals.output_file +"/mesh.txt";
+     
+
+        // error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
+        mesh_output.open(output_dir.c_str(), ios::out);
+        for (int mesh_t= 0; mesh_t < Mesh.get_total_nodes(); mesh_t++){
+             mesh_output << mesh_t << "," << Mesh.get_centroid_x(mesh_t) << "," <<
+                    Mesh.get_centroid_y(mesh_t) 
+                     << "," << Mesh.get_centroid_z(mesh_t) << endl;
+            
+            
+        }
+    mesh_output.close();
+    
     vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
     vector_var relative_interface;
     vector_var e_alpha, u_lattice,  rho_u_interface , u_interface;
@@ -339,17 +359,16 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                                                                              //(1-1/(2*tau))*fneq_interface);
 
                             x_flux.momentum_x = x_flux.momentum_x + e_alpha.x * (e_alpha.x) *( feq_interface
-                                                                          + (1-1/(2*tau))*fneq_interface);
+                                    + (1-1/(2*tau))*fneq_interface);
                             x_flux.momentum_y = x_flux.momentum_y + e_alpha.x*(e_alpha.y) *( feq_interface
-                                                                            + (1-1/(2*tau))*fneq_interface);
-
+                                                    + (1-1/(2*tau))*fneq_interface);
 
                             y_flux.momentum_x = y_flux.momentum_x + e_alpha.y*(e_alpha.x) *( feq_interface
-                                                                             + (1-1/(2*tau))*fneq_interface);
+                                                    + (1-1/(2*tau))*fneq_interface);
                             //y_flux.momentum_y = y_flux.momentum_y + pow(e_alpha.y,2) *( feq_interface
                                                                              //+ (1-1/(2*tau))*fneq_interface);
                             y_flux.momentum_y = y_flux.momentum_y + e_alpha.y * (e_alpha.y) *( feq_interface
-                                                                              + (1-1/(2*tau))*fneq_interface);
+                                                    + (1-1/(2*tau))*fneq_interface);
 
 
 
@@ -369,21 +388,18 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                         //arti_dis.get_local_coeffs( soln,bcs,Mesh,temp_soln,domain,j,i);
 
-                        if( Mesh.get_cell_volume(i) < pow(10,-5)){
-                            //do nothing for now
-
-                        }else{
+                        
                             //cell_flux.P = 0;
                             cell_flux.P = cell_flux.P
-                                + (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                + (-1)*interface_area*
                                 ( (x_flux.P +arti_dis.local_flux.P) * cell_normal.x
                                  + (y_flux.P +arti_dis.local_flux.P) *cell_normal.y );
                             cell_flux.momentum_x = cell_flux.momentum_x
-                                + (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                + (-1)*interface_area*
                                     ( (x_flux.momentum_x + arti_dis.local_flux.momentum_x)* cell_normal.x
                                      + (y_flux.momentum_x + arti_dis.local_flux.momentum_x) *cell_normal.y ) ;
                             cell_flux.momentum_y = cell_flux.momentum_y
-                                + (-1)*interface_area/ Mesh.get_cell_volume(i)*
+                                + (-1)*interface_area*
                                     ( (x_flux.momentum_y +arti_dis.local_flux.momentum_y ) * cell_normal.x
                                        + ( y_flux.momentum_y +arti_dis.local_flux.momentum_y) *cell_normal.y );
 
@@ -404,11 +420,12 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                                  + arti_dis.local_flux.momentum_x *cell_normal.y ;
 
 
-                        }
+                        
 
                     }
-
-
+                    // divide sum of fluxes by zero    
+                    //cell_flux.div_volume(Mesh.get_cell_volume(i),globals.small_number);
+                    
                     //
 
                     // account for rounding errors
@@ -456,7 +473,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
                     temp_force = source.get_force(i)* Mesh.get_cell_volume(i) * temp_soln.get_rho(i);
                     // try removing
-                    f1= soln_t0.get_rho(i) + RK_delta_t * (RK.P + mg_forcing_term[i].P);
+                    f1= soln_t0.get_rho(i) + RK_delta_t * (RK.P/Mesh.get_cell_volume(i) + mg_forcing_term[i].P);
 //                    f2 =  soln_t0.get_average_rho()* soln_t0.get_u(i) + (RK_delta_t *
 //                            (RK.momentum_x + mg_forcing_term[i].momentum_x +
 //                            source.get_force(i)* Mesh.get_cell_volume(i) * temp_soln.get_average_rho()));
@@ -464,10 +481,10 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 //                                                (RK.momentum_y + mg_forcing_term[i].momentum_y)) ;
                     
                     f2 =  soln_t0.get_rho(i)* soln_t0.get_u(i) + (RK_delta_t *
-                            (RK.momentum_x + mg_forcing_term[i].momentum_x +
+                            (RK.momentum_x/Mesh.get_cell_volume(i) + mg_forcing_term[i].momentum_x +
                             source.get_force(i)* Mesh.get_cell_volume(i) * temp_soln.get_rho(i)));
                     f3 =  soln_t0.get_rho(i) * soln_t0.get_v(i) + (RK_delta_t *
-                                                (RK.momentum_y + mg_forcing_term[i].momentum_y)) ;
+                                                (RK.momentum_y/Mesh.get_cell_volume(i) + mg_forcing_term[i].momentum_y)) ;
                     
                     //f3 = 0.0;
                     switch (rk){
@@ -495,16 +512,16 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
                     if( rk == 3){
                        
 
-                        f1 = soln_t0.get_rho(i) + residual.get_rho(i)* delta_t;
+                        f1 = soln_t0.get_rho(i) + residual.get_rho(i)/Mesh.get_cell_volume(i)* delta_t;
 //                        f2 = soln_t0.get_average_rho()* soln_t0.get_u(i) 
 //                                + residual.get_u(i) *  delta_t;
 //                        f3 = soln_t0.get_average_rho() * soln_t0.get_v(i) 
 //                                + residual.get_v(i) * delta_t;
                         
                          f2 = soln_t0.get_rho(i)* soln_t0.get_u(i) 
-                                + residual.get_u(i) *  delta_t;
+                                + residual.get_u(i)/Mesh.get_cell_volume(i) *  delta_t;
                         f3 = soln_t0.get_rho(i) * soln_t0.get_v(i) 
-                                + residual.get_v(i) * delta_t;
+                                + residual.get_v(i)/Mesh.get_cell_volume(i) * delta_t;
                         
                         //f3 = 0.0;
 

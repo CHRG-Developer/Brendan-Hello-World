@@ -42,7 +42,7 @@ void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &
         initial_conditions &initials,domain_geometry &geometry ){
     
     
-    double factor = globals.mach_number * geometry.cs;
+    double factor = globals.mach_number / sqrt(3) ;
     
     bcs.e_u = bcs.e_u * factor;
     bcs.w_u = bcs.w_u * factor;
@@ -54,7 +54,7 @@ void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &
     bcs.n_v = bcs.n_v * factor;
     bcs.s_v = bcs.s_v *factor;
     
-    initials.vel_gradient.x = initials.vel_gradient.x * factor;
+    initials.vel_gradient.x = initials.vel_gradient.x * factor ;
     initials.vel_gradient.y = initials.vel_gradient.y * factor;
     initials.vel_gradient.z = initials.vel_gradient.z * factor;
     initials.vel_origin_mag.x = initials.vel_origin_mag.x * factor;

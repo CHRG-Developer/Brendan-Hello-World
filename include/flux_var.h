@@ -12,7 +12,9 @@ class flux_var
         double momentum_x;
         double momentum_y;
         double momentum_z;
-
+        
+        void div_volume( double vol, double small_num);
+        
     protected:
 
     private:

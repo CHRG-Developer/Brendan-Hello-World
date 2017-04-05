@@ -21,7 +21,7 @@ class global_variables
         const int neumann = 2;
 
         //small number constant
-        const double small_number = 0.00000000000001;
+        const double small_number = 0.0000000000000001;
 
         //PI
         const double PI = acos(-1.0);
@@ -34,6 +34,7 @@ class global_variables
         double time_marching_step;
         double reynolds_number;
         double mach_number;
+        double knudsen_number;
         double tau;
         double arti_disp_kappa_2; // artiifical dissipation constant 2nd order
         double arti_disp_kappa_4;
