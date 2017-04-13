@@ -29,7 +29,7 @@ class Solution
         void assign_velocity_gradient( vector_var _gradient, vector_var gradient_origin,
             vector_var origin_magnitude,Uniform_Mesh &Mesh);
         void update ( double rho, double u, double v, double w , int i);
-        
+
         void output (std::string output_location, global_variables &globals,
         domain_geometry &geometry) ;
         void clone( Solution &soln_a);
@@ -44,13 +44,15 @@ class Solution
                             Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh,
                             Boundary_Conditions &bc, bool fmg);
         void update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geometry &domain);
+        void Initialise();
+        void remove_double_errors();
 
     protected:
     private:
         double *rho, *u, *v, *w;
         int total_nodes;
         double average_rho;
-        void Initialise();
+
 
 };
 

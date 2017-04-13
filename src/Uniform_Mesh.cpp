@@ -3,7 +3,14 @@
 #include <stdio.h>      /* printf, scanf, NULL */
 #include <stdlib.h>
 #include <algorithm>
-Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
+#include <fstream>
+#include <iostream>
+#include "global_variables.h"
+#include <cstdio>
+
+using namespace std;
+
+Uniform_Mesh::Uniform_Mesh(domain_geometry domain, global_variables globals)
 {
     //ctor
     X = domain.X;
@@ -22,8 +29,8 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
 
 	//dx = X/(num_x_nodes-2); // reset dx/dy t0 allow for ceiling
     //dy = Y/(num_y_nodes -2);
-        dx =2.0; // turn into non-dimensional form
-        dy =2.0;
+        dx =dx/domain.dt; // turn into non-dimensional form
+        dy =dy/domain.dt;
         // 2.0 as cell is 2 LBM nodes in length
     cs = domain.cs;
     // allocate memory to arrays
@@ -111,6 +118,23 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain)
         if (delta_t==NULL) exit (1);
 
 	this->create_mesh();
+
+    std::ofstream mesh_output ;
+    std::string output_dir;
+
+    output_dir = globals.output_file +"/mesh.txt";
+
+
+        // error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
+        mesh_output.open(output_dir.c_str(), ios::out);
+        for (int mesh_t= 0; mesh_t < total_nodes; mesh_t++){
+             mesh_output << mesh_t << "," << centroid_x[mesh_t] << "," <<
+                    centroid_y[mesh_t] << "," << centroid_z[mesh_t] << endl;
+
+
+        }
+    mesh_output.close();
+
 
 	X=X;
 }

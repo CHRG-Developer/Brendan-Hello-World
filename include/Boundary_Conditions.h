@@ -13,6 +13,8 @@ class Boundary_Conditions
         void assign_boundary_conditions(int num_x, int num_y, quad_bcs);
         void assign_boundary_conditions(int num_x, int num_y, quad_bcs_plus _bc);
         bool get_bc( int i) {return bc[i];};
+        bool get_bc_include( int i) {return bc_include[i];};
+
 
         double get_rho( int i) {return rho[i];};
         double get_u( int i) {return u[i];};
@@ -29,12 +31,12 @@ class Boundary_Conditions
 
         //centroid and cell interface locations
 
-        bool *bc;
+        bool *bc,*bc_include;
         double * rho, * u, * v ;
         int *type_rho;
         int *type_vel;
         int *periodic_node;
         int *neighbour;
-};
+        };
 
 #endif // BOUNDARY_CONDITIONS_H

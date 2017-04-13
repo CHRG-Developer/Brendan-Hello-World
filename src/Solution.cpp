@@ -5,6 +5,8 @@
 #include <iostream>
 
 #include <math.h>
+
+
 using namespace std;
 
 Solution::Solution(){
@@ -115,7 +117,7 @@ void Solution::output (std::string output_location, global_variables &globals,
     u_txt.open(u_file.c_str(), ios::out);
     v_txt.open(v_file.c_str(), ios::out);
     double factor = globals.mach_number * geometry.cs;
-    
+
     for( int i = 0; i < total_nodes; i++){
 
         rho_txt << i << " ,"  << rho[i] << endl;
@@ -178,7 +180,7 @@ void Solution::update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geo
 
 
             if(bcs.get_vel_type(i) == 1){
-                u[i] = bcs.get_u(i) - (u[bcs.get_neighbour(i)] -bcs.get_u(i));
+                u[i] = bcs.get_u(i) - (u[bcs.get_neighbour(i)] - bcs.get_u(i));
                 v[i] = bcs.get_v(i) - (v[bcs.get_neighbour(i)] -bcs.get_v(i));
             }else if(bcs.get_vel_type(i) == 2){
                 u[i] = u[bcs.get_neighbour(i)] + domain.dx*bcs.get_u(i);
@@ -207,6 +209,35 @@ void Solution::update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geo
 
 
 }
+
+
+void Solution::remove_double_errors(){
+    double tolerance;
+    tolerance = numeric_limits<double>::epsilon();
+    for (int i= 0; i< total_nodes; i++){
+
+        if( fabs(rho[i]) < tolerance){
+
+            rho[i] = 0.0;
+        }
+
+        if( fabs(u[i]) < tolerance){
+
+            u[i] = 0.0;
+        }
+
+        if( fabs(v[i]) < tolerance){
+
+            v[i] = 0.0;
+        }
+
+
+
+    }
+
+
+}
+
 void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
                            Uniform_Mesh &fine_mesh, Boundary_Conditions &bc){
 
@@ -257,19 +288,19 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
             //loop through the finer mesh as this will enable parrelisation later
 
         int edge_cell_x,edge_cell_y,coarse_i,coarse_x,coarse_y;
-   
+
 
         double mg_factor[4] = {9.0/16.0 ,3.0/16.0, 3.0/16.0, 1./16.0 };
-        
+
         bool calculate;
         Solution debug(fine_mesh.get_total_nodes());
-        
+
         debug.Initialise();
-        
+
        for(int i =0; i< total_nodes; i++){
 
             if(! bc.get_bc(i)){
-          
+
             // get index in terms of x and y
             coarse_x = floor(i/ fine_mesh.get_num_y()/2.0 +0.5);
             coarse_y = floor(fmod(i, fine_mesh.get_num_y())/2.0+ 0.5);
@@ -330,7 +361,7 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
             }
         }
     }
-      calculate = true;  
+      calculate = true;
 }
 
 

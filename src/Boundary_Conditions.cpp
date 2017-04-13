@@ -12,7 +12,8 @@ Boundary_Conditions::Boundary_Conditions(int num_x_nodes, int num_y_nodes)
       // if boundary condition is present for this cell face
       bc = new bool [total_nodes +1];
         if (bc==NULL) exit (1);
-
+     bc_include = new bool [total_nodes +1];
+        if (bc_include==NULL) exit (1);
       rho = new double [total_nodes +1];
         if (rho==NULL) exit (1);
 
@@ -49,6 +50,8 @@ Boundary_Conditions::~Boundary_Conditions()
     delete [] (bc);
     bc = NULL;
 
+    delete [] (bc_include);
+    bc_include = NULL;
     delete []  (u);
     u = NULL;
     delete []  (v);
@@ -82,6 +85,10 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
     for (int i =0; i < num_x; i++){
         for( int j=0; j < num_y; j++){
 
+            // default status
+            bc[t] = false;
+            bc_include[t] = true;
+
             // West boundary
             if( i ==0){
                 bc[t] = true;
@@ -93,6 +100,16 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
 
                 periodic_node[t] = (num_x-2) * (num_y ) + t;
                 neighbour[t] = t + num_y;
+
+                if (j ==0){
+                    bc_include[t] = false;
+                }else if( j == (num_y-1)){
+                    bc_include[t] = false;
+                }else{
+                    bc_include[t] = true;
+                }
+
+
                 /// east boundary
             }else if( i == (num_x -1)){
                 bc[t] = true;
@@ -105,6 +122,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
 
                 periodic_node[t] = t - (num_x-2) * (num_y );
                 neighbour[t] = t - num_y;
+                bc_include[t] = false;
 
             // south boundary
             }else if(j == 0){
@@ -118,6 +136,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 periodic_node[t] = t + (num_y-2);
                 neighbour[t] = t + 1;
 
+                bc_include[t] = true;
 
             //north boundary
 
@@ -131,11 +150,13 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
 
                 periodic_node[t] = t - (num_y-2);
                 neighbour[t] = t - 1;
-
+                bc_include[t] = false;
 
             }else {
                 bc[t] = false;
             }
+
+
 
             t++;
         }
@@ -165,6 +186,15 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 periodic_node[t] = (num_x-2) * (num_y ) + t;
                 neighbour[t] = t + num_y;
 
+                 if (j ==0){
+                    bc_include[t] = false;
+                }else if( j == (num_y-1)){
+                    bc_include[t] = false;
+                }else{
+                    bc_include[t] = true;
+                }
+
+
             }else{
                 bc[t] =false;
             }
@@ -182,6 +212,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 periodic_node[t] = t - (num_x-2) * (num_y );
                 neighbour[t] = t - num_y;
 
+                bc_include[t] = true;
 
             }else {
                     bc[t] = false;
@@ -199,7 +230,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 periodic_node[t] = t + (num_y-2);
                 neighbour[t] = t + 1;
 
-
+                bc_include[t] = true;
 
 
             }else{
@@ -218,7 +249,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 periodic_node[t] = t - (num_y-2);
                 neighbour[t] = t - 1;
 
-
+                bc_include[t] = false;
             }else {
                 bc[t] = false;
             }

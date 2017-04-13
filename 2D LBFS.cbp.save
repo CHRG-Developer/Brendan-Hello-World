@@ -40,6 +40,9 @@
 		<Unit filename="include/Boundary_Conditions.h">
 			<Option virtualFolder="Data Objects/Include/" />
 		</Unit>
+		<Unit filename="include/RungeKutta.h">
+			<Option virtualFolder="Data Objects/Include/" />
+		</Unit>
 		<Unit filename="include/Solution.h">
 			<Option virtualFolder="Data Objects/Include/" />
 		</Unit>
@@ -95,6 +98,9 @@
 			<Option virtualFolder="workflow objects/" />
 		</Unit>
 		<Unit filename="src/Boundary_Conditions.cpp">
+			<Option virtualFolder="Data Objects/src/" />
+		</Unit>
+		<Unit filename="src/RungeKutta.cpp">
 			<Option virtualFolder="Data Objects/src/" />
 		</Unit>
 		<Unit filename="src/Solution.cpp">

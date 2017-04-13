@@ -2,11 +2,11 @@
 #define UNIFORM_MESH_H
 
 #include "domain_geometry.h"
-
+#include "global_variables.h"
 class Uniform_Mesh
 {
     public:
-        Uniform_Mesh(domain_geometry domain);
+        Uniform_Mesh(domain_geometry domain, global_variables globals);
         virtual ~Uniform_Mesh();
         double get_node_x(int node_num);
         int get_num_x() { return num_x_nodes; };

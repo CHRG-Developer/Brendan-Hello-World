@@ -20,13 +20,17 @@ class Solver
                                    external_forces &source,global_variables &globals, domain_geometry &domain,
                                    initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
                                    Solution &residual,int fmg);
-
+        void Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
+                                   external_forces &source,global_variables &globals, domain_geometry &domain,
+                                   initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
+                                   Solution &residual,int fmg);
         void multi_grid_agglomoration( Solution &residuals , Solution &soln,
                                          int cycle_no, Uniform_Mesh &fine_mesh,  quad_bcs_plus &bcs,
                                          initial_conditions &init_conds, int &mg, global_variables globals,
                                          domain_geometry &fine_domain,Boundary_Conditions &fine_bc);
 
 
+    // initialise variables
     protected:
     private:
 
@@ -55,12 +59,19 @@ class Solver
             int periodic_node;
 
         };
-        void cell_interface_variables( int j,int i ,vector_var &interface_node, int &neighbour, double &interface_area,
-                              vector_var &cell_normal, Boundary_Conditions &boundary_conditions,  bc_var &bc ,Uniform_Mesh &Mesh) ;
+        void cell_interface_variables( int j,int i ,vector_var &interface_node, int &neighbour,
+                                      double &interface_area,vector_var &cell_normal,
+                                      Boundary_Conditions &boundary_conditions,  bc_var &bc
+                                      ,Uniform_Mesh &Mesh, vector_var &cell2) ;
 
         void truncate_flux(flux_var &flux);
         void truncate_flux(double &val);
-
+         void cell_interface_initialiser( double &rho_interface,vector_var &rho_u_interface,
+                                        flux_var &x_flux,flux_var &y_flux);
+        double feq_calc(double weight, vector_var e_alpha, vector_var u_lattice, double u_magnitude,
+                        double cs, double rho_lattice);
+        double feq_calc_incomp(double weight, vector_var e_alpha, vector_var u_lattice, double u_magnitude,
+                        double cs, double rho_lattice, double rho_0);
 };
 
 #endif // SOLVER_H

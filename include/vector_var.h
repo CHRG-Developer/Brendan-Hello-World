@@ -19,6 +19,7 @@ class vector_var
         void factor(double a);
         void round(int precision);
         vector_var line_magnitude(vector_var intercept, vector_var slope, vector_var displacement);
+        void relative_vectors(vector_var origin, vector_var ref1, vector_var ref2, double const2);
     protected:
     private:
 };

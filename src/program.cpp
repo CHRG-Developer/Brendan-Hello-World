@@ -42,7 +42,7 @@ void program::run(char* xml_input){
 
     copyfile(xml_input,globals.output_file);
      // create Mesh
-    Uniform_Mesh mesh(domain);
+    Uniform_Mesh mesh(domain,globals);
 
 
     // create boundary conditions
@@ -76,19 +76,19 @@ void program::run(char* xml_input){
 
     Solver solve;
 
-    solve.Uniform_Mesh_Solver(mesh,soln,bc,source_term,globals,domain,initial_conds,bcs,
+    solve.Uniform_Mesh_Solver_Clean(mesh,soln,bc,source_term,globals,domain,initial_conds,bcs,
                               mg,residual,fmg);
 
     soln.post_process(globals.pre_conditioned_gamma);
     soln.output(globals.output_file, globals, domain);
     std::clock_t end = clock();
-    
+
     duration = double(end-start)/ CLOCKS_PER_SEC;
-    
+
     output_runtime(globals.output_file,duration,globals.simulation_name);
-    
+
     std::cout << duration << std::endl;
-    
+
 
 
 }
@@ -96,17 +96,17 @@ void program::run(char* xml_input){
 void program::output_runtime (std::string output_location,double duration,std::string filename){
 
     std::ofstream time_txt ;
-    std::string time_file; 
+    std::string time_file;
     time_file = output_location + "/time.txt";
-    
+
 
     time_txt.open(time_file.c_str(), ios::out);
-    
+
     time_txt << "Runtime:" << duration << "s" << endl;
     time_txt << "File:" << filename.c_str()  << endl;
 
     time_txt.close();
-   
+
 
 }
 
@@ -136,7 +136,7 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
     // create new coarse Mesh with double up dimensions
     domain_geometry coarse_domain = fine_mesh.create_coarse_mesh_domain();
 
-    Uniform_Mesh coarse_mesh (coarse_domain);
+    Uniform_Mesh coarse_mesh (coarse_domain,globals);
 
     globals.update_tau(coarse_domain);
 
@@ -167,7 +167,7 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
 
     Solver solve_coarse;
 
-    solve_coarse.Uniform_Mesh_Solver(coarse_mesh,coarse_soln,bc,source_term,globals,
+    solve_coarse.Uniform_Mesh_Solver_Clean(coarse_mesh,coarse_soln,bc,source_term,globals,
                                      coarse_domain,initial_conds,bcs,mg,coarse_residual,fmg);
 
     Solution temp_soln(coarse_mesh.get_total_nodes());

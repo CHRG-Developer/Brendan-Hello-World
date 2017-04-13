@@ -64,13 +64,13 @@ void vector_var::factor(double a){
     z= z/a;
 }
 void vector_var::round(int precision){
-    
-     
+
+
 
     double f = pow(10,precision);
     double temp;
 
-    
+
     temp = floor(fabs(x *f))/f;
     if (x < 0.0){
         x = -temp;
@@ -89,7 +89,7 @@ void vector_var::round(int precision){
     }else{
         z = temp;
     }
-    
+
 }
 void vector_var::Get_Gradient(double y1, double y2, vector_var x1, vector_var x2 ){
 
@@ -108,6 +108,15 @@ void vector_var::Get_Gradient(double y1, double y2, vector_var x1, vector_var x2
             y = y / (x2.y -x1.y);
         }
         z = 0; //update for 3d
+
+
+}
+
+void vector_var::relative_vectors(vector_var origin, vector_var ref1, vector_var ref2, double const2){
+
+    x = origin.x -ref1.x - ref2.x * const2;
+    y = origin.y -ref1.y - ref2.y * const2;
+    z = 0; // update in 3d
 
 
 }
