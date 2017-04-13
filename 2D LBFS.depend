@@ -2378,7 +2378,7 @@
 	"domain_geometry.h"
 	<Boundary_Conditions.h>
 
-1491930737 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
+1492089406 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
 	"Uniform_Mesh.h"
 	"Boundary_Conditions.h"
 	"Solution.h"
@@ -2387,6 +2387,7 @@
 	"global_variables.h"
 	"initial_conditions.h"
 	"flux_var.h"
+	"vector"
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/external_forces.h
 
@@ -2512,7 +2513,7 @@
 	<iostream>
 	<math.h>
 
-1492033771 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1492089494 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	<math.h>
 	<cmath>
 	"Solver.h"

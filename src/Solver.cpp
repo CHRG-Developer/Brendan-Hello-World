@@ -51,7 +51,7 @@ void Solver::cell_interface_initialiser( double &rho_interface,vector_var &rho_u
 
 
 double Solver::feq_calc_incomp(double weight, vector_var e_alpha, vector_var u_lattice, double u_magnitude,
-                        double cs, double rho_lattice, double rho_0){
+                        double cs, double rho_lattice, double rho_0, int k){
     double feq;
 
 
@@ -104,7 +104,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
     double rho_lattice ;
     double feq_lattice [9], feq_int_debug[9], fneq_int_debug[9];
     double u_lattice_deb[9], v_lattice[9], rho_lattice_deb[9];
-    double lattice_weight;
+    double lattice_weight [9];
     double time;
     double u_bc, rho_bc,  v_bc;
     double u_magnitude;
@@ -115,10 +115,13 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
     std::string output_dir;
     vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
     vector_var relative_interface;
-    vector_var e_alpha, u_lattice,  rho_u_interface , u_interface;
-    vector_var flux_e_alpha;
-    vector_var cell_normal;
+    vector_var  u_lattice,  rho_u_interface , u_interface;
 
+    vector_var cell_normal;
+    vector_var flux_e_alpha [9];
+    std::vector<vector_var> e_alpha;
+
+    // vector_var flux_e_alpha;
     residuals convergence_residual;
     flux_var x_flux , y_flux;
     flux_var cell_flux ;
@@ -150,6 +153,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
     output_dir = globals.output_file +"/error.txt";
    // error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
     error_output.open(output_dir.c_str(), ios::out);
+    populate_e_alpha(e_alpha,lattice_weight,c,globals.PI,9);
 
     // loop in time
     for (int t= 0; t < timesteps; t++){
@@ -210,13 +214,13 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
                         // using D2Q9 , loop through each lattice node
                         for (int k =0 ; k<9; k++){
                             /// GET change in magnitude across the lattice
-                            e_alpha = get_e_alpha(k,lattice_weight,c,globals.PI);
+                          //  e_alpha = get_e_alpha(k,lattice_weight,c,globals.PI);
 
                             //f( r- e*c*dt) relative to cell_centroid
-                            lattice_node.relative_vectors(interface_node,cell_1,e_alpha,dt);
+                            lattice_node.relative_vectors(interface_node,cell_1,e_alpha[k],dt);
 
                             // y = mx + c
-                            relative_interface.relative_vectors(interface_node,cell_1,e_alpha,0.0);
+                            relative_interface.relative_vectors(interface_node,cell_1,e_alpha[k],0.0);
 
                              // lattice densities are scalars but need to have gradients relative to cell normal
 
@@ -230,12 +234,12 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
 
                             //feq_lattice[k] = feq_calc(lattice_weight,e_alpha,u_lattice,u_magnitude,cs,
                             //                          rho_lattice) ;
-                            feq_lattice[k] = feq_calc_incomp(lattice_weight,e_alpha,u_lattice,u_magnitude,cs,
-                                                      rho_lattice,soln_t0.get_average_rho()) ;
+                            feq_lattice[k] = feq_calc_incomp(lattice_weight[k],e_alpha[k],u_lattice,u_magnitude,cs,
+                                                      rho_lattice,soln_t0.get_average_rho(), k) ;
                             rho_interface = rho_interface + feq_lattice[k];
-                            rho_u_interface.x = rho_u_interface.x + feq_lattice[k] * e_alpha.x;
-                            rho_u_interface.y = rho_u_interface.y + feq_lattice[k] * e_alpha.y;
-                            rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha.z;
+                            rho_u_interface.x = rho_u_interface.x + feq_lattice[k] * e_alpha[k].x;
+                            rho_u_interface.y = rho_u_interface.y + feq_lattice[k] * e_alpha[k].y;
+                            rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha[k].z;
 
                         }
                          // divide rho * u to get u but only after complete summation
@@ -249,10 +253,10 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
                         for (int k =0 ; k<9; k++){
 
 
-                            e_alpha = get_e_alpha(k,lattice_weight,c,globals.PI);
+                            //e_alpha = get_e_alpha(k,lattice_weight,c,globals.PI);
                             // get feq at cell interface
-                            feq_interface =feq_calc_incomp(lattice_weight,e_alpha, u_interface,u_magnitude,
-                                                    cs,rho_interface,soln_t0.get_average_rho());
+                            feq_interface =feq_calc_incomp(lattice_weight[k],e_alpha[k], u_interface,u_magnitude,
+                                                    cs,rho_interface,soln_t0.get_average_rho(),k);
                             fneq_interface = -tau * ( feq_interface -feq_lattice[k]);
 
                                     feq_int_debug[k] = feq_interface;
@@ -260,12 +264,12 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
                              //calculate fluxes from feq and fneq
                             mom_flux_const = ( feq_interface + (1-1/(2*tau))*fneq_interface);
 
-                            x_flux.P = x_flux.P + e_alpha.x* feq_interface;
-                            y_flux.P = y_flux.P +  e_alpha.y * feq_interface;
-                            x_flux.momentum_x = x_flux.momentum_x + e_alpha.x * (e_alpha.x) *mom_flux_const;
-                            x_flux.momentum_y = x_flux.momentum_y + e_alpha.x*(e_alpha.y) *mom_flux_const;
-                            y_flux.momentum_x = y_flux.momentum_x + e_alpha.y*(e_alpha.x) * mom_flux_const;
-                            y_flux.momentum_y = y_flux.momentum_y + e_alpha.y * (e_alpha.y) * mom_flux_const;
+                            x_flux.P = x_flux.P + e_alpha[k].x* feq_interface;
+                            y_flux.P = y_flux.P +  e_alpha[k].y * feq_interface;
+                            x_flux.momentum_x = x_flux.momentum_x + e_alpha[k].x * (e_alpha[k].x) *mom_flux_const;
+                            x_flux.momentum_y = x_flux.momentum_y + e_alpha[k].x*(e_alpha[k].y) *mom_flux_const;
+                            y_flux.momentum_x = y_flux.momentum_x + e_alpha[k].y*(e_alpha[k].x) * mom_flux_const;
+                            y_flux.momentum_y = y_flux.momentum_y + e_alpha[k].y * (e_alpha[k].y) * mom_flux_const;
 
                         }
 
@@ -1128,6 +1132,45 @@ vector_var Solver::get_e_alpha(int k, double &lattice_weight, double c, double P
 
 
     return temp;
+}
+
+void Solver::populate_e_alpha(vector<vector_var> &e_alpha,double *lattice_weight, double c, double PI,int j ){
+
+        vector_var temp;
+        int x ,y,z;
+        //get e_alpha again
+
+        for(int k =0; k<j; k++){
+            if (k >0 && k< 5){ //
+
+                x = round(cos((k-1)*PI/2 ) * c );
+                y = round(sin((k-1)*PI/2 )* c);
+                z = 0; //update in 3D
+                lattice_weight[k] = 1.0/9.0;
+            }else if( k >4){
+
+                x = round(sqrt(2) * cos((k-5)*PI/2 + PI/4 ) * c );
+                y = round(sqrt(2) * sin((k-5)*PI/2 + PI/4 ) * c);
+                z = 0; //update in 3D
+                lattice_weight[k] = 1.0/36.0;
+
+            }else{
+                x = 0 ;
+                y = 0;
+                z = 0;
+                lattice_weight[k] = 4.0/9.0;
+            }
+            temp.x = x;
+            temp.y = y;
+            temp.z = z;
+
+            e_alpha.push_back(temp);
+
+
+        }
+
+
+
 }
 
 

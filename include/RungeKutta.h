@@ -12,6 +12,7 @@ class RungeKutta
         double beta[4] = {1.0/6.0, 1.0/3.0, 1.0/3.0, 1.0/6.0} ;
         int timesteps = 4;
 
+
     protected:
 
     private:

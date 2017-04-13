@@ -3,8 +3,6 @@
 RungeKutta::RungeKutta()
 {
     //ctor
-
-
 }
 
 RungeKutta::~RungeKutta()
