@@ -19,102 +19,104 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain, global_variables globals)
     dy = domain.dy;
     multi_grid_dt = domain.dt;
 
-	num_x_nodes = ceil(X/dx) + 2;
-	num_y_nodes = ceil(Y/dy) + 2;
+	num_x_cells = ceil(X/dx) + 2;
+	num_y_cells= ceil(Y/dy) + 2;
 	// plus twos account for ghost nodes
-	total_nodes  = (num_x_nodes ) * (num_y_nodes);
+	total_cells  = (num_x_cells ) * (num_y_cells);
 
     /// need error check here to see if grid divisible by multigrid criteria
     //Uniform only
 
-	//dx = X/(num_x_nodes-2); // reset dx/dy t0 allow for ceiling
-    //dy = Y/(num_y_nodes -2);
+	//dx = X/(num_x_cells-2); // reset dx/dy t0 allow for ceiling
+    //dy = Y/(num_y_cells -2);
         dx =dx/domain.dt; // turn into non-dimensional form
         dy =dy/domain.dt;
         // 2.0 as cell is 2 LBM nodes in length
     cs = domain.cs;
     // allocate memory to arrays
+    X = X/domain.dt;
+    Y = Y/domain.dt;
 
-    centroid_x = new double [total_nodes +1];
+    centroid_x = new double [total_cells +1];
         if (centroid_x==NULL) exit (1);
-    centroid_y = new double [total_nodes +1];
+    centroid_y = new double [total_cells +1];
         if (centroid_y==NULL) exit (1);
-    centroid_z = new double [total_nodes +1];
+    centroid_z = new double [total_cells +1];
         if (centroid_z==NULL) exit (1);
-    north_x = new double [total_nodes +1];
+    north_x = new double [total_cells +1];
         if (north_x==NULL) exit (1);
-    north_y = new double [total_nodes +1];
+    north_y = new double [total_cells +1];
         if (north_y==NULL) exit (1);
-    north_z = new double [total_nodes +1];
+    north_z = new double [total_cells +1];
         if (north_z==NULL) exit (1);
-    east_x = new double [total_nodes +1];
+    east_x = new double [total_cells +1];
         if (east_x==NULL) exit (1);
-    east_y = new double [total_nodes +1];
+    east_y = new double [total_cells +1];
         if (east_y==NULL) exit (1);
-    east_z = new double [total_nodes +1];
+    east_z = new double [total_cells +1];
         if (east_z==NULL) exit (1);
-    west_x = new double [total_nodes +1];
+    west_x = new double [total_cells +1];
         if (west_x==NULL) exit (1);
-    west_y = new double [total_nodes +1];
+    west_y = new double [total_cells +1];
         if (west_y==NULL) exit (1);
-    west_z = new double [total_nodes +1];
+    west_z = new double [total_cells +1];
         if (west_z==NULL) exit (1);
-    south_x = new double [total_nodes +1];
+    south_x = new double [total_cells +1];
         if (south_x==NULL) exit (1);
-    south_y = new double [total_nodes +1];
+    south_y = new double [total_cells +1];
         if (south_y==NULL) exit (1);
-    south_z = new double [total_nodes +1];
+    south_z = new double [total_cells +1];
         if (south_z==NULL) exit (1);
 
-    n_area = new double [total_nodes +1];
+    n_area = new double [total_cells +1];
         if (n_area==NULL) exit (1);
-    s_area = new double [total_nodes +1];
+    s_area = new double [total_cells +1];
         if (s_area==NULL) exit (1);
-    w_area = new double [total_nodes +1];
+    w_area = new double [total_cells +1];
         if (w_area==NULL) exit (1);
-    e_area = new double [total_nodes +1];
+    e_area = new double [total_cells +1];
         if (e_area==NULL) exit (1);
 
-    cell_volume = new double [total_nodes +1];
+    cell_volume = new double [total_cells +1];
         if (cell_volume==NULL) exit (1);
 
 
-    n_i = new double [total_nodes +1];
+    n_i = new double [total_cells +1];
         if (n_i==NULL) exit (1);
-    n_j = new double [total_nodes +1];
+    n_j = new double [total_cells +1];
         if (n_j==NULL) exit (1);
-    n_k = new double [total_nodes +1];
+    n_k = new double [total_cells +1];
         if (n_k==NULL) exit (1);
-     e_i = new double [total_nodes +1];
+     e_i = new double [total_cells +1];
         if (e_i==NULL) exit (1);
-    e_j = new double [total_nodes +1];
+    e_j = new double [total_cells +1];
         if (e_j==NULL) exit (1);
-    e_k = new double [total_nodes +1];
+    e_k = new double [total_cells +1];
         if (e_k==NULL) exit (1);
-     w_i = new double [total_nodes +1];
+     w_i = new double [total_cells +1];
         if (w_i==NULL) exit (1);
-    w_j = new double [total_nodes +1];
+    w_j = new double [total_cells +1];
         if (w_j==NULL) exit (1);
-    w_k = new double [total_nodes +1];
+    w_k = new double [total_cells +1];
         if (w_k==NULL) exit (1);
-     s_i = new double [total_nodes +1];
+     s_i = new double [total_cells +1];
         if (s_i==NULL) exit (1);
-    s_j = new double [total_nodes +1];
+    s_j = new double [total_cells +1];
         if (s_j==NULL) exit (1);
-    s_k = new double [total_nodes +1];
+    s_k = new double [total_cells +1];
         if (s_k==NULL) exit (1);
 
 
-     n_node = new int [total_nodes +1];
+     n_node = new int [total_cells +1];
         if (n_node==NULL) exit (1);
-    s_node = new int [total_nodes +1];
+    s_node = new int [total_cells +1];
         if (s_node==NULL) exit (1);
-    w_node = new int [total_nodes +1];
+    w_node = new int [total_cells +1];
         if (w_node==NULL) exit (1);
-    e_node = new int [total_nodes +1];
+    e_node = new int [total_cells +1];
         if (e_node==NULL) exit (1);
 
-    delta_t = new double [total_nodes +1];
+    delta_t = new double [total_cells +1];
         if (delta_t==NULL) exit (1);
 
 	this->create_mesh();
@@ -127,7 +129,7 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain, global_variables globals)
 
         // error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
         mesh_output.open(output_dir.c_str(), ios::out);
-        for (int mesh_t= 0; mesh_t < total_nodes; mesh_t++){
+        for (int mesh_t= 0; mesh_t < total_cells; mesh_t++){
              mesh_output << mesh_t << "," << centroid_x[mesh_t] << "," <<
                     centroid_y[mesh_t] << "," << centroid_z[mesh_t] << endl;
 
@@ -227,8 +229,9 @@ Uniform_Mesh::~Uniform_Mesh()
 
 void Uniform_Mesh::create_mesh(){
     int counter =0;
-    for( int i=0; i < num_x_nodes; i++){
-        for( int j=0; j < num_y_nodes; j++){
+    for( int j=0; j < num_y_cells; j++){
+        for( int i=0; i < num_x_cells; i++){
+
             centroid_x[counter] = dx/2 + (i-1)*dx;
             centroid_y[counter] = dy/2 + (j-1)*dy;
             centroid_z[counter] = 0; //temporary
@@ -276,28 +279,29 @@ void Uniform_Mesh::create_mesh(){
             if( i ==0){
                 w_node[counter] = 0 ;//dummy value
             }else{
-                w_node[counter] = counter - num_y_nodes;
+                //w_node[counter] = counter - num_y_cells;
+                w_node[counter] = counter - 1;
             }
 
             // east boundary
-            if ( i == (num_x_nodes -1)){
+            if ( i == (num_x_cells -1)){
                 e_node[counter] = 0; //dummy value
             }else{
-                e_node[counter] = counter + num_y_nodes;
+                e_node[counter] = counter + 1;
             }
 
             // south boundary
             if(j == 0){
                 s_node[counter] = 0; //dummy value
             }else{
-                s_node[counter] = counter - 1;
+                s_node[counter] = counter - num_x_cells;
             }
 
             // north boundary
-            if( j == (num_y_nodes-1)){
+            if( j == (num_y_cells-1)){
                 n_node[counter] = 0; //dummy value
             }else{
-                n_node[counter] = counter + 1;
+                n_node[counter] = counter + num_x_cells;
             }
 
             counter = counter +1;

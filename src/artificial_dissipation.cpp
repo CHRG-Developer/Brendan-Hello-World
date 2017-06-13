@@ -38,7 +38,7 @@ void artificial_dissipation::get_global_jst(Solution &soln, Boundary_Conditions 
 {
     int neighbour;
 
-    for(int i = 0; i < Mesh.get_total_nodes(); i++){
+    for(int i = 0; i < Mesh.get_total_cells(); i++){
 
         if (bcs.get_bc(i)){
             global_JST_switch_x[i] = 0.0;
@@ -98,8 +98,8 @@ void artificial_dissipation::get_local_coeffs(Solution &soln, Boundary_Condition
         jst_num = -2*local_soln.get_rho(i);
         jst_den = 2*local_soln.get_rho(i);
         if( j == 0 || j == 2){
-           
-          
+
+
             neighbour = Mesh.get_w_node(i);
             m1 = global_JST_switch_x[neighbour];
             jst_num = jst_num + soln.get_rho(neighbour);
@@ -108,12 +108,12 @@ void artificial_dissipation::get_local_coeffs(Solution &soln, Boundary_Condition
             p1 = global_JST_switch_x[neighbour];
             jst_num = jst_num + soln.get_rho(neighbour);
             jst_den = jst_den + soln.get_rho(neighbour);
-            
+
             neighbour = Mesh.get_e_node(neighbour);
             p2 = global_JST_switch_x[neighbour];
 
         }else{
-          
+
             neighbour = Mesh.get_s_node(i);
             m1 = global_JST_switch_y[neighbour];
             jst_num = jst_num + soln.get_rho(neighbour);
@@ -126,9 +126,9 @@ void artificial_dissipation::get_local_coeffs(Solution &soln, Boundary_Condition
             p2 = global_JST_switch_y[neighbour];
 
         }
-        
+
         zero = jst_num/jst_den;
-         
+
         global_2nd_order = std::max(m1,std::max(zero,std::max(p1,p2))) * kappa_2;
         global_4th_order = std::max(0.0,(kappa_4 - global_2nd_order));
 

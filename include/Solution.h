@@ -4,6 +4,7 @@
 #include "global_variables.h"
 #include "domain_geometry.h"
 #include <Boundary_Conditions.h>
+#include "initial_conditions.h"
 #ifndef SOLUTION_H
 #define SOLUTION_H
 
@@ -19,6 +20,8 @@ class Solution
         double get_v( int i) {return v[i];};
         double get_w( int i) {return w[i];};
         double get_average_rho (){return average_rho;};
+        double get_u_exact( int i) {return u_exact[i];};
+        double get_u_error( int i) {return error[i];};
         void set_average_rho(double arg) { average_rho = arg;};
         void set_rho( int i,double arg) {rho[i] =arg;};
         void set_u( int i,double arg) {u[i] =arg;};
@@ -33,7 +36,8 @@ class Solution
         void output (std::string output_location, global_variables &globals,
         domain_geometry &geometry) ;
         void clone( Solution &soln_a);
-        void post_process(double pre_condition_gamma);
+        void post_process(double pre_condition_gamma, Uniform_Mesh &mesh, global_variables &globals,
+                          initial_conditions &initials);
         void add_rho(int i, double arg) { rho[i] = rho[i] + arg;};
         void add_u(int i, double arg) { u[i] = u[i] + arg;}
         void add_v (int i , double arg) {v[i] = v[i] + arg;}
@@ -49,7 +53,7 @@ class Solution
 
     protected:
     private:
-        double *rho, *u, *v, *w;
+        double *rho, *u, *v, *w , *error , *u_exact;
         int total_nodes;
         double average_rho;
 

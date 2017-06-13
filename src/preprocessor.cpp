@@ -25,35 +25,35 @@ void preprocessor::initialise_program_variables(char* xmltest, global_variables 
     XMLDocument xmlDoc;
 
     XMLError eResult = xmlDoc.LoadFile(xmltest);
-    
+
 
     parse_global_variables(xmlDoc,  globals);
     parse_geometry_variables(xmlDoc,  geometry);
     parse_initial_conditions(xmlDoc, initial_conds);
     parse_boundary_conditions(xmlDoc, bcs);
-    
+
     mach_number_factor(globals,bcs,initial_conds,geometry);
-    
+
     globals.initialise(geometry);
 
 
 }
 void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &bcs,
         initial_conditions &initials,domain_geometry &geometry ){
-    
-    
+
+
     double factor = globals.mach_number / sqrt(3) ;
-    
+
     bcs.e_u = bcs.e_u * factor;
     bcs.w_u = bcs.w_u * factor;
     bcs.n_u = bcs.n_u * factor;
     bcs.s_u = bcs.s_u *factor;
-    
+
     bcs.e_v = bcs.e_v * factor;
     bcs.w_v = bcs.w_v * factor;
     bcs.n_v = bcs.n_v * factor;
     bcs.s_v = bcs.s_v *factor;
-    
+
     initials.vel_gradient.x = initials.vel_gradient.x * factor ;
     initials.vel_gradient.y = initials.vel_gradient.y * factor;
     initials.vel_gradient.z = initials.vel_gradient.z * factor;
@@ -64,7 +64,7 @@ void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &
     initials.velocity.x = initials.velocity.x * factor;
     initials.velocity.y = initials.velocity.y * factor;
     initials.velocity.z = initials.velocity.z * factor;
-    
+
 }
 void preprocessor::parse_boundary_conditions(XMLDocument &xmlDoc, quad_bcs_plus &bcs){
 
@@ -251,7 +251,7 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.arti_disp_kappa_2 = get_xml_double(parent,"dissipation_kappa_2",xmlDoc);
     globals.arti_disp_kappa_4 = get_xml_double(parent,"dissipation_kappa_4",xmlDoc);
     globals.martinelli = get_xml_double(parent,"martinelli_exponent",xmlDoc);
-
+    globals.testcase= get_xml_double(parent, "testcase", xmlDoc);
 
 }
 

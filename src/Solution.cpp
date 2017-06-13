@@ -25,6 +25,10 @@ Solution::Solution(int _total_nodes)
         if (v==NULL) exit (1);
      w = new double [total_nodes +1];
         if (w==NULL) exit (1);
+        error = new double [total_nodes +1];
+        if (w==NULL) exit (1);
+        u_exact = new double [total_nodes +1];
+        if (w==NULL) exit (1);
     Initialise();
 
 }
@@ -40,6 +44,10 @@ Solution::~Solution()
     v= NULL;
     delete [] w;
     w= NULL;
+    delete [] error;
+    error= NULL;
+    delete [] u_exact;
+    u_exact= NULL;
 
 }
 
@@ -60,7 +68,7 @@ void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradie
    vector_var displacement;
    vector_var rho_temp;
 
-   for( int t =0 ; t< Mesh.get_total_nodes(); t++){
+   for( int t =0 ; t< Mesh.get_total_cells(); t++){
 
 
             displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
@@ -81,7 +89,7 @@ void Solution::assign_velocity_gradient( vector_var _gradient, vector_var gradie
    vector_var displacement;
    vector_var vel_temp;
 
-   for( int t =0 ; t< Mesh.get_total_nodes(); t++){
+   for( int t =0 ; t< Mesh.get_total_cells(); t++){
 
 
             displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
@@ -121,8 +129,8 @@ void Solution::output (std::string output_location, global_variables &globals,
     for( int i = 0; i < total_nodes; i++){
 
         rho_txt << i << " ,"  << rho[i] << endl;
-        u_txt << i << " ,"  << u[i]/factor << endl;
-        v_txt << i << " ,"  << v[i]/factor << endl;
+        u_txt << i << " ,"  << u[i] << endl;
+        v_txt << i << " ,"  << v[i] << endl;
 
 
     }
@@ -146,13 +154,27 @@ void Solution::clone( Solution &soln_a){
 }
 
 
-void Solution::post_process(double gamma){
+void Solution::post_process(double gamma, Uniform_Mesh &mesh, global_variables &globals,
+                            initial_conditions &initials){
 
- for (int i =0; i< total_nodes; i++){
+    if( globals.testcase == 1){
+
+
+        for (int i =0; i< total_nodes; i++){
             rho[i] = rho[i] /gamma;
+            u_exact[i] = mesh.get_centroid_y(i) *globals.mach_number /sqrt(3) / mesh.get_Y() ;
+            error[i] = (u[i] - u_exact[i]) / u_exact[i] *100;
+          }
+    }else if( globals.testcase == 2){
+         for (int i =0; i< total_nodes; i++){
+            rho[i] = rho[i] /gamma;
+            u_exact[i] = -initials.rho_gradient.x /2* mesh.get_centroid_y(i)*
+                (mesh.get_Y()- mesh.get_centroid_y(i)) / ( (globals.tau - 0.5) /3) /3 ;
+              //second divide by 3 for rho to P conversion
+             error[i] = (u[i] - u_exact[i]) / u_exact[i] *100;
+          }
 
-        }
-
+    }
 
 }
 
@@ -160,7 +182,7 @@ void Solution::post_process(double gamma){
 // update bc nodes to allow for changes in solution
 void Solution::update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geometry &domain){
 
-    for(int i =0; i< mesh.get_total_nodes();i++){
+    for(int i =0; i< mesh.get_total_cells();i++){
 
         // if bc present
         if (bcs.get_bc(i)){
@@ -293,7 +315,7 @@ void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution
         double mg_factor[4] = {9.0/16.0 ,3.0/16.0, 3.0/16.0, 1./16.0 };
 
         bool calculate;
-        Solution debug(fine_mesh.get_total_nodes());
+        Solution debug(fine_mesh.get_total_cells());
 
         debug.Initialise();
 

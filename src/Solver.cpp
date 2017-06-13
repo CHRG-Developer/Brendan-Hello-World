@@ -89,11 +89,11 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
 
     ///Declarations
     RungeKutta rk4;
-    Solution temp_soln(Mesh.get_total_nodes()); // intermediate solution for RK
-    Solution soln_t0(Mesh.get_total_nodes()); // solution at t0 in RK cycle
-    Solution residual_worker(Mesh.get_total_nodes()); // stores residuals
-    Solution rj2(Mesh.get_total_nodes()); // stores residuals
-    Solution rj3(Mesh.get_total_nodes()); // stores residuals
+    Solution temp_soln(Mesh.get_total_cells()); // intermediate solution for RK
+    Solution soln_t0(Mesh.get_total_cells()); // solution at t0 in RK cycle
+    Solution residual_worker(Mesh.get_total_cells()); // stores residuals
+    Solution rj2(Mesh.get_total_cells()); // stores residuals
+    Solution rj3(Mesh.get_total_cells()); // stores residuals
     flux_var RK;
     double RK_delta_t,RK_weight;
     double delta_t = globals.time_marching_step;
@@ -175,7 +175,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
 
              residual_worker.Initialise(); //set to zeros
              // loop through each node
-              for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
+              for (int i=0 ; i < Mesh.get_total_cells() ; i ++) {
 
 
                     // skip if a boundary node
@@ -312,7 +312,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
           //  residual_worker.remove_double_errors();
 
             //update RK values
-            for( int i=0; i < Mesh.get_total_nodes(); i++){
+            for( int i=0; i < Mesh.get_total_cells(); i++){
 
                 if( ! bcs.get_bc(i)){
 
@@ -345,7 +345,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
         }
 
 
-        for( int i = 0; i < Mesh.get_total_nodes(); i++){
+        for( int i = 0; i < Mesh.get_total_cells(); i++){
                 if( ! bcs.get_bc(i)){
                     convergence_residual.add_ansys_l2_norm_residuals(soln.get_rho(i),soln_t0.get_rho(i)
                                     ,soln.get_u(i),soln_t0.get_u(i),
@@ -363,7 +363,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
 
         convergence_residual.ansys_5_iter_rms(t);
 
-        if( mg == 0){
+        if( mg == 0 && t%1000 == 1){
             error_output << t << ", "  << convergence_residual.max_error()   << ", " <<
             convergence_residual.rho_rms << ", " << convergence_residual.u_rms << ", " <<
             convergence_residual.v_rms << " , FMG cycle: " << fmg << endl;
@@ -373,7 +373,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
 
 
 
-        cout << "time t=" << time << std::endl;
+        cout << "time t=" << time  << " error e =" << convergence_residual.max_error() << std::endl;
 
 
         if ( convergence_residual.max_error() < local_tolerance){
@@ -406,11 +406,11 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     cs = domain.cs;
 
     tau = globals.tau;
-    Solution temp_soln(Mesh.get_total_nodes());
-    Solution soln_t0(Mesh.get_total_nodes());
+    Solution temp_soln(Mesh.get_total_cells());
+    Solution soln_t0(Mesh.get_total_cells());
 
 
-    artificial_dissipation arti_dis(Mesh.get_total_nodes(),globals);
+    artificial_dissipation arti_dis(Mesh.get_total_cells(),globals);
 
     temp_soln.clone(soln);
     soln_t0.clone(soln);
@@ -464,7 +464,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
 
         // error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
         mesh_output.open(output_dir.c_str(), ios::out);
-        for (int mesh_t= 0; mesh_t < Mesh.get_total_nodes(); mesh_t++){
+        for (int mesh_t= 0; mesh_t < Mesh.get_total_cells(); mesh_t++){
              mesh_output << mesh_t << "," << Mesh.get_centroid_x(mesh_t) << "," <<
                     Mesh.get_centroid_y(mesh_t)
                      << "," << Mesh.get_centroid_z(mesh_t) << endl;
@@ -484,7 +484,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     flux_var cell_flux ;
     flux_var *mg_forcing_term;
 
-    mg_forcing_term= new flux_var [Mesh.get_total_nodes() +1 ];
+    mg_forcing_term= new flux_var [Mesh.get_total_cells() +1 ];
     if (mg_forcing_term==NULL) exit (1);
     flux_var debug [4] ,debug_flux[4],arti_debug [4];
     flux_var dbug [4];
@@ -534,7 +534,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
             convergence_residual.reset();
 
             //arti_dis.get_global_jst(soln,bcs, Mesh,domain);
-            for (int i=0 ; i < Mesh.get_total_nodes() ; i ++) {
+            for (int i=0 ; i < Mesh.get_total_cells() ; i ++) {
 
 
                 // skip if a boundary node
@@ -1005,11 +1005,11 @@ void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int 
     Boundary_Conditions bc(coarse_mesh.get_num_x(), coarse_mesh.get_num_y());
     bc.assign_boundary_conditions(coarse_mesh.get_num_x(), coarse_mesh.get_num_y(),bcs);
 
-    external_forces source_term(coarse_mesh.get_total_nodes());
+    external_forces source_term(coarse_mesh.get_total_cells());
     source_term.set_uniform_force(initial_conds.pressure_gradient); //pressure force applied through external force
 
-    Solution coarse_soln( coarse_mesh.get_total_nodes());
-    Solution coarse_residual_0( coarse_mesh.get_total_nodes()) ;
+    Solution coarse_soln( coarse_mesh.get_total_cells());
+    Solution coarse_residual_0( coarse_mesh.get_total_cells()) ;
 
     soln.restriction(coarse_soln,coarse_mesh,fine_mesh,fine_bc);
 
@@ -1018,7 +1018,7 @@ void Solver::multi_grid_agglomoration( Solution &residual , Solution &soln, int 
     // call solver for coarser mesh
 
     Solver solve_coarse;
-    Solution temp_soln(coarse_mesh.get_total_nodes());
+    Solution temp_soln(coarse_mesh.get_total_cells());
     coarse_soln.update_bcs(bc,coarse_mesh,coarse_domain);
     temp_soln.clone(coarse_soln);
 

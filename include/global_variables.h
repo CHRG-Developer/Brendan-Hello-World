@@ -27,7 +27,7 @@ class global_variables
         const double PI = acos(-1.0);
 
         //tolerance in final solution
-        double tolerance = 0.000001;
+        double tolerance;
 
         double pre_conditioned_gamma = 1;
         double simulation_length = 2000; // cut off time in seconds
@@ -42,11 +42,13 @@ class global_variables
 
         int max_mg_levels ; // number of coarse grids to enter
         int fmg_levels;
+        int testcase; // couette = 1 , poiseuille = 2
         double fmg_tolerance;
 
         std::string output_file_dir;
         std::string simulation_name;
         std::string output_file;
+        const std::string test_case = "Couette";
 
     protected:
     private:

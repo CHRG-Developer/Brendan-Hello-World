@@ -24,7 +24,9 @@ class program
                                       initial_conditions &initial_conds,
                                       global_variables globals, domain_geometry &fine_domain,
                                       Boundary_Conditions &fine_bcs);
-        void output_runtime (std::string output_location,double duration,std::string filename);
+        void output_globals (global_variables globals ,double duration);
+        void output_tecplot(global_variables &globals, Uniform_Mesh &Mesh, Solution &Soln,
+                            Boundary_Conditions &bcs) ;
     protected:
     private:
 };

@@ -16,6 +16,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add directory="include" />
+					<Add directory="../../../../../../../usr/local/tecplot/360ex_2017r2/include" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -24,12 +25,18 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option parameters='&quot;/home/brendan/Dropbox/PhD/Code/XML Schema/template.xml&quot;' />
+				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-O3" />
+					<Add option="-std=c++11" />
 					<Add directory="include" />
+					<Add directory="../../../../../../../usr/local/tecplot/360ex_2017r2/include" />
+					<Add directory="../../../../../../../usr/local/tecplot/360ex_2017r2/bin" />
+					<Add directory="../../../../../../../usr/local/tecplot/360ex_2017r2/bin/sys" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="../../../../../../../usr/local/tecplot/360ex_2017r2/bin/libtecio.so" />
 				</Linker>
 			</Target>
 		</Build>

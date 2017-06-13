@@ -9,11 +9,13 @@ class Uniform_Mesh
         Uniform_Mesh(domain_geometry domain, global_variables globals);
         virtual ~Uniform_Mesh();
         double get_node_x(int node_num);
-        int get_num_x() { return num_x_nodes; };
-        int get_num_y () { return num_y_nodes; };
-        int get_total_nodes () { return total_nodes; };
+        int get_num_x() { return num_x_cells; };
+        int get_num_y () { return num_y_cells; };
+        int get_total_cells () { return total_cells; };
         double get_dx() { return dx;};
         double get_dy() { return dy;};
+        double get_X() { return X;};
+        double get_Y() { return Y;};
         double get_centroid_x( int i) {return centroid_x[i];};
         double get_centroid_y( int i) {return centroid_y[i];};
         double get_centroid_z( int i) {return centroid_z[i];};
@@ -60,7 +62,7 @@ class Uniform_Mesh
 
 
         void create_mesh();
-        int num_x_nodes, num_y_nodes, total_nodes;
+        int num_x_cells, num_y_cells, total_cells;
         double X,Y,dx,dy,multi_grid_dt;
         //centroid and cell interface locations
         double * centroid_x, * centroid_y, * centroid_z;

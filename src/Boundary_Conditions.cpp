@@ -82,8 +82,9 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
     int t = 0;
 
     //lid driven cavity conditions
-    for (int i =0; i < num_x; i++){
-        for( int j=0; j < num_y; j++){
+    for( int j=0; j < num_y; j++){
+        for (int i =0; i < num_x; i++){
+
 
             // default status
             bc[t] = false;
@@ -98,8 +99,8 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.w_type_vel;
                 type_rho[t] = _bc.w_type_rho;
 
-                periodic_node[t] = (num_x-2) * (num_y ) + t;
-                neighbour[t] = t + num_y;
+                periodic_node[t] = (num_x-2) + t;
+                neighbour[t] = t + 1;
 
                 if (j ==0){
                     bc_include[t] = false;
@@ -120,8 +121,8 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_rho[t] = _bc.e_type_rho;
 
 
-                periodic_node[t] = t - (num_x-2) * (num_y );
-                neighbour[t] = t - num_y;
+                periodic_node[t] = t - (num_x-2) ;
+                neighbour[t] = t - 1;
                 bc_include[t] = false;
 
             // south boundary
@@ -133,8 +134,8 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.s_type_vel;
                 type_rho[t] = _bc.s_type_rho;
 
-                periodic_node[t] = t + (num_y-2);
-                neighbour[t] = t + 1;
+                periodic_node[t] = t + (num_y-2) *num_x;
+                neighbour[t] = t + num_x;
 
                 bc_include[t] = true;
 
@@ -148,8 +149,8 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.n_type_vel;
                 type_rho[t] = _bc.n_type_rho;
 
-                periodic_node[t] = t - (num_y-2);
-                neighbour[t] = t - 1;
+                periodic_node[t] = t - (num_y-2)* num_x;
+                neighbour[t] = t - num_x;
                 bc_include[t] = false;
 
             }else {
@@ -172,8 +173,9 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
     int t = 0;
 
     //lid driven cavity conditions
-    for (int i =0; i < num_x; i++){
+
         for( int j=0; j < num_y; j++){
+            for (int i =0; i < num_x; i++){
              // West boundary
             if( i ==0){
                 bc[t] = true;
@@ -183,7 +185,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.w_type;
                 type_rho[t] = _bc.w_type;
 
-                periodic_node[t] = (num_x-2) * (num_y ) + t;
+                periodic_node[t] = (num_x-2)  + t;
                 neighbour[t] = t + num_y;
 
                  if (j ==0){
@@ -209,7 +211,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_rho[t] = _bc.e_type;
 
 
-                periodic_node[t] = t - (num_x-2) * (num_y );
+                periodic_node[t] = t - (num_x-2) ;
                 neighbour[t] = t - num_y;
 
                 bc_include[t] = true;
@@ -227,7 +229,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.s_type;
                 type_rho[t] = _bc.s_type;
 
-                periodic_node[t] = t + (num_y-2);
+                periodic_node[t] = t + (num_y-2) *num_x;
                 neighbour[t] = t + 1;
 
                 bc_include[t] = true;
@@ -246,7 +248,7 @@ void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_
                 type_vel[t] = _bc.n_type;
                 type_rho[t] = _bc.n_type;
 
-                periodic_node[t] = t - (num_y-2);
+                periodic_node[t] = t - (num_y-2)*num_x;
                 neighbour[t] = t - 1;
 
                 bc_include[t] = false;

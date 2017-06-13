@@ -2349,13 +2349,13 @@
 	"test_cases.h"
 	"program.h"
 
-1491456980 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Uniform_Mesh.h
+1496245871 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Uniform_Mesh.h
 	"domain_geometry.h"
 	"global_variables.h"
 
 1464023144 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/domain_geometry.h
 
-1487083863 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
+1496923093 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
 	<string>
 	"domain_geometry.h"
 	<math.h>
@@ -2370,13 +2370,14 @@
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/quad_bcs_plus.h
 
-1491927663 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solution.h
+1496925641 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solution.h
 	"Uniform_Mesh.h"
 	"vector_var.h"
 	<string>
 	"global_variables.h"
 	"domain_geometry.h"
 	<Boundary_Conditions.h>
+	"initial_conditions.h"
 
 1492089406 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
 	"Uniform_Mesh.h"
@@ -2399,7 +2400,7 @@
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/test_cases.h
 	<string>
 
-1475595570 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/program.h
+1496174225 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/program.h
 	<string>
 	<Solution.h>
 	<Uniform_Mesh.h>
@@ -2408,7 +2409,7 @@
 	<global_variables.h>
 	<domain_geometry.h>
 
-1473846988 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/artificial_dissipation.cpp
+1496167972 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/artificial_dissipation.cpp
 	"artificial_dissipation.h"
 	<stdlib.h>
 	<math.h>
@@ -2421,7 +2422,7 @@
 	"flux_var.h"
 	"global_variables.h"
 
-1491921722 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
+1496171768 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
 	"Boundary_Conditions.h"
 	<stdlib.h>
 
@@ -2436,7 +2437,7 @@
 1479396863 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/flux_var.cpp
 	"flux_var.h"
 
-1492003716 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/global_variables.cpp
+1496938869 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/global_variables.cpp
 	"global_variables.h"
 	"domain_geometry.h"
 	<boost/algorithm/string/replace.hpp>
@@ -2446,7 +2447,7 @@
 1464023837 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/initial_conditions.cpp
 	"initial_conditions.h"
 
-1491223665 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
+1496923093 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
 	"preprocessor.h"
 	"global_variables.h"
 	<fstream>
@@ -2476,7 +2477,7 @@
 	<android/log.h>
 	<assert.h>
 
-1491838123 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/program.cpp
+1497367034 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/program.cpp
 	"program.h"
 	"quad_bcs.h"
 	"global_variables.h"
@@ -2491,6 +2492,11 @@
 	"Solver.h"
 	<fstream>
 	<iostream>
+	"postprocessor.h"
+	<stdlib.h>
+	<stdio.h>
+	"TECIO.h"
+	<sstream>
 
 1453812249 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/quad_bcs.cpp
 	"quad_bcs.h"
@@ -2505,7 +2511,7 @@
 
 1469535870 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/residuals.h
 
-1491998274 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
+1497016920 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
 	<stdlib.h>
 	"Solution.h"
 	<algorithm>
@@ -2513,7 +2519,7 @@
 	<iostream>
 	<math.h>
 
-1492089494 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1497364783 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	<math.h>
 	<cmath>
 	"Solver.h"
@@ -2540,7 +2546,7 @@
 	<cstddef>
 	<cstdarg>
 
-1492001777 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Uniform_Mesh.cpp
+1496245755 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Uniform_Mesh.cpp
 	"Uniform_Mesh.h"
 	<math.h>
 	<stdio.h>
@@ -2557,8 +2563,43 @@
 
 1464005120 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/xmltest.cpp
 
-1492013131 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/RungeKutta.cpp
+1492090006 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/RungeKutta.cpp
 	"RungeKutta.h"
 
-1492014848 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/RungeKutta.h
+1492090076 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/RungeKutta.h
+
+1494430410 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/postprocessor.cpp
+	"postprocessor.h"
+	<vtkVersion.h>
+	<vtkSmartPointer.h>
+	<vtkTetra.h>
+	<vtkCellArray.h>
+	<vtkXMLUnstructuredGridReader.h>
+	<vtkDataSetMapper.h>
+	<vtkActor.h>
+	<vtkRenderer.h>
+	<vtkRenderWindow.h>
+	<vtkRenderWindowInteractor.h>
+	<vtkXMLUnstructuredGridWriter.h>
+	<vtkUnstructuredGrid.h>
+	<vtkPointData.h>
+	<vtkVertexGlyphFilter.h>
+	<vtkXMLWriter.h>
+	<vtkSmartPointerBase.h>
+
+1494429690 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/postprocessor.h
+	"global_variables.h"
+	"domain_geometry.h"
+
+1493112618 /usr/local/tecplot/360ex_2017r2/include/TECIO.h
+	"mpi.h"
+	"StandardIntegralTypes.h"
+	"tecio_Exports.h"
+
+1493112731 /usr/local/tecplot/360ex_2017r2/include/StandardIntegralTypes.h
+	<limits.h>
+	<wchar.h>
+	<inttypes.h>
+
+1493112651 /usr/local/tecplot/360ex_2017r2/include/tecio_Exports.h
 
