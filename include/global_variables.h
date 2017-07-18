@@ -13,6 +13,8 @@ class global_variables
         void update_tau(domain_geometry domain);
         void update_fine_tau();
         void update_coarse_tau();
+        void magnify_time_step();
+        void reduce_time_step();
         std::string create_output_directory();
 
         //BC constants

@@ -20,7 +20,7 @@ global_variables::~global_variables()
 void global_variables::initialise(domain_geometry domain){
     //tau = 0.5 + viscosity / dt/ gamma
     // viscosity = MA/root(3) /Re
-    tau = 0.5 + mach_number * sqrt(3)/reynolds_number * ceil(domain.Y/domain.dy) /domain.dt *pre_conditioned_gamma;
+    tau = 0.5 + mach_number * sqrt(3)/reynolds_number * domain.Y/domain.dt*pre_conditioned_gamma;
     knudsen_number = mach_number / reynolds_number;
     output_file = create_output_directory();
 }
@@ -36,11 +36,18 @@ void global_variables::update_fine_tau(){
 }
 
 void global_variables::update_tau( domain_geometry domain){
-    tau = 0.5 + mach_number * sqrt(3)/reynolds_number /domain.dt *pre_conditioned_gamma;
-    tau = tau/2;
+     tau = 0.5 + mach_number * sqrt(3)/reynolds_number * ceil(domain.Y /domain.dt) *pre_conditioned_gamma;
+
+}
+void global_variables::magnify_time_step( ){
+     time_marching_step = time_marching_step * 2;
 
 }
 
+void global_variables::reduce_time_step( ){
+     time_marching_step = time_marching_step / 2;
+
+}
 std::string global_variables::create_output_directory(){
 
     std::string output_file;

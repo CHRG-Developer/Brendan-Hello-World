@@ -1,13 +1,13 @@
-#ifndef UNIFORM_MESH_H
-#define UNIFORM_MESH_H
+#ifndef Mesh_H
+#define Mesh_H
 
 #include "domain_geometry.h"
 #include "global_variables.h"
-class Uniform_Mesh
+class Mesh
 {
     public:
-        Uniform_Mesh(domain_geometry domain, global_variables globals);
-        virtual ~Uniform_Mesh();
+        Mesh(domain_geometry domain, global_variables globals);
+        virtual ~Mesh();
         double get_node_x(int node_num);
         int get_num_x() { return num_x_cells; };
         int get_num_y () { return num_y_cells; };
@@ -94,4 +94,4 @@ class Uniform_Mesh
 
 };
 
-#endif // UNIFORM_MESH_H
+#endif // Mesh_H

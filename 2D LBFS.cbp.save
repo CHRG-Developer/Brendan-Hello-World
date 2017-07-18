@@ -29,13 +29,14 @@
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++11" />
+					<Add option="-march=native" />
+					<Add option="-Ofast" />
 					<Add directory="include" />
 					<Add directory="../../../../../../../usr/local/tecplot/360ex_2017r2/include" />
 					<Add directory="../../../../../../../usr/local/tecplot/360ex_2017r2/bin" />
 					<Add directory="../../../../../../../usr/local/tecplot/360ex_2017r2/bin/sys" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
 					<Add library="../../../../../../../usr/local/tecplot/360ex_2017r2/bin/libtecio.so" />
 				</Linker>
 			</Target>

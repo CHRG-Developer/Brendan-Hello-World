@@ -78,15 +78,15 @@ double residuals::max_error (){
 
     double temp;
     temp = fmax(rho_rms, u_rms);
-    //return fmax(temp, v_rms);
-    return temp;
+    return fmax(temp, v_rms);
+
 }
 
-void residuals::add_ansys_l2_norm_residuals(double f1, double rho, double f2, double u, double f3, double v){
+void residuals::add_ansys_l2_norm_residuals(double f1, double rho, double f2, double u, double f3, double v,double delta_t){
 
-    rho_rms_num = rho_rms_num + pow( f1 -rho ,2.0 );
-    u_rms_num = u_rms_num + pow( f2 - u ,2.0 );
-    v_rms_num = v_rms_num + pow( f3 - v ,2.0 ) ;
+    rho_rms_num = rho_rms_num + pow( (f1 -rho)/delta_t ,2.0 );
+    u_rms_num = u_rms_num + pow( (f2 - u)/delta_t ,2.0 );
+    v_rms_num = v_rms_num + pow( (f3 - v)/delta_t ,2.0 ) ;
 
 
 };

@@ -12,7 +12,8 @@ class residuals
         void l2_norm_rms();
         double max_error();
 
-        void add_ansys_l2_norm_residuals(double f1, double rho, double f2, double u, double f3, double v);
+        void add_ansys_l2_norm_residuals(double f1, double rho, double f2, double u, double f3, double v,
+                                          double delta_t);
         void ansys_5_iter_rms (int timestep);
         double rho_rms, u_rms, v_rms, w_rms;
     protected:

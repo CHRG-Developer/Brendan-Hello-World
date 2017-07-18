@@ -349,7 +349,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
                 if( ! bcs.get_bc(i)){
                     convergence_residual.add_ansys_l2_norm_residuals(soln.get_rho(i),soln_t0.get_rho(i)
                                     ,soln.get_u(i),soln_t0.get_u(i),
-                                    soln.get_v(i),soln_t0.get_v(i));
+                                    soln.get_v(i),soln_t0.get_v(i),delta_t);
                        //error checking
                     if (std::isnan(temp_soln.get_rho(i)) || std::isnan(temp_soln.get_u(i))) {
                                     if( mg == 0){
@@ -367,13 +367,14 @@ void Solver::Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Bou
             error_output << t << ", "  << convergence_residual.max_error()   << ", " <<
             convergence_residual.rho_rms << ", " << convergence_residual.u_rms << ", " <<
             convergence_residual.v_rms << " , FMG cycle: " << fmg << endl;
+            cout << "time t=" << time  << " error e =" << convergence_residual.max_error() << std::endl;
         }
 
          time = t*delta_t;
 
 
 
-        cout << "time t=" << time  << " error e =" << convergence_residual.max_error() << std::endl;
+
 
 
         if ( convergence_residual.max_error() < local_tolerance){
@@ -916,7 +917,7 @@ void Solver::Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_
     //                        residual.add_l2_norm_residuals(f1,soln.get_rho(i),f2,soln.get_u(i),
     //                            f3,soln.get_v(i));
                             convergence_residual.add_ansys_l2_norm_residuals(f1,soln.get_rho(i),f2,soln.get_u(i),
-                                f3,soln.get_v(i));
+                                f3,soln.get_v(i), delta_t);
 
                           if (std::isnan(temp_soln.get_rho(i)) || std::isnan(temp_soln.get_u(i))) {
                                 if( mg == 0){

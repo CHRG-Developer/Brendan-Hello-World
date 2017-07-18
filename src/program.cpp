@@ -191,7 +191,7 @@ void program::output_tecplot(global_variables &globals, Uniform_Mesh &Mesh, Solu
         if( bcs.get_bc(i) == false){
             p[t] = (float) Soln.get_rho(i);
             u[t] = (float) Soln.get_u(i)/globals.mach_number *sqrt(3);
-            v[t] = (float) Soln.get_v(i);
+            v[t] = (float) Soln.get_v(i)/globals.mach_number *sqrt(3);
             x[t] = (float) Mesh.get_centroid_x(i)/Mesh.get_X();
             y[t] = (float) Mesh.get_centroid_y(i)/Mesh.get_Y();
             u_err[t] = (float) Soln.get_u_error(i);
@@ -336,7 +336,7 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
     Uniform_Mesh coarse_mesh (coarse_domain,globals);
 
     globals.update_tau(coarse_domain);
-
+    globals.magnify_time_step();
     Boundary_Conditions bc(coarse_mesh.get_num_x(), coarse_mesh.get_num_y());
     bc.assign_boundary_conditions(coarse_mesh.get_num_x(), coarse_mesh.get_num_y(),bcs);
 
@@ -376,6 +376,7 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
     soln.set_average_rho(initial_conds.average_rho);
     soln.update_bcs(fine_bcs,fine_mesh,fine_domain);
     globals.update_tau(fine_domain);
+     globals.reduce_time_step();
     fmg = fmg -1;
 
 }

@@ -163,7 +163,7 @@ void Solution::post_process(double gamma, Uniform_Mesh &mesh, global_variables &
         for (int i =0; i< total_nodes; i++){
             rho[i] = rho[i] /gamma;
             u_exact[i] = mesh.get_centroid_y(i) *globals.mach_number /sqrt(3) / mesh.get_Y() ;
-            error[i] = (u[i] - u_exact[i]) / u_exact[i] *100;
+            error[i] = (u[i] - u_exact[i]) *100;
           }
     }else if( globals.testcase == 2){
          for (int i =0; i< total_nodes; i++){
@@ -171,7 +171,7 @@ void Solution::post_process(double gamma, Uniform_Mesh &mesh, global_variables &
             u_exact[i] = -initials.rho_gradient.x /2* mesh.get_centroid_y(i)*
                 (mesh.get_Y()- mesh.get_centroid_y(i)) / ( (globals.tau - 0.5) /3) /3 ;
               //second divide by 3 for rho to P conversion
-             error[i] = (u[i] - u_exact[i]) / u_exact[i] *100;
+             error[i] = (u[i] - u_exact[i])  *100;
           }
 
     }

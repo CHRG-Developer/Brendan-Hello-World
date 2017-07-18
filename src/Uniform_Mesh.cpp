@@ -1,4 +1,4 @@
-#include "Uniform_Mesh.h"
+#include "Mesh.h"
 #include <math.h>
 #include <stdio.h>      /* printf, scanf, NULL */
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Uniform_Mesh::Uniform_Mesh(domain_geometry domain, global_variables globals)
+Mesh::Mesh(domain_geometry domain, global_variables globals)
 {
     //ctor
     X = domain.X;
@@ -141,7 +141,7 @@ Uniform_Mesh::Uniform_Mesh(domain_geometry domain, global_variables globals)
 	X=X;
 }
 
-Uniform_Mesh::~Uniform_Mesh()
+Mesh::~Mesh()
 {
     //dtor
     delete [](centroid_x);
@@ -169,7 +169,7 @@ Uniform_Mesh::~Uniform_Mesh()
     delete [](centroid_z);
     centroid_z = NULL;
     delete [] (north_z);
-    north_z = NULL;
+    north_z = NULL;129
     delete [] (south_z);
     south_z = NULL;
     delete [] (east_z);
@@ -227,7 +227,7 @@ Uniform_Mesh::~Uniform_Mesh()
     s_node = NULL;
 }
 
-void Uniform_Mesh::create_mesh(){
+void Mesh::create_mesh(){
     int counter =0;
     for( int j=0; j < num_y_cells; j++){
         for( int i=0; i < num_x_cells; i++){
@@ -310,7 +310,7 @@ void Uniform_Mesh::create_mesh(){
 
 
 }
-double  Uniform_Mesh::get_node_x(int node_num){
+double  Mesh::get_node_x(int node_num){
     double result;
     result = centroid_x[node_num];
 
@@ -318,15 +318,15 @@ double  Uniform_Mesh::get_node_x(int node_num){
 }
 
 
-domain_geometry Uniform_Mesh::create_coarse_mesh_domain(){
+domain_geometry Mesh::create_coarse_mesh_domain(){
 
     domain_geometry coarse_domain;
 
-    coarse_domain.X = X;
-    coarse_domain.Y = Y;
-    coarse_domain.dx = dx*2;
-    coarse_domain.dy = dy*2;
-    coarse_domain.dt = multi_grid_dt*2; //streaming time step
+    coarse_domain.X = X/dx;
+    coarse_domain.Y = Y/dy;
+    coarse_domain.dx = dx*2*multi_grid_dt;
+    coarse_domain.dy = dy*2*multi_grid_dt;
+    coarse_domain.dt = multi_grid_dt; //streaming time step
     //coarse_domain.dt = multi_grid_dt;
     coarse_domain.cs = cs;
 
