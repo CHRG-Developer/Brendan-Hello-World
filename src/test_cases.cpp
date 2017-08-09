@@ -1,6 +1,6 @@
 //#include "test_cases.h"
 //#include <iostream>
-//#include "Uniform_Mesh.h"
+//#include "Mesh.h"
 //#include "vector_var.h"
 //#include <stdio.h>      /* printf */
 //#include <iostream>
@@ -129,7 +129,7 @@
 //    //vector_var_tests();
 //
 //    // create Mesh
-//    Uniform_Mesh mesh(X,Y,dx,dy);
+//    Mesh mesh(X,Y,dx,dy);
 //
 //    // create boundary conditions
 //    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
@@ -147,7 +147,7 @@
 //
 //    Solver solve;
 //
-//    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file,source_term,
+//    solve.Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file,source_term,
 //                              pre_condition_gamma);
 //
 //    soln.post_process(pre_condition_gamma);
@@ -210,7 +210,7 @@
 //    //vector_var_tests();
 //
 //    // create Mesh
-//    Uniform_Mesh mesh(X,Y,dx,dy);
+//    Mesh mesh(X,Y,dx,dy);
 //
 //    // create boundary conditions
 //    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
@@ -223,7 +223,7 @@
 //    // Solve
 //
 //    Solver solve;
-//    //solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t, dx,tolerance);
+//    //solve.Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t, dx,tolerance);
 //
 //    tau = 1;
 //
@@ -295,7 +295,7 @@
 //    //vector_var_tests();
 //
 //    // create Mesh
-//    Uniform_Mesh mesh(X,Y,dx,dy);
+//    Mesh mesh(X,Y,dx,dy);
 //
 //    // create boundary conditions
 //    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
@@ -313,7 +313,7 @@
 //    // Solve
 //
 //    Solver solve;
-//    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file, source_term,pre_conditioned_gamma);
+//    solve.Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx ,output_file, source_term,pre_conditioned_gamma);
 //    soln.output(output_file);
 //    tau = 1;
 //
@@ -386,7 +386,7 @@
 //    //vector_var_tests();
 //
 //    // create Mesh
-//    Uniform_Mesh mesh(X,Y,dx,dy);
+//    Mesh mesh(X,Y,dx,dy);
 //
 //    // create boundary conditions
 //    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
@@ -403,7 +403,7 @@
 //
 //
 //    Solver solve;
-//    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file,source_term,pre_conditioned_gamma);
+//    solve.Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file,source_term,pre_conditioned_gamma);
 //    soln.output(output_file);
 //
 //    tau = 1;
@@ -475,7 +475,7 @@
 //    //vector_var_tests();
 //
 //    // create Mesh
-//    Uniform_Mesh mesh(X,Y,dx,dy);
+//    Mesh mesh(X,Y,dx,dy);
 //
 //    // create boundary conditions
 //    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
@@ -491,7 +491,7 @@
 //    // Solve
 //
 //    Solver solve;
-//    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,output_file,source_term,pre_conditioned_gamma);
+//    solve.Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx,output_file,source_term,pre_conditioned_gamma);
 //
 //    tau = 1;
 //
@@ -561,7 +561,7 @@
 //    //vector_var_tests();
 //
 //    // create Mesh
-//    Uniform_Mesh mesh(X,Y,dx,dy);
+//    Mesh mesh(X,Y,dx,dy);
 //
 //    // create boundary conditions
 //    Boundary_Conditions bc(mesh.get_num_x(), mesh.get_num_y());
@@ -577,7 +577,7 @@
 //    // Solve
 //
 //    Solver solve;
-//    solve.Uniform_Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file, source_term,pre_conditioned_gamma);
+//    solve.Mesh_Solver(dt,tau,mesh,soln,bc,simulation_length, delta_t,dx, output_file, source_term,pre_conditioned_gamma);
 //
 //    tau = 1;
 //

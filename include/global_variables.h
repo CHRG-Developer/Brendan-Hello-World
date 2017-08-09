@@ -45,6 +45,7 @@ class global_variables
         int max_mg_levels ; // number of coarse grids to enter
         int fmg_levels;
         int testcase; // couette = 1 , poiseuille = 2
+        int mesh_type; // standard =1 , cosine = 2
         double fmg_tolerance;
 
         std::string output_file_dir;

@@ -34,7 +34,7 @@ artificial_dissipation::~artificial_dissipation()
 }
 
 void artificial_dissipation::get_global_jst(Solution &soln, Boundary_Conditions &bcs,
-                                            Uniform_Mesh &Mesh, domain_geometry &domain)
+                                            Mesh &Mesh, domain_geometry &domain)
 {
     int neighbour;
 
@@ -75,7 +75,7 @@ void artificial_dissipation::get_global_jst(Solution &soln, Boundary_Conditions 
 
 }
 void artificial_dissipation::get_local_coeffs(Solution &soln, Boundary_Conditions &bcs,
-                                            Uniform_Mesh &Mesh, Solution &local_soln, domain_geometry &domain,
+                                            Mesh &Mesh, Solution &local_soln, domain_geometry &domain,
                                             int j, int i)
 {
     int neighbour;
@@ -263,7 +263,7 @@ double artificial_dissipation::second_order_difference(int var, int neighbour, i
 
                     }
 double artificial_dissipation::_4th_order_difference(int var, int neighbour, int i,Solution &soln,
-                        Boundary_Conditions &bcs,Uniform_Mesh &Mesh, Solution &local_soln,
+                        Boundary_Conditions &bcs,Mesh &Mesh, Solution &local_soln,
                         domain_geometry &domain,int j){
 
                     double temp;

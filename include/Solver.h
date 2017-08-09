@@ -1,4 +1,4 @@
-#include "Uniform_Mesh.h"
+#include "Mesh.h"
 #include "Boundary_Conditions.h"
 #include "Solution.h"
 #include "vector_var.h"
@@ -17,16 +17,20 @@ class Solver
     public:
         Solver();
         virtual ~Solver();
-         void Uniform_Mesh_Solver( Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
+         void Mesh_Solver( Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
                                    external_forces &source,global_variables &globals, domain_geometry &domain,
                                    initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
                                    Solution &residual,int fmg);
-        void Uniform_Mesh_Solver_Clean( Uniform_Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
+        void Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
+                                   external_forces &source,global_variables &globals, domain_geometry &domain,
+                                   initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
+                                   Solution &residual,int fmg);
+        void Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
                                    external_forces &source,global_variables &globals, domain_geometry &domain,
                                    initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
                                    Solution &residual,int fmg);
         void multi_grid_agglomoration( Solution &residuals , Solution &soln,
-                                         int cycle_no, Uniform_Mesh &fine_mesh,  quad_bcs_plus &bcs,
+                                         int cycle_no, Mesh &fine_mesh,  quad_bcs_plus &bcs,
                                          initial_conditions &init_conds, int &mg, global_variables globals,
                                          domain_geometry &fine_domain,Boundary_Conditions &fine_bc);
         void populate_e_alpha(std::vector<vector_var> &e_alpha,double * lattice_weight, double c, double PI, int k );
@@ -63,7 +67,7 @@ class Solver
         void cell_interface_variables( int j,int i ,vector_var &interface_node, int &neighbour,
                                       double &interface_area,vector_var &cell_normal,
                                       Boundary_Conditions &boundary_conditions,  bc_var &bc
-                                      ,Uniform_Mesh &Mesh, vector_var &cell2) ;
+                                      ,Mesh &Mesh, vector_var &cell2) ;
 
         void truncate_flux(flux_var &flux);
         void truncate_flux(double &val);

@@ -252,6 +252,7 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.arti_disp_kappa_4 = get_xml_double(parent,"dissipation_kappa_4",xmlDoc);
     globals.martinelli = get_xml_double(parent,"martinelli_exponent",xmlDoc);
     globals.testcase= get_xml_double(parent, "testcase", xmlDoc);
+    globals.mesh_type= get_xml_double(parent, "mesh_type", xmlDoc);
 
 }
 

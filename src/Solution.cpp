@@ -63,7 +63,7 @@ void Solution::Initialise() {
 }
 
 void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradient_origin,
-    vector_var origin_magnitude, Uniform_Mesh &Mesh){
+    vector_var origin_magnitude, Mesh &Mesh){
 
    vector_var displacement;
    vector_var rho_temp;
@@ -84,7 +84,7 @@ void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradie
    }
 
 void Solution::assign_velocity_gradient( vector_var _gradient, vector_var gradient_origin,
-    vector_var origin_magnitude, Uniform_Mesh &Mesh){
+    vector_var origin_magnitude, Mesh &Mesh){
 
    vector_var displacement;
    vector_var vel_temp;
@@ -154,7 +154,7 @@ void Solution::clone( Solution &soln_a){
 }
 
 
-void Solution::post_process(double gamma, Uniform_Mesh &mesh, global_variables &globals,
+void Solution::post_process(double gamma, Mesh &mesh, global_variables &globals,
                             initial_conditions &initials){
 
     if( globals.testcase == 1){
@@ -180,7 +180,7 @@ void Solution::post_process(double gamma, Uniform_Mesh &mesh, global_variables &
 
 
 // update bc nodes to allow for changes in solution
-void Solution::update_bcs(Boundary_Conditions &bcs,Uniform_Mesh &mesh,domain_geometry &domain){
+void Solution::update_bcs(Boundary_Conditions &bcs,Mesh &mesh,domain_geometry &domain){
 
     for(int i =0; i< mesh.get_total_cells();i++){
 
@@ -260,8 +260,8 @@ void Solution::remove_double_errors(){
 
 }
 
-void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
-                           Uniform_Mesh &fine_mesh, Boundary_Conditions &bc){
+void Solution::restriction(Solution &coarse_soln,Mesh &coarse_mesh,
+                           Mesh &fine_mesh, Boundary_Conditions &bc){
 
     int coarse_x, coarse_y;
     int coarse_i;
@@ -304,7 +304,7 @@ void Solution::restriction(Solution &coarse_soln,Uniform_Mesh &coarse_mesh,
 
 
 void Solution::prolongation(Solution &coarse_soln, Solution &temp_soln, Solution &soln,
-                            Uniform_Mesh &coarse_mesh, Uniform_Mesh &fine_mesh,
+                            Mesh &coarse_mesh, Mesh &fine_mesh,
                     Boundary_Conditions &bc ,bool fmg){
         double mg_delta_rho, mg_delta_u, mg_delta_v, mg_delta_w;
             //loop through the finer mesh as this will enable parrelisation later
