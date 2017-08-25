@@ -85,7 +85,7 @@ void program::run(char* xml_input){
     Solver solve;
     tecplot_output grid(globals,mesh,soln,bc,1,0.0);
 
-    solve.Mesh_Solver_Clean(mesh,soln,bc,source_term,globals,domain,initial_conds,bcs,
+    solve.Uniform_Mesh_Solver_Clean(mesh,soln,bc,source_term,globals,domain,initial_conds,bcs,
                               mg,residual,fmg);
 
     soln.post_process(globals.pre_conditioned_gamma,mesh, globals,initial_conds);
@@ -367,7 +367,7 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
 
     Solver solve_coarse;
 
-    solve_coarse.Mesh_Solver_Clean(coarse_mesh,coarse_soln,bc,source_term,globals,
+    solve_coarse.Uniform_Mesh_Solver_Clean(coarse_mesh,coarse_soln,bc,source_term,globals,
                                      coarse_domain,initial_conds,bcs,mg,coarse_residual,fmg);
 
     Solution temp_soln(coarse_mesh.get_total_cells());

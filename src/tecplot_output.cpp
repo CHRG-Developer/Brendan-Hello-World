@@ -13,7 +13,7 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
 
     std::string output_location;
-     std::string reynolds_text;
+    std::string reynolds_text;
     reynolds_text = globals.reynolds_number;
     std::string zone_name;
     std::stringstream ss;
@@ -55,7 +55,7 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
     INTEGER4 nNodes, nCells, nFaces, connectivityCount, index;
     int XDIM, YDIM, ZDIM; // nodes
-    int t;
+    int t,r;
     XDIM = Mesh.get_num_x() +1 -2;
     YDIM = Mesh.get_num_y() +1 -2;
     ZDIM = 2;
@@ -113,18 +113,24 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
         nodx  = (float*)malloc(nNodes * sizeof(float));
         nody  = (float*)malloc(nNodes * sizeof(float));
         z  = (float*)malloc(nNodes * sizeof(float));
-
-        for (k = 0; k < ZDIM; k++)
-            for (j = 0; j < YDIM; j++)
-                for (i = 0; i < XDIM; i++)
+        t = 0;
+        r=0;
+        for (k = 0; k < ZDIM; k++){
+            r=0;
+            for (j = 0; j < Mesh.get_num_y(); j++){
+                for (i = 0; i < Mesh.get_num_x(); i++)
                 {
-                    index = (k * YDIM + j) * XDIM + i;
-                    nodx[index] = (float)(i + 1);
-                    nody[index] = (float)(j + 1);
-                    z[index] = (float)(k + 1);
+                    if( i != 0 && j != 0 ){
+                        nodx[t] = (float)(Mesh.get_west_x(r));
+                        nody[t] = (float)(Mesh.get_south_y(r));
+                        z[t] = (float)(k + 1);
+                        t++;
+                   }
+                    r++;
 
                 }
-
+            }
+        }
 
         connectivityCount = 8 * nCells;
         connectivity = (INTEGER4*)malloc(connectivityCount * sizeof(INTEGER4));
@@ -133,7 +139,7 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
                 for (i = 0; i < XDIM - 1; i++)
                 {
                     index = ((k * (YDIM - 1) + j) * (XDIM - 1) + i) * 8;
-                    connectivity[index] = (k * YDIM + j) * XDIM + i + 1;
+                    connectivity[index] = (k * YDIM + j) * XDIM + i +1;
                     connectivity[index + 1] = connectivity[index] + 1;
                     connectivity[index + 2] = connectivity[index] + XDIM + 1;
                     connectivity[index + 3] = connectivity[index] + XDIM;

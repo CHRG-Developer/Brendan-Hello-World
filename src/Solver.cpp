@@ -535,14 +535,19 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
                         delta_v.Get_Gradient(temp_soln.get_v(i), temp_soln.get_v(neighbour),cell_1,cell_2 );
 
                         //get cell ineterface macro variables
-                        rho_avg = (temp_soln.get_rho(neighbour) + temp_soln.get_rho(i))/2;
-                        u_avg = (temp_soln.get_u(neighbour) + temp_soln.get_u(i))/2;
-                        v_avg = (temp_soln.get_v(neighbour) + temp_soln.get_v(i))/2;
 
-                        // add in reset function
-                        delta_w.x = 0;
-                        delta_w.y = 0;
-                        delta_w.z = 0; //update for 3d
+                        //unrolled to reduce arithmetic operations
+                        if( j == 2){
+                            rho_avg = delta_rho.x * interface_area/2 +temp_soln.get_rho(i);
+                            u_avg = delta_u.x * interface_area/2 +temp_soln.get_u(i);
+                            v_avg = delta_v.x * interface_area/2 +temp_soln.get_v(i);
+                        }else{
+                            rho_avg = delta_rho.y * interface_area/2 +temp_soln.get_rho(i);
+                            u_avg = delta_u.y * interface_area/2 +temp_soln.get_u(i);
+                            v_avg = delta_v.y * interface_area/2 +temp_soln.get_v(i);
+                        }
+
+
 
                         // using D2Q9 , loop through each lattice node
                         for (int k =0 ; k<9; k++){
@@ -616,24 +621,22 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
                                 break;
                             }
 
-                            rho_interface = rho_interface + feq_lattice[k];
 
-                            rho_u_interface.x = rho_u_interface.x + feq_lattice[k] * e_alpha[k].x;
-                            rho_u_interface.y = rho_u_interface.y + feq_lattice[k] * e_alpha[k].y;
                             //rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha[k].z;
 
                         }
-                         // divide rho * u to get u but only after complete summation
 
-                        //u_interface.x = rho_u_interface.x /soln_t0.get_average_rho();
-                        //u_interface.y = rho_u_interface.y /soln_t0.get_average_rho();
-                        u_interface.x = rho_u_interface.x /rho_interface;
-                        u_interface.y = rho_u_interface.y /rho_interface;
-                        //u_interface.z = rho_u_interface.z /soln_t0.get_average_rho();
-                        //u_magnitude = u_interface.Magnitude();
+                        // get macroscopic values at cell interface
+                         rho_interface = feq_lattice[0] + feq_lattice[1] + feq_lattice[2]+ feq_lattice[3]
+                         +feq_lattice[4] + feq_lattice[5]+ feq_lattice[6]+feq_lattice[7]+ feq_lattice[8];
+
+                        u_interface.x = 1/rho_interface * ( feq_lattice[1]- feq_lattice[3]
+                         + feq_lattice[5]- feq_lattice[6]-feq_lattice[7]+ feq_lattice[8]);
+                        u_interface.y = 1/rho_interface * ( feq_lattice[2]- feq_lattice[4]
+                         + feq_lattice[5]+ feq_lattice[6]-feq_lattice[7]- feq_lattice[8]);;
 
 
-
+                        // get feq(r,t)
                         feq_interface[0] = lattice_weight[0] * rho_interface*(1 +
 
                             -1.5*(u_interface.x * u_interface.x + u_interface.y*u_interface.y)  );
@@ -693,6 +696,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
 
                         x_flux.P = feq_interface[1] - feq_interface[3]+ feq_interface[5] - feq_interface[6]
                         -feq_interface[7] +feq_interface[8];
+
                         y_flux.P = feq_interface[2] - feq_interface[4]+ feq_interface[5] + feq_interface[6]
                         -feq_interface[7] -feq_interface[8];
 
@@ -736,24 +740,17 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
 
 
                         // add density flux to current cell and neighbouring cell
-                        residual_worker.add_rho(i,cell_flux.P/Mesh.get_cell_volume(i));
-                        residual_worker.add_rho(neighbour, -cell_flux.P/Mesh.get_cell_volume(neighbour));
+                        residual_worker.add_rho(i,cell_flux.P);
+                        residual_worker.add_rho(neighbour, -cell_flux.P);
 
                         // add x momentum
-                        residual_worker.add_u(i,cell_flux.momentum_x/Mesh.get_cell_volume(i));
-                        residual_worker.add_u(neighbour, -cell_flux.momentum_x/Mesh.get_cell_volume(neighbour));
+                        residual_worker.add_u(i,cell_flux.momentum_x);
+                        residual_worker.add_u(neighbour, -cell_flux.momentum_x);
 
                         // add y momentum
-                        residual_worker.add_v(i,cell_flux.momentum_y/Mesh.get_cell_volume(i));
-                        residual_worker.add_v(neighbour, -cell_flux.momentum_y/Mesh.get_cell_volume(neighbour));
+                        residual_worker.add_v(i,cell_flux.momentum_y);
+                        residual_worker.add_v(neighbour, -cell_flux.momentum_y);
 
-                        if ( j == 2){
-                                rj2.update(cell_flux.P, cell_flux.momentum_x,cell_flux.momentum_y,0.0,i);
-                        }
-                        if (j==3){
-
-                            rj3.update(cell_flux.P, cell_flux.momentum_x,cell_flux.momentum_y,0.0,i);
-                        }
 
                     }
                     }
@@ -767,28 +764,23 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
 
                 if( ! bcs.get_bc(i)){
 
-                    // update intermediate macroscopic variables
-                    f1 = soln_t0.get_rho(i) + residual_worker.get_rho(i)*delta_t *rk4.alpha[rk+1] ;
-                    f2 = soln_t0.get_u(i) + residual_worker.get_u(i) *delta_t*rk4.alpha[rk +1];
-                    f3 = soln_t0.get_v(i) + residual_worker.get_v(i) *delta_t*rk4.alpha[rk+1];
+                    // update intermediate macroscopic variables for next Runge Kutta Time Step
+                    f1 = soln_t0.get_rho(i) + residual_worker.get_rho(i)*delta_t *rk4.alpha[rk+1]/Mesh.get_cell_volume(i) ;
+                    f2 = soln_t0.get_u(i) + residual_worker.get_u(i) *delta_t*rk4.alpha[rk +1]/Mesh.get_cell_volume(i);
+                    f3 = soln_t0.get_v(i) + residual_worker.get_v(i) *delta_t*rk4.alpha[rk+1]/Mesh.get_cell_volume(i);
 
                       // change momentum to velocity
-                    f2 = f2/soln_t0.get_average_rho();
-                    f3 =f3/soln_t0.get_average_rho();
+                    f2 = f2/f1;
+                    f3 =f3/f1;
 
                     temp_soln.update(f1,f2,f3,0.0, i);
 
                     //add contribution
-                    soln.add_rho(i, delta_t* rk4.beta[rk] * residual_worker.get_rho(i));
-                    soln.add_u(i, delta_t* rk4.beta[rk] * residual_worker.get_u(i));
-                    soln.add_v(i, delta_t* rk4.beta[rk] * residual_worker.get_v(i));
+                    soln.add_rho(i, delta_t* rk4.beta[rk] * residual_worker.get_rho(i)/Mesh.get_cell_volume(i));
+                    soln.add_u(i, delta_t* rk4.beta[rk] * residual_worker.get_u(i)/Mesh.get_cell_volume(i));
+                    soln.add_v(i, delta_t* rk4.beta[rk] * residual_worker.get_v(i)/Mesh.get_cell_volume(i));
 
-                    if( residual_worker.get_u(i) < 0  ){
-                        if( ! bcs.get_bc(i)){
-                                f2 = f2 + f3;
 
-                        }
-                    }
                 }
 
             }
@@ -835,6 +827,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
         if ( convergence_residual.max_error() < local_tolerance){
             if( mg == 0){
                 error_output.close();
+                tecplot_output solution(globals,Mesh,soln,bcs,2,time);
             }
             return ;
 
@@ -845,6 +838,7 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
     }
 
     error_output.close();
+    tecplot_output solution(globals,Mesh,soln,bcs,2,time);
 
 
 }

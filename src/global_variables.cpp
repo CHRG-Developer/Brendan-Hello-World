@@ -20,9 +20,16 @@ global_variables::~global_variables()
 void global_variables::initialise(domain_geometry domain){
     //tau = 0.5 + viscosity / dt/ gamma
     // viscosity = MA/root(3) /Re
+     std::ostringstream s;
     tau = 0.5 + mach_number * sqrt(3)/reynolds_number * domain.Y/domain.dt*pre_conditioned_gamma;
     knudsen_number = mach_number / reynolds_number;
+    s << "RE_" << reynolds_number << " N_CELLS_" << domain.Y <<
+                    " MA_" << mach_number << " dt_" << domain.dt
+                    << " DT_" << time_marching_step;
+    simulation_name = s.str();
+    boost::replace_all(simulation_name,".","_");
     output_file = create_output_directory();
+
 }
 
 void global_variables::update_coarse_tau(){
@@ -70,12 +77,13 @@ std::string global_variables::create_output_directory(){
     }
 
     //folder.replace(folder.begin(),folder.end(), ".",  "_");
+    boost::system::error_code ec;
     boost::replace_all(folder, "." , "_");
     output_file = output_file + folder;
 
     boost::filesystem::path dir(output_file);
     boost::filesystem::create_directories(dir);
-
+    output_file = output_file;
     return output_file;
 
 }
