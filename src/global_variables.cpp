@@ -17,14 +17,15 @@ global_variables::~global_variables()
     //dtor
 }
 
-void global_variables::initialise(domain_geometry domain){
+void global_variables::initialise(domain_geometry domain,initial_conditions initial_conds){
     //tau = 0.5 + viscosity / dt/ gamma
     // viscosity = MA/root(3) /Re
      std::ostringstream s;
-    tau = 0.5 + mach_number * sqrt(3)/reynolds_number * domain.Y/domain.dt*pre_conditioned_gamma;
-    knudsen_number = mach_number / reynolds_number;
+    tau = 0.5 + initial_conds.average_rho*max_velocity*3/reynolds_number *
+                domain.Y/domain.dt*pre_conditioned_gamma;
+    knudsen_number = max_velocity *sqrt(3) / reynolds_number;
     s << "RE_" << reynolds_number << " N_CELLS_" << domain.Y <<
-                    " MA_" << mach_number << " dt_" << domain.dt
+                    " MA_" << max_velocity *sqrt(3) << " dt_" << domain.dt
                     << " DT_" << time_marching_step;
     simulation_name = s.str();
     boost::replace_all(simulation_name,".","_");
@@ -43,7 +44,7 @@ void global_variables::update_fine_tau(){
 }
 
 void global_variables::update_tau( domain_geometry domain){
-     tau = 0.5 + mach_number * sqrt(3)/reynolds_number * ceil(domain.Y /domain.dt) *pre_conditioned_gamma;
+     tau = 0.5 + max_velocity/reynolds_number * ceil(domain.Y /domain.dt) *pre_conditioned_gamma;
 
 }
 void global_variables::magnify_time_step( ){

@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <math.h>
+#include <cmath>
 
 
 using namespace std;
@@ -63,45 +64,79 @@ void Solution::Initialise() {
 }
 
 void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradient_origin,
-    vector_var origin_magnitude, Mesh &Mesh){
+    vector_var origin_magnitude, Mesh &Mesh, global_variables &globals){
 
    vector_var displacement;
    vector_var rho_temp;
 
-   for( int t =0 ; t< Mesh.get_total_cells(); t++){
+   if (globals.testcase ==3){
+        double rho_0, rho_coeff, L,PI;
+        rho_0 = origin_magnitude.Magnitude();
+        rho_coeff = rho_0 * pow(globals.max_velocity,2)/4.0*3.0;
+        L = (Mesh.get_num_x()-2)*Mesh.get_dx();
+        PI = globals.PI;
+        for( int t =0 ; t< Mesh.get_total_cells(); t++){
+            rho[t] = rho_0 - rho_coeff* (cos( 4*PI*Mesh.get_centroid_x(t)/L )
+                                         +cos(4*PI*Mesh.get_centroid_y(t)/L));
 
-
-            displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
-            displacement.y = Mesh.get_centroid_y(t)- gradient_origin.y;
-            displacement.z = Mesh.get_centroid_z(t) - gradient_origin.z;
-
-            rho_temp = rho_temp.line_magnitude(origin_magnitude,_gradient,displacement);
-            rho[t] = rho_temp.Magnitude();
 
         }
-    displacement.add(rho_temp) ;
 
+
+   }else{
+
+       for( int t =0 ; t< Mesh.get_total_cells(); t++){
+
+
+                displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
+                displacement.y = Mesh.get_centroid_y(t)- gradient_origin.y;
+                displacement.z = Mesh.get_centroid_z(t) - gradient_origin.z;
+
+                rho_temp = rho_temp.line_magnitude(origin_magnitude,_gradient,displacement);
+                rho[t] = rho_temp.Magnitude();
+
+            }
+        displacement.add(rho_temp) ;
+    }
    }
 
 void Solution::assign_velocity_gradient( vector_var _gradient, vector_var gradient_origin,
-    vector_var origin_magnitude, Mesh &Mesh){
+    vector_var origin_magnitude, Mesh &Mesh, global_variables &globals){
 
    vector_var displacement;
    vector_var vel_temp;
 
-   for( int t =0 ; t< Mesh.get_total_cells(); t++){
+    if (globals.testcase ==3){
+        double U_0,  L,PI;
+        U_0 = globals.max_velocity;
 
+        L = (Mesh.get_num_x()-2)*Mesh.get_dx();
+        PI = globals.PI;
+        for( int t =0 ; t< Mesh.get_total_cells(); t++){
+            u[t] = -U_0* (  cos( 2*PI*Mesh.get_centroid_x(t)/L )
+                                         * sin(2*PI*Mesh.get_centroid_y(t)/L));
 
-            displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
-            displacement.y = Mesh.get_centroid_y(t)- gradient_origin.y;
-            displacement.z = Mesh.get_centroid_z(t) - gradient_origin.z;
-
-            vel_temp = vel_temp.line_magnitude(origin_magnitude,_gradient,displacement);
-            u[t] = vel_temp.x + vel_temp.y +vel_temp.z;
+            v[t] = U_0* (  sin( 2*PI*Mesh.get_centroid_x(t)/L )
+                                         * cos(2*PI*Mesh.get_centroid_y(t)/L));
 
         }
-    displacement.add(vel_temp) ;
 
+
+   }else{
+
+       for( int t =0 ; t< Mesh.get_total_cells(); t++){
+
+
+                displacement.x = Mesh.get_centroid_x(t)-gradient_origin.x;
+                displacement.y = Mesh.get_centroid_y(t)- gradient_origin.y;
+                displacement.z = Mesh.get_centroid_z(t) - gradient_origin.z;
+
+                vel_temp = vel_temp.line_magnitude(origin_magnitude,_gradient,displacement);
+                u[t] = vel_temp.x + vel_temp.y +vel_temp.z;
+
+            }
+        displacement.add(vel_temp) ;
+   }
    }
 
 void Solution::update ( double _rho, double _u, double _v, double _w , int i){
@@ -124,7 +159,7 @@ void Solution::output (std::string output_location, global_variables &globals,
     rho_txt.open(rho_file.c_str(), ios::out);
     u_txt.open(u_file.c_str(), ios::out);
     v_txt.open(v_file.c_str(), ios::out);
-    double factor = globals.mach_number * geometry.cs;
+
 
     for( int i = 0; i < total_nodes; i++){
 
@@ -157,12 +192,13 @@ void Solution::clone( Solution &soln_a){
 void Solution::post_process(double gamma, Mesh &mesh, global_variables &globals,
                             initial_conditions &initials){
 
+
     if( globals.testcase == 1){
 
 
         for (int i =0; i< total_nodes; i++){
             rho[i] = rho[i] /gamma;
-            u_exact[i] = mesh.get_centroid_y(i) *globals.mach_number /sqrt(3) / mesh.get_Y() ;
+            u_exact[i] = mesh.get_centroid_y(i) *globals.max_velocity  / mesh.get_Y() ;
             error[i] = (u[i] - u_exact[i]) *100;
           }
     }else if( globals.testcase == 2){

@@ -73,9 +73,9 @@ void program::run(char* xml_input){
     }else{
 
         soln.assign_pressure_gradient(initial_conds.rho_gradient,initial_conds.origin_loc,
-                                initial_conds.rho_origin_mag,mesh);
+                                initial_conds.rho_origin_mag,mesh,globals);
         soln.assign_velocity_gradient(initial_conds.vel_gradient,initial_conds.origin_loc,
-                                initial_conds.vel_origin_mag,mesh);
+                                initial_conds.vel_origin_mag,mesh,globals);
         soln.set_average_rho(initial_conds.average_rho);
 
 
@@ -85,7 +85,7 @@ void program::run(char* xml_input){
     Solver solve;
     tecplot_output grid(globals,mesh,soln,bc,1,0.0);
 
-    solve.Uniform_Mesh_Solver_Clean(mesh,soln,bc,source_term,globals,domain,initial_conds,bcs,
+    solve.Uniform_Mesh_Solver_Clean_MK2(mesh,soln,bc,source_term,globals,domain,initial_conds,bcs,
                               mg,residual,fmg);
 
     soln.post_process(globals.pre_conditioned_gamma,mesh, globals,initial_conds);
@@ -299,7 +299,7 @@ void program::output_globals (global_variables globals,double duration){
     globals_txt << "File:" << filename.c_str()  << endl;
 
     globals_txt << "Tau:"  << globals.tau << endl;
-    globals_txt << "Mach" << globals.mach_number << endl;
+    globals_txt << "Mach" << globals.max_velocity *sqrt(3)<< endl;
     globals_txt << "Reynolds" << globals.reynolds_number << endl;
 
     std::string reynolds_text;
@@ -354,9 +354,9 @@ void program::fmg_cycle(int &fmg,Solution &residual , Solution &soln,
 
         //apply initial conditions at coarsest level
         coarse_soln.assign_pressure_gradient(initial_conds.rho_gradient,initial_conds.origin_loc,
-                                initial_conds.rho_origin_mag,coarse_mesh);
+                                initial_conds.rho_origin_mag,coarse_mesh,globals);
         coarse_soln.assign_velocity_gradient(initial_conds.vel_gradient,initial_conds.origin_loc,
-                                initial_conds.vel_origin_mag,coarse_mesh);
+                                initial_conds.vel_origin_mag,coarse_mesh,globals);
         coarse_soln.set_average_rho(initial_conds.average_rho);
 
     }

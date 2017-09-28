@@ -113,6 +113,8 @@ void Solver::Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Conditions
     double u_magnitude;
     double mom_flux_const;
     double f1,f2,f3;
+
+    double uu2, vv2, u2v2,uv;
     std::clock_t start;
     std::ofstream error_output ;
     std::string output_dir;
@@ -536,6 +538,55 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
 
                         //get cell ineterface macro variables
 
+                        // If boundary condition, implement direct calc of flux
+//                        if(bcs.get_bc(i) ){
+//
+//                            if (j==2){
+//                                cell_flux.momentum_x = interface_area*(temp_soln.get_rho(neighbour)/ 3.0
+//                                - (globals.tau-0.5)/3.0 * delta_u.x);
+//                                cell_flux.momentum_y =
+//                                interface_area*(- (globals.tau-0.5)/3.0 * delta_v.x);
+//
+//                            }else{
+//                                cell_flux.momentum_x =
+//                                interface_area*(- (globals.tau-0.5)/3.0 * delta_u.y);
+//                                cell_flux.momentum_y = interface_area*(temp_soln.get_rho(neighbour)/ 3.0
+//                                - (globals.tau-0.5)/3.0 * delta_v.y);
+//
+//                            }
+//                             // add x momentum
+//                            residual_worker.add_u(i,-cell_flux.momentum_x);
+//                            residual_worker.add_u(neighbour, cell_flux.momentum_x);
+//
+//                            // add y momentum
+//                            residual_worker.add_v(i,-cell_flux.momentum_y);
+//                            residual_worker.add_v(neighbour, +cell_flux.momentum_y);
+//
+//
+//                        }else if(bcs.get_bc(neighbour)){
+//                            if (j==2){
+//                            cell_flux.momentum_x = interface_area*(temp_soln.get_rho(i)/ 3.0
+//                                - (globals.tau-0.5)/3.0 * delta_u.x);
+//                                cell_flux.momentum_y =
+//                                interface_area*(- (globals.tau-0.5)/3.0 * delta_v.x);
+//
+//                            }else{
+//                                cell_flux.momentum_x =
+//                                interface_area*(- (globals.tau-0.5)/3.0 * delta_u.y);
+//                                cell_flux.momentum_y = interface_area*(temp_soln.get_rho(i)/ 3.0
+//                                - (globals.tau-0.5)/3.0 * delta_v.y);
+//
+//                            }
+//                             // add x momentum
+//                            residual_worker.add_u(i,-cell_flux.momentum_x);
+//                            residual_worker.add_u(neighbour, cell_flux.momentum_x);
+//
+//                            // add y momentum
+//                            residual_worker.add_v(i,-cell_flux.momentum_y);
+//                            residual_worker.add_v(neighbour, cell_flux.momentum_y);
+//
+//                        }else{
+
                         //unrolled to reduce arithmetic operations
                         if( j == 2){
                             rho_avg = delta_rho.x * interface_area/2 +temp_soln.get_rho(i);
@@ -750,10 +801,10 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
                         // add y momentum
                         residual_worker.add_v(i,cell_flux.momentum_y);
                         residual_worker.add_v(neighbour, -cell_flux.momentum_y);
-
+                        }
 
                     }
-                    }
+
             }
 
 
@@ -842,6 +893,483 @@ void Solver::Uniform_Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Co
 
 
 }
+
+
+
+void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundary_Conditions &bcs,
+                                   external_forces &source,global_variables &globals, domain_geometry &domain,
+                                   initial_conditions &init_conds, quad_bcs_plus &quad_bcs_orig, int mg,
+                                   Solution &residual, int fmg)
+{
+
+    ///Declarations
+    RungeKutta rk4;
+    Solution temp_soln(Mesh.get_total_cells()); // intermediate solution for RK
+    Solution soln_t0(Mesh.get_total_cells()); // solution at t0 in RK cycle
+    Solution soln_t1(Mesh.get_total_cells());
+    Solution residual_worker(Mesh.get_total_cells()); // stores residuals
+    Solution rj2(Mesh.get_total_cells()); // stores residuals
+    Solution rj3(Mesh.get_total_cells()); // stores residuals
+    Solution vortex_error(Mesh.get_total_cells());
+    Solution real_error (Mesh.get_total_cells());
+    flux_var RK;
+    double RK_delta_t,RK_weight;
+    double delta_t = globals.time_marching_step;
+    double duration;
+    double local_tolerance;
+    double rho_interface;
+    double interface_area;
+    double rho_lattice ;
+    double feq_lattice [9], feq_int_debug[9], fneq_int_debug[9];
+    double u_lattice_deb[9], v_lattice[9], rho_lattice_deb[9];
+    double rho_avg, u_avg,v_avg,w_avg;
+    double lattice_weight [9], feq_interface[9],fneq_interface [9];
+    double time;
+    double u_bc, rho_bc,  v_bc;
+    double u_magnitude;
+    double mom_flux_const;
+    double f1,f2,f3;
+    double uu2, vv2,u2v2,uv,uu,vv;
+    double visc;
+    double rho_rms_err, u_rms_err, v_rms_err;
+    std::clock_t start;
+    std::ofstream error_output ;
+    std::string output_dir;
+    vector_var cell_1, cell_2, interface_node, lattice_node, delta_u, delta_v ,delta_w,delta_rho;
+    vector_var relative_interface;
+    vector_var  u_lattice,  rho_u_interface , u_interface;
+
+    vector_var cell_normal;
+    vector_var flux_e_alpha [9];
+    std::vector<vector_var> e_alpha;
+
+    // vector_var flux_e_alpha;
+    residuals convergence_residual;
+    flux_var x_flux , y_flux;
+    flux_var cell_flux ;
+    flux_var *mg_forcing_term;
+    flux_var debug [4] ,debug_flux[4],arti_debug [4];
+    flux_var dbug [4];
+    flux_var int_debug[4];
+
+    bc_var bc;
+
+    int neighbour;
+    int bc_node;
+    int timesteps;
+    //calculate timesteps
+
+
+
+
+    ///Initialisations
+
+    dt = 1.0; // timestepping for streaming // non-dim equals 1
+    c = 1; // assume lattice spacing is equal to streaming timestep
+    cs = c/sqrt(3);
+    visc = (globals.tau -0.5)/3;
+
+    temp_soln.clone(soln);
+    soln_t1.clone(soln);
+    local_tolerance = globals.tolerance;
+    timesteps = ceil( globals.simulation_length/delta_t);
+    output_dir = globals.output_file +"/error.txt";
+   // error_output.open("/home/brendan/Dropbox/PhD/Test Cases/Couette Flow/error.txt", ios::out);
+    error_output.open(output_dir.c_str(), ios::out);
+    populate_e_alpha(e_alpha,lattice_weight,c,globals.PI,9);
+    time =0;
+
+    // loop in time
+    for (int t= 0; t < timesteps; t++){
+                                       // soln is the solution at the start of every
+                                // RK step.(rk = n) Temp_soln holds the values at end of
+                                // step.(rk = n+1)
+        soln_t0.clone(soln_t1);    // soln_t0 holds macro variable solution at start of time step
+        temp_soln.clone(soln);  //temp holds rho,u,v                      // t= 0, rk = 0
+
+        convergence_residual.reset();
+
+         if(globals.testcase == 3){
+            double rho_coeff, vel_exp, rho_exp,rho_0,PI,U_0,L,kx,td,N;
+
+            rho_0 = soln.get_average_rho();
+            U_0 = globals.max_velocity;
+            PI = globals.PI;
+            L = (Mesh.get_num_x()-2)*Mesh.get_dx();
+            N = (Mesh.get_num_x()-2);
+            rho_coeff = rho_0 * pow(U_0,2) /4.0*3.0;
+               time = t;
+            kx = 2*PI/L;
+
+            td =1/(visc*( kx*kx +kx*kx) );
+            rho_exp = exp( -2*time/td);
+            vel_exp = exp( -time/td);
+
+            rho_rms_err = 0;
+            u_rms_err = 0;
+            v_rms_err = 0;
+            for( int i=0; i < Mesh.get_total_cells(); i++){
+
+                if( ! bcs.get_bc(i)){
+                    vortex_error.set_rho(i,rho_0 - (rho_coeff* (cos( 4*PI*Mesh.get_centroid_x(i)/L )
+                                         +cos(4*PI*Mesh.get_centroid_y(i)/L)))*rho_exp);
+
+
+                    vortex_error.set_u(i,-U_0* (  cos( 2*PI*Mesh.get_centroid_x(i)/L )
+                                         * sin(2*PI*Mesh.get_centroid_y(i)/L))*vel_exp);
+
+                    vortex_error.set_v(i,U_0* (  sin( 2*PI*Mesh.get_centroid_x(i)/L )
+                                         * cos(2*PI*Mesh.get_centroid_y(i)/L))*vel_exp);
+
+
+                    real_error.set_rho(i, temp_soln.get_rho(i) - vortex_error.get_rho(i));
+                    real_error.set_u(i, temp_soln.get_u(i) - vortex_error.get_u(i));
+                    real_error.set_v(i, temp_soln.get_v(i) - vortex_error.get_v(i));
+
+                    rho_rms_err = rho_rms_err +  pow(real_error.get_rho(i)/ vortex_error.get_rho(i),2);
+                    u_rms_err = u_rms_err +  pow(real_error.get_u(i)/ U_0,2);
+                    v_rms_err = v_rms_err +  pow(real_error.get_v(i)/ U_0,2);
+                }
+            }
+
+            rho_rms_err = sqrt( rho_rms_err/N/N);
+            u_rms_err = sqrt( u_rms_err/N/N);
+            v_rms_err = sqrt( v_rms_err/N/N);
+
+            tecplot_output solution(globals,Mesh,real_error,bcs,2,time);
+        }
+
+
+            for( int rk = 0; rk < rk4.timesteps; rk++){
+
+
+
+
+            //update temp_soln boundary conditions
+             temp_soln.update_bcs(bcs,Mesh,domain);
+
+             residual_worker.Initialise(); //set to zeros
+             // loop through each node
+              for (int i=0 ; i < Mesh.get_total_cells() ; i ++) {
+
+
+                    // skip if a boundary node
+                    if( bcs.get_bc_include(i)){
+
+                    // volume initialisers
+                    interface_area = 0.0;
+
+
+                    cell_1.x = Mesh.get_centroid_x(i);
+                    cell_1.y = Mesh.get_centroid_y(i);
+                    cell_1.z = Mesh.get_centroid_z(i);
+                    // add in reset function
+                    cell_flux.P =0.0;
+                    cell_flux.momentum_x =0.0;
+                    cell_flux.momentum_y = 0.0;
+                    cell_flux.momentum_z = 0.0;
+
+                    for (int j= 2; j <4; j++ ){
+                        bc.present = false;
+                        cell_interface_variables( j, i,interface_node, neighbour,
+                                                 interface_area,cell_normal, bcs, bc, Mesh,
+                                                 cell_2);
+                        if(bcs.get_bc(i) && bcs.get_bc(neighbour)){
+
+
+                        }else{
+
+                        cell_interface_initialiser( rho_interface, rho_u_interface, x_flux,y_flux);
+                        // use soln for neighbour values as these refelct real boundary conditions
+                        // temp_soln should update continuously through RK stepping
+
+
+                        // get gradient
+
+                        delta_rho.Get_Gradient(temp_soln.get_rho(i), temp_soln.get_rho(neighbour),cell_1,cell_2 );
+                        delta_u.Get_Gradient(temp_soln.get_u(i), temp_soln.get_u(neighbour),cell_1,cell_2 );
+                        delta_v.Get_Gradient(temp_soln.get_v(i), temp_soln.get_v(neighbour),cell_1,cell_2 );
+
+
+                        //unrolled to reduce arithmetic operations
+                        if( j == 2){
+                            rho_avg = delta_rho.x * interface_area/2 +temp_soln.get_rho(i);
+                            u_avg = delta_u.x * interface_area/2 +temp_soln.get_u(i);
+                            v_avg = delta_v.x * interface_area/2 +temp_soln.get_v(i);
+                        }else{
+                            rho_avg = delta_rho.y * interface_area/2 +temp_soln.get_rho(i);
+                            u_avg = delta_u.y * interface_area/2 +temp_soln.get_u(i);
+                            v_avg = delta_v.y * interface_area/2 +temp_soln.get_v(i);
+                        }
+
+
+
+                        // using D2Q9 , loop through each lattice node
+                        for (int k =0 ; k<9; k++){
+                            /// GET change in magnitude across the lattice
+
+                             if( j ==2){
+                                rho_lattice = rho_avg + delta_rho.x * -e_alpha[k].x;
+                                u_lattice.x  = u_avg + delta_u.x * -e_alpha[k].x;
+                                u_lattice.y = v_avg + delta_v.x * -e_alpha[k].x;
+
+                             }else{
+                                rho_lattice = rho_avg + delta_rho.y * -e_alpha[k].y;
+                                u_lattice.x  = u_avg + delta_u.y * -e_alpha[k].y;
+                                u_lattice.y = v_avg + delta_v.y * -e_alpha[k].y;
+
+                             }
+
+                            //switch
+
+                            uu2 = u_lattice.x * u_lattice.x;
+                            vv2 = u_lattice.y * u_lattice.y;
+                            u2v2 = (uu2 + vv2) * 3.0;
+                            uv = u_lattice.x*u_lattice.y*9.0;
+                            uu =u_lattice.x;
+                            vv = u_lattice.y;
+                            switch(k) {
+
+                            case 0:
+                                 feq_lattice[k] = lattice_weight[k] * rho_lattice*(1.0
+
+                                -0.5*u2v2)  ;
+                                break;
+
+                            case 1:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0+3.0*uu+3.0*uu2-1.5*vv2);
+                                break;
+                            case 2:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0+3.0*vv+3.0*vv2-1.5*uu2);
+                                break;
+                            case 3:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0-3.0*uu+3.0*uu2-1.5*vv2)  ;
+                                break;
+                            case 4:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0-3.0*vv+3.0*vv2-1.5*uu2);
+                                break;
+                            case 5:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0+3.0*uu+3.0*vv+u2v2+uv);
+                                break;
+                           case 6:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0-3.0*uu+3.0*vv+u2v2-uv);
+                                break;
+                            case 7:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0-3.0*uu-3.0*vv+u2v2+uv);
+                                break;
+                            case 8:
+                                feq_lattice[k] = lattice_weight[k] * rho_lattice*
+                                (1.0+3.0*uu-3.0*vv+u2v2-uv);
+                                break;
+                            }
+
+
+                            //rho_u_interface.z = rho_u_interface.z + feq_lattice[k] * e_alpha[k].z;
+
+                        }
+
+                        // get macroscopic values at cell interface
+                         rho_interface = feq_lattice[0] + feq_lattice[1] + feq_lattice[2]+ feq_lattice[3]
+                         +feq_lattice[4] + feq_lattice[5]+ feq_lattice[6]+feq_lattice[7]+ feq_lattice[8];
+
+                        u_interface.x = 1/rho_interface * ( feq_lattice[1]- feq_lattice[3]
+                         + feq_lattice[5]- feq_lattice[6]-feq_lattice[7]+ feq_lattice[8]);
+                        u_interface.y = 1/rho_interface * ( feq_lattice[2]- feq_lattice[4]
+                         + feq_lattice[5]+ feq_lattice[6]-feq_lattice[7]- feq_lattice[8]);;
+
+
+                        // get feq(r,t)
+                        uu2 = u_interface.x * u_interface.x;
+                        vv2 = u_interface.y * u_interface.y;
+                        u2v2 = 3.0*( uu2 +vv2);
+                        uu =u_interface.x;
+                        vv = u_interface.y;
+                        uv = uu*vv*9.0;
+
+
+                        feq_interface[5] = lattice_weight[5] * rho_interface*
+                            (1.0+3.0*uu+3.0*vv+u2v2+uv);
+                        feq_interface[5] = feq_interface[5]
+                            - visc * (feq_interface[5] - feq_lattice[5]);
+
+                        feq_interface[6] = lattice_weight[6] * rho_interface*
+                            (1.0-3.0*uu+3.0*vv+u2v2-uv);
+                        feq_interface[6] = feq_interface[6]
+                            -visc * (feq_interface[6] - feq_lattice[6]);
+
+                        feq_interface[7] = lattice_weight[7] * rho_interface*
+                            (1.0-3.0*uu-3.0*vv+u2v2+uv);
+                        feq_interface[7] = feq_interface[7]
+                            - visc * (feq_interface[7] - feq_lattice[7]);
+
+                        feq_interface[8] = lattice_weight[8] * rho_interface*
+                            (1.0+3.0*uu-3.0*vv+u2v2-uv);
+                        feq_interface[8] = feq_interface[8]
+                            - visc * (feq_interface[8] - feq_lattice[8]);
+
+                        if ( j == 2){
+                            feq_interface[1] = lattice_weight[1] * rho_interface*
+                                (1.0+3.0*uu+3.0*uu2-1.5*vv2);
+                            feq_interface[1] = feq_interface[1]
+                                - visc * (feq_interface[1] - feq_lattice[1]);
+                            feq_interface[3] = lattice_weight[3] * rho_interface*
+                                (1.0-3.0*uu+3.0*uu2-1.5*vv2);
+                            feq_interface[3] = feq_interface[3]
+                                - visc * (feq_interface[3] - feq_lattice[3]);
+
+                            x_flux.P = feq_interface[1] - feq_interface[3]+ feq_interface[5] - feq_interface[6]
+                            -feq_interface[7] +feq_interface[8];
+
+                            x_flux.momentum_x  =
+                                feq_interface[1] + feq_interface[3] +feq_interface[5] + feq_interface[6] +feq_interface[7] + feq_interface[8];
+                            x_flux.momentum_y  =
+                                feq_interface[5] -feq_interface[6] +feq_interface[7]- feq_interface[8];
+
+                            cell_flux.P =  interface_area *x_flux.P ;
+                            cell_flux.momentum_x = interface_area *x_flux.momentum_x ;
+                            cell_flux.momentum_y = interface_area * x_flux.momentum_y ;
+
+                        }else{
+                            feq_interface[2] = lattice_weight[2] * rho_interface*
+                            (1.0+3.0*vv+3.0*vv2-1.5*uu2);
+                            feq_interface[2] = feq_interface[2]
+                                - visc * (feq_interface[2] - feq_lattice[2]);
+                            feq_interface[4] = lattice_weight[4] * rho_interface*
+                            (1.0-3.0*vv+3.0*vv2-1.5*uu2);
+                            feq_interface[4] = feq_interface[4]
+                                - visc * (feq_interface[4] - feq_lattice[4]);
+
+                            y_flux.P = feq_interface[2] - feq_interface[4]+ feq_interface[5] + feq_interface[6]
+                                -feq_interface[7] -feq_interface[8];
+                            y_flux.momentum_x  =
+                                feq_interface[5] -feq_interface[6] +feq_interface[7]- feq_interface[8];
+                            y_flux.momentum_y = feq_interface[2] + feq_interface[4]+ feq_interface[5] + feq_interface[6]
+                                +feq_interface[7] +feq_interface[8];
+
+                            cell_flux.P =  interface_area *y_flux.P ;
+                            cell_flux.momentum_x = interface_area *y_flux.momentum_x ;
+                            cell_flux.momentum_y = interface_area * y_flux.momentum_y ;
+                        }
+
+
+                        // add density flux to current cell and neighbouring cell
+                        residual_worker.add_rho(i,-cell_flux.P);
+                        residual_worker.add_rho(neighbour, +cell_flux.P);
+
+                        // add x momentum
+                        residual_worker.add_u(i,-cell_flux.momentum_x);
+                        residual_worker.add_u(neighbour, +cell_flux.momentum_x);
+
+                        // add y momentum
+                        residual_worker.add_v(i,-cell_flux.momentum_y);
+                        residual_worker.add_v(neighbour, cell_flux.momentum_y);
+                        }
+                    }
+                }
+
+            }
+
+
+          //  residual_worker.remove_double_errors();
+
+            //update RK values
+            for( int i=0; i < Mesh.get_total_cells(); i++){
+
+                if( ! bcs.get_bc(i)){
+
+                    // update intermediate macroscopic variables for next Runge Kutta Time Step
+                    f1 = soln_t0.get_rho(i) + residual_worker.get_rho(i)*delta_t *rk4.alpha[rk+1]/Mesh.get_cell_volume(i) ;
+                    f2 = soln_t0.get_u(i) + residual_worker.get_u(i) *delta_t*rk4.alpha[rk +1]/Mesh.get_cell_volume(i);
+                    f3 = soln_t0.get_v(i) + residual_worker.get_v(i) *delta_t*rk4.alpha[rk+1]/Mesh.get_cell_volume(i);
+
+                      // change momentum to velocity
+                    f2 = f2/f1;
+                    f3 =f3/f1;
+
+                    temp_soln.update(f1,f2,f3,0.0, i);
+
+                    //add contributions to
+                    soln_t1.add_rho(i, delta_t* rk4.beta[rk] * residual_worker.get_rho(i)/Mesh.get_cell_volume(i));
+                    soln_t1.add_u(i, delta_t* rk4.beta[rk] * residual_worker.get_u(i)/Mesh.get_cell_volume(i));
+                    soln_t1.add_v(i, delta_t* rk4.beta[rk] * residual_worker.get_v(i)/Mesh.get_cell_volume(i));
+
+                    f1 = soln_t1.get_rho(i);
+                    f2 = soln_t1.get_u(i)/soln_t1.get_rho(i);
+                    f3 = soln_t1.get_v(i)/soln_t1.get_rho(i);
+
+                    soln.update(f1,f2,f3,0.0, i);
+
+                }
+
+            }
+
+        }
+
+
+        for( int i = 0; i < Mesh.get_total_cells(); i++){
+                if( ! bcs.get_bc(i)){
+                    convergence_residual.add_ansys_l2_norm_residuals(soln_t1.get_rho(i),soln_t0.get_rho(i)
+                                    ,soln_t1.get_u(i),soln_t0.get_u(i),
+                                    soln_t1.get_v(i),soln_t0.get_v(i),delta_t);
+                       //error checking
+                    if (std::isnan(temp_soln.get_rho(i)) || std::isnan(temp_soln.get_u(i))) {
+                                    if( mg == 0){
+                                        error_output.close();
+                                    }
+                                    return;
+                            }
+
+                }
+        }
+
+        convergence_residual.ansys_5_iter_rms(t);
+
+        if( mg == 0 && t%1000 == 1){
+            time = t*delta_t;
+            error_output << t << ", "  << convergence_residual.max_error()   << ", " <<
+            convergence_residual.rho_rms << ", " << convergence_residual.u_rms << ", " <<
+            convergence_residual.v_rms << " , FMG cycle: " << fmg << endl;
+            cout << "time t=" << time  << " error e =" << convergence_residual.max_error() << std::endl;
+
+            tecplot_output solution(globals,Mesh,soln,bcs,2,time);
+
+        }
+
+
+
+
+
+
+
+
+
+
+        if ( convergence_residual.max_error() < local_tolerance){
+            if( mg == 0){
+                error_output.close();
+                tecplot_output solution(globals,Mesh,real_error,bcs,2,time);
+            }
+            return ;
+
+        }
+
+
+
+    }
+
+    error_output.close();
+    tecplot_output solution(globals,Mesh,real_error,bcs,2,time);
+
+
+}
+
 
 
 void Solver::Mesh_Solver( Mesh &Mesh , Solution &soln, Boundary_Conditions &bcs,

@@ -32,8 +32,8 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
     }else{
         output_location = globals.output_file + "/" + tt.str() +".plt";
-        valueLocation = new int[5];
-        for(int i = 0; i < 5;i++){
+        valueLocation = new int[6];
+        for(int i = 0; i < 6;i++){
                valueLocation[i] = 0;
         }
         strandID  = 1;
@@ -43,7 +43,7 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
    //enum fileType_e { FULL = 0, GRID = 1, SOLUTION = 2 };
 
-     float *nodx, *nody, *z, *p,*u, *v,*y ,*x, *u_err, *u_exact;
+     float *nodx, *nody, *z, *p,*u, *v,*y ,*x, *u_err, *u_exact ,*w;
     int *connectivity;
     double solTime;
     INTEGER4 debug, i, j, k, dIsDouble, vIsDouble, zoneType,  parentZn, isBlock;
@@ -97,7 +97,7 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
      }else{
      i = TECINI142((char*) "Couette Flow" ,
-                  (char*)"p u v x y ",
+                  (char*)"p u v x y w ",
                   (char*) output_location.c_str(),
                   (char*) ".",
                   &fileFormat,
@@ -154,14 +154,16 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
          p  = (float*)malloc(nCells * sizeof(float));
         u = (float*)malloc(nCells * sizeof(float));
         v = (float*)malloc(nCells * sizeof(float));
+        w = (float*)malloc(nCells * sizeof(float));
         y = (float*)malloc(nCells * sizeof(float));
         x = (float*)malloc(nCells * sizeof(float));
         t=0;
         for (i = 0; i < Mesh.get_total_cells(); ++i){
         if( bcs.get_bc(i) == false){
             p[t] = (float) Soln.get_rho(i);
-            u[t] = (float) Soln.get_u(i)/globals.mach_number *sqrt(3);
-            v[t] = (float) Soln.get_v(i)/globals.mach_number *sqrt(3);
+            u[t] = (float) Soln.get_u(i)/globals.max_velocity;
+            v[t] = (float) Soln.get_v(i)/globals.max_velocity;
+            w[t] = (float) 0.0;
             x[t] = (float) Mesh.get_centroid_x(i)/Mesh.get_X();
             y[t] = (float) Mesh.get_centroid_y(i)/Mesh.get_Y();
             t++;
@@ -225,11 +227,13 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
         i = TECDAT142(&nCells, v, &dIsDouble);
         i = TECDAT142(&nCells, x, &dIsDouble);
         i = TECDAT142(&nCells, y, &dIsDouble);
+        i = TECDAT142(&nCells, w, &dIsDouble);
         free(p);
         free(u);
         free(v);
         free(x);
         free(y);
+        free(w);
 
 
    }

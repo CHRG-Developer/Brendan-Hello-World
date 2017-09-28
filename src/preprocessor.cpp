@@ -34,7 +34,7 @@ void preprocessor::initialise_program_variables(char* xmltest, global_variables 
 
     mach_number_factor(globals,bcs,initial_conds,geometry);
 
-    globals.initialise(geometry);
+    globals.initialise(geometry,initial_conds);
 
 
 }
@@ -42,7 +42,7 @@ void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &
         initial_conditions &initials,domain_geometry &geometry ){
 
 
-    double factor = globals.mach_number / sqrt(3) ;
+    double factor = globals.max_velocity ;
 
     bcs.e_u = bcs.e_u * factor;
     bcs.w_u = bcs.w_u * factor;
@@ -242,7 +242,7 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.simulation_length = get_xml_double(parent, "simulation_length", xmlDoc);
     globals.time_marching_step = get_xml_double(parent, "time_marching_step", xmlDoc);
     globals.reynolds_number = get_xml_double(parent, "reynolds_no", xmlDoc);
-    globals.mach_number = get_xml_double(parent, "mach_no", xmlDoc);
+    globals.max_velocity = get_xml_double(parent, "mach_no", xmlDoc);
     globals.simulation_name = get_xml_text(parent,"simulation_name",xmlDoc);
     globals.output_file_dir = get_xml_text(parent, "output_directory", xmlDoc);
     globals.max_mg_levels = get_xml_double(parent,"max_multi_grid_levels",xmlDoc);

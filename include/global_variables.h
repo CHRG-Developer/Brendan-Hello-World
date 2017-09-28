@@ -3,13 +3,14 @@
 #include <string>
 #include "domain_geometry.h"
 #include <math.h>
+#include "initial_conditions.h"
 
 class global_variables
 {
     public:
         global_variables();
         virtual ~global_variables();
-        void initialise(domain_geometry domain);
+        void initialise(domain_geometry domain, initial_conditions inits);
         void update_tau(domain_geometry domain);
         void update_fine_tau();
         void update_coarse_tau();
@@ -35,12 +36,13 @@ class global_variables
         double simulation_length = 2000; // cut off time in seconds
         double time_marching_step;
         double reynolds_number;
-        double mach_number;
+        double max_velocity;
         double knudsen_number;
         double tau;
         double arti_disp_kappa_2; // artiifical dissipation constant 2nd order
         double arti_disp_kappa_4;
         double martinelli;
+        double ref_rho;
 
         int max_mg_levels ; // number of coarse grids to enter
         int fmg_levels;

@@ -29,6 +29,10 @@ class Solver
                                    external_forces &source,global_variables &globals, domain_geometry &domain,
                                    initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
                                    Solution &residual,int fmg);
+        void Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
+                                   external_forces &source,global_variables &globals, domain_geometry &domain,
+                                   initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
+                                   Solution &residual,int fmg);
         void multi_grid_agglomoration( Solution &residuals , Solution &soln,
                                          int cycle_no, Mesh &fine_mesh,  quad_bcs_plus &bcs,
                                          initial_conditions &init_conds, int &mg, global_variables globals,
