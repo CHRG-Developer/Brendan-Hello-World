@@ -54,6 +54,8 @@ class Mesh
         int get_w_node( int i) {return w_node[i];};
         double get_cell_volume( int i) {return cell_volume[i];};
 
+        void get_centroid(int i, vector_var &cell) ;
+
         domain_geometry create_coarse_mesh_domain( );
 
 

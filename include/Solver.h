@@ -55,6 +55,11 @@ class Solver
 //        };
         vector_var get_e_alpha(int k, double &lattice_weight, double c,double PI );
 
+        void get_cell_gradients(Mesh &Mesh, int i, int neighbour, int j, Solution &temp_soln,
+                                vector_var &delta_rho, vector_var &delta_rho1,
+                                vector_var &delta_u, vector_var &delta1_u1,
+                                vector_var &delta_v, vector_var &delta_v1,
+                                Boundary_Conditions &bcs);
 
 
         struct bc_var{
@@ -68,10 +73,8 @@ class Solver
             int periodic_node;
 
         };
-        void cell_interface_variables( int j,int i ,vector_var &interface_node, int &neighbour,
-                                      double &interface_area,vector_var &cell_normal,
-                                      Boundary_Conditions &boundary_conditions,  bc_var &bc
-                                      ,Mesh &Mesh, vector_var &cell2) ;
+
+
 
         void truncate_flux(flux_var &flux);
         void truncate_flux(double &val);
@@ -81,6 +84,9 @@ class Solver
                         double cs, double rho_lattice);
         double feq_calc_incomp(double weight, vector_var e_alpha, vector_var u_lattice, double u_magnitude,
                         double cs, double rho_lattice, double rho_0,int k);
+        void cell_interface_variables( int j, int i, vector_var &interface_node, int &neighbour, double &interface_area,
+                              vector_var &cell_normal, Boundary_Conditions &boundary_conditions,  bc_var &bc,
+                              Mesh &Mesh, vector_var &cell_2);
 };
 
 #endif // SOLVER_H

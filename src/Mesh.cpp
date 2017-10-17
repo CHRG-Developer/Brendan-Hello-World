@@ -320,6 +320,14 @@ void Mesh::create_standard_mesh(){
 
 }
 
+void Mesh::get_centroid(int i, vector_var &cell){
+
+    cell.x = centroid_x[i];
+    cell.y = centroid_y[i];
+    cell.z = centroid_z[i];
+
+}
+
 void Mesh::create_cosine_mesh(double PI,double dt){
     int counter =0;
     double delta_y ,delta_x , y2,y1,x2,x1,cx,cy;
