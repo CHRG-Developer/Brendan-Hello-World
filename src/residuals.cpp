@@ -82,11 +82,12 @@ double residuals::max_error (){
 
 }
 
-void residuals::add_ansys_l2_norm_residuals(double f1, double rho, double f2, double u, double f3, double v,double delta_t){
+void residuals::add_ansys_l2_norm_residuals(double f1, double rho, double f2, double u, double f3,
+ double v,double factor){
 
-    rho_rms_num = rho_rms_num + pow( (f1 -rho)/delta_t ,2.0 );
-    u_rms_num = u_rms_num + pow( (f2 - u)/delta_t ,2.0 );
-    v_rms_num = v_rms_num + pow( (f3 - v)/delta_t ,2.0 ) ;
+    rho_rms_num = rho_rms_num + pow( (f1 -rho)/factor ,2.0 );
+    u_rms_num = u_rms_num + pow( (f2 - u)/factor ,2.0 );
+    v_rms_num = v_rms_num + pow( (f3 - v)/factor ,2.0 ) ;
 
 
 };

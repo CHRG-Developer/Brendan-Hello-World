@@ -95,6 +95,8 @@ void Solver::Mesh_Solver_Clean( Mesh &Mesh , Solution &soln, Boundary_Conditions
     Solution temp_soln(Mesh.get_total_cells()); // intermediate solution for RK
     Solution soln_t0(Mesh.get_total_cells()); // solution at t0 in RK cycle
     Solution residual_worker(Mesh.get_total_cells()); // stores residuals
+    Solution residual_worker_e(Mesh.get_total_cells()); // stores residuals
+
     Solution rj2(Mesh.get_total_cells()); // stores residuals
     Solution rj3(Mesh.get_total_cells()); // stores residuals
     flux_var RK;
@@ -930,11 +932,12 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
     double mom_flux_const;
     double f1,f2,f3;
     double uu2, vv2,u2v2,uv,uu,vv;
-    double visc;
+    double visc,fneq_tau;
     double rho_rms_err, u_rms_err, v_rms_err, rho_rms_err_wang, u_rms_err_wang, v_rms_err_wang,
             rho_rms_err_lbfs, u_rms_err_lbfs, v_rms_err_lbfs;
     double rho_rms_ref, u_rms_ref, v_rms_ref;
     double dx_2,dy_2, dx_2m1,dy_2m1;
+    double residual_factor;
     std::clock_t start;
     std::ofstream error_output , vortex_output;
     std::string output_dir,decay_dir;
@@ -971,6 +974,7 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
     c = 1; // assume lattice spacing is equal to streaming timestep
     cs = c/sqrt(3);
     visc = (globals.tau -0.5)/3;
+    fneq_tau = (globals.tau -0.5);
     dx_2 = Mesh.get_dx()/2;
     dx_2m1 = dx_2-1; //calculating here save operations in the loop
     dy_2 = Mesh.get_dy()/2;
@@ -986,7 +990,7 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
     vortex_output.open(decay_dir.c_str(), ios::out);
     populate_e_alpha(e_alpha,lattice_weight,c,globals.PI,9);
     time =0;
-
+    residual_factor = delta_t/ Mesh.get_s_area(0);
     // loop in time
     for (int t= 0; t < timesteps; t++){
                                        // soln is the solution at the start of every
@@ -1095,7 +1099,18 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                     cell_flux.momentum_y = 0.0;
                     cell_flux.momentum_z = 0.0;
 
+
                     for (int j= 2; j <4; j++ ){
+
+                        y_flux.P =0.0;
+                        y_flux.momentum_x =0.0;
+                        y_flux.momentum_y = 0.0;
+                        y_flux.momentum_z = 0.0;
+                        x_flux.P =0.0;
+                        x_flux.momentum_x =0.0;
+                        x_flux.momentum_y = 0.0;
+                        x_flux.momentum_z = 0.0;
+
                         bc.present = false;
                         cell_interface_variables( j, i,interface_node, neighbour,
                                                  interface_area,cell_normal, bcs, bc, Mesh,
@@ -1117,12 +1132,24 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
 
                         //linear slop for BC cells
                          if(bcs.get_bc(i) || bcs.get_bc(neighbour)){
-                            delta_rho.Get_Gradient(temp_soln.get_rho(i), temp_soln.get_rho(neighbour),cell_1,cell_2 );
-                            delta_u.Get_Gradient(temp_soln.get_u(i), temp_soln.get_u(neighbour),cell_1,cell_2 );
-                            delta_v.Get_Gradient(temp_soln.get_v(i), temp_soln.get_v(neighbour),cell_1,cell_2 );
-                            delta_rho1 = delta_rho;
-                            delta_u1 = delta_u;
-                            delta_v1 = delta_v;
+                            if(bcs.get_vel_type(i) == 3){
+                                get_cell_gradients(Mesh, bcs.get_periodic_node(i), neighbour, j, temp_soln, delta_rho, delta_rho1,
+                                           delta_u,delta_u1, delta_v,delta_v1 , bcs);
+                                           }
+                            else if(bcs.get_bc(neighbour) == 3){
+                                get_cell_gradients(Mesh, i, bcs.get_periodic_node(neighbour), j, temp_soln, delta_rho, delta_rho1,
+                                           delta_u,delta_u1, delta_v,delta_v1 , bcs);
+                            }else {
+                                delta_rho.Get_Gradient(temp_soln.get_rho(i), temp_soln.get_rho(neighbour),cell_1,cell_2 );
+                                delta_u.Get_Gradient(temp_soln.get_u(i), temp_soln.get_u(neighbour),cell_1,cell_2 );
+                                delta_v.Get_Gradient(temp_soln.get_v(i), temp_soln.get_v(neighbour),cell_1,cell_2 );
+                                delta_rho1 = delta_rho;
+                                delta_u1 = delta_u;
+                                delta_v1 = delta_v;
+
+                            }
+
+
 
                          }else{
 
@@ -1272,6 +1299,8 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                          + feq_lattice[5]+ feq_lattice[6]-feq_lattice[7]- feq_lattice[8]);;
 
 
+
+
                         // get feq(r,t)
                         uu2 = u_interface.x * u_interface.x;
                         vv2 = u_interface.y * u_interface.y;
@@ -1284,32 +1313,32 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                         feq_interface[5] = lattice_weight[5] * rho_interface*
                             (1.0+3.0*uu+3.0*vv+u2v2+uv);
                         feq_interface[5] = feq_interface[5]
-                            - visc * (feq_interface[5] - feq_lattice[5]);
+                            - fneq_tau * (feq_interface[5] - feq_lattice[5]);
 
                         feq_interface[6] = lattice_weight[6] * rho_interface*
                             (1.0-3.0*uu+3.0*vv+u2v2-uv);
                         feq_interface[6] = feq_interface[6]
-                            -visc * (feq_interface[6] - feq_lattice[6]);
+                            -fneq_tau * (feq_interface[6] - feq_lattice[6]);
 
                         feq_interface[7] = lattice_weight[7] * rho_interface*
                             (1.0-3.0*uu-3.0*vv+u2v2+uv);
                         feq_interface[7] = feq_interface[7]
-                            - visc * (feq_interface[7] - feq_lattice[7]);
+                            - fneq_tau * (feq_interface[7] - feq_lattice[7]);
 
                         feq_interface[8] = lattice_weight[8] * rho_interface*
                             (1.0+3.0*uu-3.0*vv+u2v2-uv);
                         feq_interface[8] = feq_interface[8]
-                            - visc * (feq_interface[8] - feq_lattice[8]);
+                            - fneq_tau * (feq_interface[8] - feq_lattice[8]);
 
                         if ( j == 2){
                             feq_interface[1] = lattice_weight[1] * rho_interface*
                                 (1.0+3.0*uu+3.0*uu2-1.5*vv2);
                             feq_interface[1] = feq_interface[1]
-                                - visc * (feq_interface[1] - feq_lattice[1]);
+                                - fneq_tau * (feq_interface[1] - feq_lattice[1]);
                             feq_interface[3] = lattice_weight[3] * rho_interface*
                                 (1.0-3.0*uu+3.0*uu2-1.5*vv2);
                             feq_interface[3] = feq_interface[3]
-                                - visc * (feq_interface[3] - feq_lattice[3]);
+                                - fneq_tau * (feq_interface[3] - feq_lattice[3]);
 
                             x_flux.P = feq_interface[1] - feq_interface[3]+ feq_interface[5] - feq_interface[6]
                             -feq_interface[7] +feq_interface[8];
@@ -1319,19 +1348,19 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                             x_flux.momentum_y  =
                                 feq_interface[5] -feq_interface[6] +feq_interface[7]- feq_interface[8];
 
-                            cell_flux.P =  interface_area *x_flux.P ;
-                            cell_flux.momentum_x = interface_area *x_flux.momentum_x ;
-                            cell_flux.momentum_y = interface_area * x_flux.momentum_y ;
+                            cell_flux.P =  x_flux.P /interface_area ;
+                            cell_flux.momentum_x = x_flux.momentum_x /interface_area ;
+                            cell_flux.momentum_y = x_flux.momentum_y /interface_area ;
 
                         }else{
                             feq_interface[2] = lattice_weight[2] * rho_interface*
                             (1.0+3.0*vv+3.0*vv2-1.5*uu2);
                             feq_interface[2] = feq_interface[2]
-                                - visc * (feq_interface[2] - feq_lattice[2]);
+                                - fneq_tau * (feq_interface[2] - feq_lattice[2]);
                             feq_interface[4] = lattice_weight[4] * rho_interface*
                             (1.0-3.0*vv+3.0*vv2-1.5*uu2);
                             feq_interface[4] = feq_interface[4]
-                                - visc * (feq_interface[4] - feq_lattice[4]);
+                                - fneq_tau * (feq_interface[4] - feq_lattice[4]);
 
                             y_flux.P = feq_interface[2] - feq_interface[4]+ feq_interface[5] + feq_interface[6]
                                 -feq_interface[7] -feq_interface[8];
@@ -1340,9 +1369,16 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                             y_flux.momentum_y = feq_interface[2] + feq_interface[4]+ feq_interface[5] + feq_interface[6]
                                 +feq_interface[7] +feq_interface[8];
 
-                            cell_flux.P =  interface_area *y_flux.P ;
-                            cell_flux.momentum_x = interface_area *y_flux.momentum_x ;
-                            cell_flux.momentum_y = interface_area * y_flux.momentum_y ;
+                            cell_flux.P =  y_flux.P /interface_area ;
+                            cell_flux.momentum_x = y_flux.momentum_x /interface_area ;
+                            cell_flux.momentum_y = y_flux.momentum_y /interface_area ;
+                        }
+                        if ( j == 2){
+                                rj2.update(cell_flux.P, cell_flux.momentum_x,cell_flux.momentum_y,0.0,i);
+                        }
+                        if (j==3){
+
+                            rj3.update(cell_flux.P, cell_flux.momentum_x,cell_flux.momentum_y,0.0,i);
                         }
 
 
@@ -1372,9 +1408,9 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                 if( ! bcs.get_bc(i)){
 
                     // update intermediate macroscopic variables for next Runge Kutta Time Step
-                    f1 = soln_t0.get_rho(i) + residual_worker.get_rho(i)*delta_t *rk4.alpha[rk+1]/Mesh.get_cell_volume(i) ;
-                    f2 = soln_t0.get_u(i) + residual_worker.get_u(i) *delta_t*rk4.alpha[rk +1]/Mesh.get_cell_volume(i);
-                    f3 = soln_t0.get_v(i) + residual_worker.get_v(i) *delta_t*rk4.alpha[rk+1]/Mesh.get_cell_volume(i);
+                    f1 = soln_t0.get_rho(i) + residual_worker.get_rho(i)*delta_t *rk4.alpha[rk+1];
+                    f2 = soln_t0.get_u(i) + residual_worker.get_u(i) *delta_t*rk4.alpha[rk +1];
+                    f3 = soln_t0.get_v(i) + residual_worker.get_v(i) *delta_t*rk4.alpha[rk+1];
 
                       // change momentum to velocity
                     f2 = f2/f1;
@@ -1383,9 +1419,9 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                     temp_soln.update(f1,f2,f3,0.0, i);
 
                     //add contributions to
-                    soln_t1.add_rho(i, delta_t* rk4.beta[rk] * residual_worker.get_rho(i)/Mesh.get_cell_volume(i));
-                    soln_t1.add_u(i, delta_t* rk4.beta[rk] * residual_worker.get_u(i)/Mesh.get_cell_volume(i));
-                    soln_t1.add_v(i, delta_t* rk4.beta[rk] * residual_worker.get_v(i)/Mesh.get_cell_volume(i));
+                    soln_t1.add_rho(i, delta_t* rk4.beta[rk] * residual_worker.get_rho(i));
+                    soln_t1.add_u(i, delta_t* rk4.beta[rk] * residual_worker.get_u(i));
+                    soln_t1.add_v(i, delta_t* rk4.beta[rk] * residual_worker.get_v(i));
 
                     f1 = soln_t1.get_rho(i);
                     f2 = soln_t1.get_u(i)/soln_t1.get_rho(i);
@@ -1404,7 +1440,7 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
                 if( ! bcs.get_bc(i)){
                     convergence_residual.add_ansys_l2_norm_residuals(soln_t1.get_rho(i),soln_t0.get_rho(i)
                                     ,soln_t1.get_u(i),soln_t0.get_u(i),
-                                    soln_t1.get_v(i),soln_t0.get_v(i),delta_t);
+                                    soln_t1.get_v(i),soln_t0.get_v(i),residual_factor);
                        //error checking
                     if (std::isnan(temp_soln.get_rho(i)) || std::isnan(temp_soln.get_u(i))) {
                                     if( mg == 0){
@@ -1442,7 +1478,7 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
             if( mg == 0){
                 error_output.close();
                 vortex_output.close();
-                tecplot_output solution(globals,Mesh,real_error,bcs,2,time);
+                tecplot_output solution(globals,Mesh,soln,bcs,2,time);
             }
             return ;
 
@@ -1454,7 +1490,7 @@ void Solver::Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundar
 
     error_output.close();
     vortex_output.close();
-    tecplot_output solution(globals,Mesh,real_error,bcs,2,time);
+    tecplot_output solution(globals,Mesh,soln,bcs,2,time);
 
 
 }

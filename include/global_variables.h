@@ -43,6 +43,7 @@ class global_variables
         double arti_disp_kappa_4;
         double martinelli;
         double ref_rho;
+        double scale;
 
         int max_mg_levels ; // number of coarse grids to enter
         int fmg_levels;

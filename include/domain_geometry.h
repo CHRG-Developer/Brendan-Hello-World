@@ -11,6 +11,7 @@ class domain_geometry
         double dt ;  // streaming time step
         double cs; // speed of sound in medium
         void initialise();
+        void scale_geometries(double scale);
 
     protected:
     private:

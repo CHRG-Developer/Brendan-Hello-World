@@ -33,8 +33,9 @@ void preprocessor::initialise_program_variables(char* xmltest, global_variables 
     parse_boundary_conditions(xmlDoc, bcs);
 
     mach_number_factor(globals,bcs,initial_conds,geometry);
-
+    geometry.scale_geometries(globals.scale);
     globals.initialise(geometry,initial_conds);
+
 
 
 }
@@ -42,7 +43,7 @@ void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &
         initial_conditions &initials,domain_geometry &geometry ){
 
 
-    double factor = globals.max_velocity ;
+    double factor = globals.max_velocity/globals.scale ;
 
     bcs.e_u = bcs.e_u * factor;
     bcs.w_u = bcs.w_u * factor;
@@ -233,6 +234,7 @@ void preprocessor::parse_geometry_variables(XMLDocument &xmlDoc, domain_geometry
 
     geometry.initialise();
 
+
 }
 void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables &globals){
 
@@ -253,7 +255,7 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.martinelli = get_xml_double(parent,"martinelli_exponent",xmlDoc);
     globals.testcase= get_xml_double(parent, "testcase", xmlDoc);
     globals.mesh_type= get_xml_double(parent, "mesh_type", xmlDoc);
-
+    globals.scale= get_xml_double(parent, "scale", xmlDoc);
 }
 
 double preprocessor::get_xml_double(const char* parent, const char* child, XMLDocument &doc){

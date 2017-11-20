@@ -21,15 +21,21 @@ void global_variables::initialise(domain_geometry domain,initial_conditions init
     //tau = 0.5 + viscosity / dt/ gamma
     // viscosity = MA/root(3) /Re
      std::ostringstream s;
-    tau = 0.5 + initial_conds.average_rho*max_velocity*3/reynolds_number *
-                domain.Y/domain.dt*pre_conditioned_gamma;
+     double visc;
+     visc = max_velocity * domain.Y/domain.dt /reynolds_number;
+    int d_t;
+    d_t =1;
+     tau = 3*visc/d_t + 0.5;  // non-dimensional dt is 1 here
+//    tau = 0.5 + initial_conds.average_rho*max_velocity*3/reynolds_number *
+//                domain.Y/domain.dt*pre_conditioned_gamma;
     knudsen_number = max_velocity *sqrt(3) / reynolds_number;
-    s << "RE_" << reynolds_number << " N_CELLS_" << domain.Y <<
-                    " MA_" << max_velocity *sqrt(3) << " dt_" << domain.dt
+    s << "RE_" << reynolds_number << " N_CELLS_" << domain.Y *scale <<
+                    " MA_" << max_velocity *sqrt(3)/scale << " dt_" << domain.dt
                     << " DT_" << time_marching_step;
     simulation_name = s.str();
     boost::replace_all(simulation_name,".","_");
     output_file = create_output_directory();
+    simulation_length = simulation_length *scale;
 
 }
 

@@ -17,3 +17,9 @@ void domain_geometry::initialise(){
 
 
 }
+
+void domain_geometry::scale_geometries(double scale){
+    X = X*scale + 1;
+    Y = Y*scale +1;
+
+}
