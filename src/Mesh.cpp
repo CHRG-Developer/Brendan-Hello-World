@@ -19,8 +19,13 @@ Mesh::Mesh(domain_geometry domain, global_variables globals)
     dy = domain.dy;
     multi_grid_dt = domain.dt;
 
-	num_x_cells = ceil(X/dx) + 2;
-	num_y_cells= ceil(Y/dy) + 2;
+    if (globals.testcase == 3){
+        num_x_cells = ceil(X/dx) + 4;
+        num_y_cells= ceil(Y/dy) + 4;
+    }else{
+        num_x_cells = ceil(X/dx) + 2;
+        num_y_cells= ceil(Y/dy) + 2;
+	}
 	// plus twos account for ghost nodes
 	total_cells  = (num_x_cells ) * (num_y_cells);
 
@@ -118,7 +123,12 @@ Mesh::Mesh(domain_geometry domain, global_variables globals)
         if (delta_t==NULL) exit (1);
 
     if (globals.mesh_type == 1) {
-        this->create_standard_mesh();
+        if(globals.testcase == 3){
+            this->create_standard_mesh(-1,-1);
+        }else{
+            this->create_standard_mesh(0,0);
+        }
+
         X = X/domain.dt;
     Y = Y/domain.dt;
 
@@ -236,10 +246,10 @@ Mesh::~Mesh()
     s_node = NULL;
 }
 
-void Mesh::create_standard_mesh(){
+void Mesh::create_standard_mesh(int strt, int fnsh ){
     int counter =0;
-    for( int j=0; j < num_y_cells; j++){
-        for( int i=0; i < num_x_cells; i++){
+    for( int j=(0 +strt); j < (num_y_cells + fnsh); j++){
+        for( int i=(0+strt); i < (num_x_cells + fnsh); i++){
 
             centroid_x[counter] = dx/2 + (i-1)*dx;
             centroid_y[counter] = dy/2 + (j-1)*dy;
@@ -285,32 +295,32 @@ void Mesh::create_standard_mesh(){
             delta_t[counter] = 0.5 * std::min(dy,dx);
 
              // West boundary
-            if( i ==0){
-                w_node[counter] = 0 ;//dummy value
+            if( i ==(0 + strt)){
+                w_node[counter] = -1 ;//dummy value
             }else{
                 //w_node[counter] = counter - num_y_cells;
                 w_node[counter] = counter - 1;
             }
 
             // east boundary
-            if ( i == (num_x_cells -1)){
-                e_node[counter] = 0; //dummy value
+            if ( i == (num_x_cells -1 + fnsh)){
+                e_node[counter] = -1; //dummy value
             }else{
                 e_node[counter] = counter + 1;
             }
 
             // south boundary
-            if(j == 0){
-                s_node[counter] = 0; //dummy value
+            if(j == (0+ strt) ){
+                s_node[counter] = -1; //dummy value
             }else{
-                s_node[counter] = counter - num_x_cells;
+                s_node[counter] = counter - num_x_cells ;
             }
 
             // north boundary
-            if( j == (num_y_cells-1)){
-                n_node[counter] = 0; //dummy value
+            if( j == (num_y_cells-1 +fnsh)){
+                n_node[counter] = -1; //dummy value
             }else{
-                n_node[counter] = counter + num_x_cells;
+                n_node[counter] = counter + num_x_cells ;
             }
 
             counter = counter +1;

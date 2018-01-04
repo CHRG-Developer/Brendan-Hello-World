@@ -17,7 +17,7 @@ class Solution
         virtual ~Solution();
         double get_rho( int i) {return rho[i];};
         double get_u( int i) {return u[i];};
-        double get_v( int i) {return v[i];};
+       double get_v( int i) {return v[i];};
         double get_w( int i) {return w[i];};
         double get_average_rho (){return average_rho;};
         double get_u_exact( int i) {return u_exact[i];};
@@ -50,6 +50,11 @@ class Solution
         void update_bcs(Boundary_Conditions &bcs,Mesh &mesh,domain_geometry &domain);
         void Initialise();
         void remove_double_errors();
+
+        void update_gradients(Boundary_Conditions &bcs,Mesh &mesh,domain_geometry &domain,
+                    int direction, Solution &src );
+        void output_centrelines (std::string output_location, global_variables &globals,
+        Mesh &mesh);
 
     protected:
     private:

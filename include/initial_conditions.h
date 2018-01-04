@@ -12,7 +12,7 @@ class initial_conditions
         double average_rho; // average rho that is kept constant and used for momentum calcs
         vector_var velocity;
         vector_var vel_gradient, vel_origin_mag;
-        const double pressure_gradient = 0.0;
+        double pressure_gradient = 0.0;
     protected:
     private:
 };

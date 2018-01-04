@@ -71,6 +71,9 @@
 		<Unit filename="include/initial_conditions.h">
 			<Option virtualFolder="Data Objects/Include/" />
 		</Unit>
+		<Unit filename="include/post_processing.h">
+			<Option virtualFolder="Data Objects/Include/" />
+		</Unit>
 		<Unit filename="include/preprocessor.h">
 			<Option virtualFolder="workflow objects/" />
 		</Unit>
@@ -132,6 +135,9 @@
 			<Option virtualFolder="Data Objects/src/" />
 		</Unit>
 		<Unit filename="src/initial_conditions.cpp">
+			<Option virtualFolder="Data Objects/src/" />
+		</Unit>
+		<Unit filename="src/post_processing.cpp">
 			<Option virtualFolder="Data Objects/src/" />
 		</Unit>
 		<Unit filename="src/preprocessor.cpp">

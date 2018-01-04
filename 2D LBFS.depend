@@ -2336,7 +2336,7 @@
 	"flux_var.h"
 	"global_variables.h"
 
-1506602471 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/main.cpp
+1511199695 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/main.cpp
 	<iostream>
 	"Mesh.h"
 	"vector_var.h"
@@ -2355,7 +2355,7 @@
 
 1508266378 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/domain_geometry.h
 
-1508267313 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
+1515077421 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/global_variables.h
 	<string>
 	"domain_geometry.h"
 	<math.h>
@@ -2363,7 +2363,7 @@
 
 1491910432 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/vector_var.h
 
-1491917856 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Boundary_Conditions.h
+1512411838 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Boundary_Conditions.h
 	"quad_bcs.h"
 	"quad_bcs_plus.h"
 
@@ -2371,7 +2371,7 @@
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/quad_bcs_plus.h
 
-1505242382 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solution.h
+1511803767 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solution.h
 	"Mesh.h"
 	"vector_var.h"
 	<string>
@@ -2380,7 +2380,7 @@
 	<Boundary_Conditions.h>
 	"initial_conditions.h"
 
-1506615153 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
+1511794807 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Solver.h
 	"Mesh.h"
 	"Boundary_Conditions.h"
 	"Solution.h"
@@ -2390,10 +2390,11 @@
 	"initial_conditions.h"
 	"flux_var.h"
 	"vector"
+	"post_processing.h"
 
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/external_forces.h
 
-1469717214 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/initial_conditions.h
+1515077421 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/initial_conditions.h
 	"vector_var.h"
 
 1479397183 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/flux_var.h
@@ -2401,7 +2402,7 @@
 1460549164 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/test_cases.h
 	<string>
 
-1506602526 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/program.h
+1511352059 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/program.h
 	<string>
 	<Solution.h>
 	<Mesh.h>
@@ -2423,11 +2424,11 @@
 	"flux_var.h"
 	"global_variables.h"
 
-1496171768 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
+1512479248 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Boundary_Conditions.cpp
 	"Boundary_Conditions.h"
 	<stdlib.h>
 
-1508346635 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/domain_geometry.cpp
+1511266789 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/domain_geometry.cpp
 	"domain_geometry.h"
 	<math.h>
 
@@ -2438,7 +2439,7 @@
 1479396863 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/flux_var.cpp
 	"flux_var.h"
 
-1508267828 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/global_variables.cpp
+1512501661 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/global_variables.cpp
 	"global_variables.h"
 	"domain_geometry.h"
 	<boost/algorithm/string/replace.hpp>
@@ -2448,7 +2449,7 @@
 1464023837 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/initial_conditions.cpp
 	"initial_conditions.h"
 
-1508346635 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
+1515077421 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/preprocessor.cpp
 	"preprocessor.h"
 	"global_variables.h"
 	<fstream>
@@ -2478,7 +2479,7 @@
 	<android/log.h>
 	<assert.h>
 
-1505242403 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/program.cpp
+1512411968 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/program.cpp
 	"program.h"
 	"quad_bcs.h"
 	"global_variables.h"
@@ -2499,6 +2500,8 @@
 	"TECIO.h"
 	<sstream>
 	<tecplot_output.h>
+	<boost/filesystem.hpp>
+	"post_processing.h"
 
 1453812249 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/quad_bcs.cpp
 	"quad_bcs.h"
@@ -2506,14 +2509,14 @@
 1460549164 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/quad_bcs_plus.cpp
 	"quad_bcs_plus.h"
 
-1509538849 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/residuals.cpp
+1511449558 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/residuals.cpp
 	"residuals.h"
 	<math.h>
 	"global_variables.h"
 
 1497960378 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/residuals.h
 
-1505481472 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
+1512586485 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solution.cpp
 	<stdlib.h>
 	"Solution.h"
 	<algorithm>
@@ -2522,7 +2525,7 @@
 	<math.h>
 	<cmath>
 
-1509546967 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
+1515078786 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Solver.cpp
 	<math.h>
 	<cmath>
 	"Solver.h"
@@ -2570,7 +2573,8 @@
 1492090006 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/RungeKutta.cpp
 	"RungeKutta.h"
 
-1508780426 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/RungeKutta.h
+1512658681 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/RungeKutta.h
+	"Solution.h"
 
 1494430410 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/postprocessor.cpp
 	"postprocessor.h"
@@ -2607,11 +2611,11 @@
 
 1493112651 /usr/local/tecplot/360ex_2017r2/include/tecio_Exports.h
 
-1506602184 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Mesh.h
+1512146424 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/Mesh.h
 	"domain_geometry.h"
 	"global_variables.h"
 
-1506601929 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Mesh.cpp
+1512147657 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/Mesh.cpp
 	"Mesh.h"
 	<math.h>
 	<stdio.h>
@@ -2622,7 +2626,7 @@
 	"global_variables.h"
 	<cstdio>
 
-1504787006 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/tecplot_output.cpp
+1512501032 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/tecplot_output.cpp
 	"tecplot_output.h"
 	"TECIO.h"
 	<sstream>
@@ -2630,10 +2634,21 @@
 	<stdio.h>
 	<fstream>
 	<iostream>
+	"post_processing.h"
 
-1501514352 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/tecplot_output.h
+1511800914 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/tecplot_output.h
 	<global_variables.h>
 	<Mesh.h>
 	<Solution.h>
 	<Boundary_Conditions.h>
+	<post_processing.h>
+
+1511810767 source:/home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/src/post_processing.cpp
+	<stdlib.h>
+	<math.h>
+	"post_processing.h"
+	<iostream>
+
+1511801225 /home/brendan/Dropbox/PhD/Code/LBM/2D LBFS/include/post_processing.h
+	"Solution.h"
 

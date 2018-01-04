@@ -29,7 +29,7 @@ void global_variables::initialise(domain_geometry domain,initial_conditions init
 //    tau = 0.5 + initial_conds.average_rho*max_velocity*3/reynolds_number *
 //                domain.Y/domain.dt*pre_conditioned_gamma;
     knudsen_number = max_velocity *sqrt(3) / reynolds_number;
-    s << "RE_" << reynolds_number << " N_CELLS_" << domain.Y *scale <<
+    s << "RE_" << reynolds_number << " N_CELLS_" << domain.Y <<
                     " MA_" << max_velocity *sqrt(3)/scale << " dt_" << domain.dt
                     << " DT_" << time_marching_step;
     simulation_name = s.str();

@@ -11,7 +11,8 @@ class Boundary_Conditions
         Boundary_Conditions(int num_x, int num_y);
         virtual ~Boundary_Conditions();
         void assign_boundary_conditions(int num_x, int num_y, quad_bcs);
-        void assign_boundary_conditions(int num_x, int num_y, quad_bcs_plus _bc);
+        void assign_boundary_conditions(int num_x, int num_y, quad_bcs_plus _bc,
+            int testcase);
         bool get_bc( int i) {return bc[i];};
         bool get_bc_include( int i) {return bc_include[i];};
 
