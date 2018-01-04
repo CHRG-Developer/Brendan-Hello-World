@@ -44,6 +44,7 @@ class global_variables
         double martinelli;
         double ref_rho;
         double scale;
+        double womersley_no;
 
         int max_mg_levels ; // number of coarse grids to enter
         int fmg_levels;

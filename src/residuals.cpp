@@ -77,7 +77,8 @@ void residuals::l2_norm_rms(){
 double residuals::max_error (){
 
     double temp;
-    temp = fmax(rho_rms, u_rms);
+    //temp = fmax(rho_rms, u_rms);
+    temp = u_rms;
     return fmax(temp, v_rms);
 
 }

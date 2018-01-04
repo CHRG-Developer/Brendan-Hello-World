@@ -27,6 +27,7 @@ class program
         void output_globals (global_variables globals ,double duration);
         void output_tecplot(global_variables &globals, Mesh &Mesh, Solution &Soln,
                             Boundary_Conditions &bcs) ;
+        void remove_existing_files(global_variables &globals);
     protected:
     private:
 };

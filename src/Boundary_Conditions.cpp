@@ -75,95 +75,192 @@ Boundary_Conditions::~Boundary_Conditions()
     neighbour = NULL;
 }
 
-void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_bcs_plus _bc){
+void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_bcs_plus _bc,int testcase){
 
     /// this method should be user defined to reflect the geometry of the problem
     /// currently set up for quad problem domain-> potential overload of this operator.
     int t = 0;
 
-    //lid driven cavity conditions
-    for( int j=0; j < num_y; j++){
-        for (int i =0; i < num_x; i++){
 
 
-            // default status
-            bc[t] = false;
-            bc_include[t] = true;
+        //special periodic boundary conditions for Taylor Vortex Flow
+        //consists of two layers of ghost cells
 
-            // West boundary
-            if( i ==0){
-                bc[t] = true;
-                rho[t] = _bc.w_rho;
-                u[t] = _bc.w_u;
-                v[t] = _bc.w_v;
-                type_vel[t] = _bc.w_type_vel;
-                type_rho[t] = _bc.w_type_rho;
-
-                periodic_node[t] = (num_x-2) + t;
-                neighbour[t] = t + 1;
-
-                if (j ==0){
-                    bc_include[t] = false;
-                }else if( j == (num_y-1)){
-                    bc_include[t] = false;
-                }else{
-                    bc_include[t] = true;
-                }
-
-
-                /// east boundary
-            }else if( i == (num_x -1)){
-                bc[t] = true;
-                rho[t] = _bc.e_rho;
-                u[t] = _bc.e_u;
-                v[t] = _bc.e_v;
-                type_vel[t] = _bc.e_type_vel;
-                type_rho[t] = _bc.e_type_rho;
-
-
-                periodic_node[t] = t - (num_x-2) ;
-                neighbour[t] = t - 1;
-                bc_include[t] = false;
-
-            // south boundary
-            }else if(j == 0){
-                bc[t] = true;
-                rho[t] = _bc.s_rho;
-                u[t] = _bc.s_u;
-                v[t] = _bc.s_v;
-                type_vel[t] = _bc.s_type_vel;
-                type_rho[t] = _bc.s_type_rho;
-
-                periodic_node[t] = t + (num_y-2) *num_x;
-                neighbour[t] = t + num_x;
-
+    if ( testcase == 3){
+          for( int j=0; j < num_y; j++){
+            for (int i =0; i < num_x; i++){
+                  // default status
+                bc[t] = false;
                 bc_include[t] = true;
 
-            //north boundary
+                     // West boundary outer layer
+                if( i ==0 || i ==1){
+                    bc[t] = true;
+                    type_vel[t] = _bc.w_type_vel;
+                    type_rho[t] = _bc.w_type_rho;
+                    rho[t] = _bc.w_rho;
+                    u[t] = _bc.w_u;
+                    v[t] = _bc.w_v;
 
-            }else if( j == (num_y-1)){
-                bc[t] = true;
-                rho[t] = _bc.n_rho;
-                u[t] = _bc.n_u;
-                v[t] = _bc.n_v;
-                type_vel[t] = _bc.n_type_vel;
-                type_rho[t] = _bc.n_type_rho;
+                    periodic_node[t] = (num_x-4 ) + t;
+                    neighbour[t] = t + 1;
 
-                periodic_node[t] = t - (num_y-2)* num_x;
-                neighbour[t] = t - num_x;
-                bc_include[t] = false;
+                    if (j ==0 && i ==0){
+                        bc_include[t] = false;
+                    }else if( j == (num_y-1) && i ==0){
+                        bc_include[t] = false;
+                    }else{
+                        bc_include[t] = true;
+                    }
 
-            }else {
+
+                    /// east boundary
+                }else if( i == (num_x -1) || i == (num_x -2)){
+                    bc[t] = true;
+                    type_vel[t] = _bc.e_type_vel;
+                    type_rho[t] = _bc.e_type_rho;
+                    rho[t] = _bc.e_rho;
+                    u[t] = _bc.e_u;
+                    v[t] = _bc.e_v;
+
+
+                    periodic_node[t] = t - (num_x-4  ) ;
+                    neighbour[t] = t - 1;
+
+                    if (j ==0 && i ==(num_x -1) ){
+                        bc_include[t] = false;
+                    }else if( j == (num_y-1) && i ==0){
+                        bc_include[t] = false;
+                    }else{
+                        bc_include[t] = true;
+                    }
+
+
+                // south boundary
+                }else if(j == 0 || j == 1){
+                    bc[t] = true;
+                    type_vel[t] = _bc.s_type_vel;
+                    type_rho[t] = _bc.s_type_rho;
+                    rho[t] = _bc.s_rho;
+                    u[t] = _bc.s_u;
+                    v[t] = _bc.s_v;
+
+                    periodic_node[t] = t + (num_y-4) *num_x;
+                    neighbour[t] = t + num_x;
+
+                    bc_include[t] = true;
+
+                //north boundary
+
+                }else if( j == (num_y-1) || j == (num_y -2)){
+                    bc[t] = true;
+                    type_vel[t] = _bc.n_type_vel;
+                    type_rho[t] = _bc.n_type_rho;
+                    rho[t] = _bc.n_rho;
+                    u[t] = _bc.n_u;
+                    v[t] = _bc.n_v;
+
+                    periodic_node[t] = t - (num_y-4)* num_x;
+                    neighbour[t] = t - num_x;
+                    bc_include[t] = false;
+
+                }else {
+                    bc[t] = false;
+                }
+
+               t++;
+
+
+
+            }
+          }
+    }else{
+
+
+        //lid driven cavity conditions
+        for( int j=0; j < num_y; j++){
+            for (int i =0; i < num_x; i++){
+
+
+                // default status
                 bc[t] = false;
+                bc_include[t] = true;
+
+                // West boundary
+                if( i ==0){
+                    bc[t] = true;
+                    rho[t] = _bc.w_rho;
+                    u[t] = _bc.w_u;
+                    v[t] = _bc.w_v;
+                    type_vel[t] = _bc.w_type_vel;
+                    type_rho[t] = _bc.w_type_rho;
+
+                    periodic_node[t] = (num_x-2) + t;
+                    neighbour[t] = t + 1;
+
+                    if (j ==0){
+                        bc_include[t] = false;
+                    }else if( j == (num_y-1)){
+                        bc_include[t] = false;
+                    }else{
+                        bc_include[t] = true;
+                    }
+
+
+                    /// east boundary
+                }else if( i == (num_x -1)){
+                    bc[t] = true;
+                    rho[t] = _bc.e_rho;
+                    u[t] = _bc.e_u;
+                    v[t] = _bc.e_v;
+                    type_vel[t] = _bc.e_type_vel;
+                    type_rho[t] = _bc.e_type_rho;
+
+
+                    periodic_node[t] = t - (num_x-2) ;
+                    neighbour[t] = t - 1;
+                    bc_include[t] = false;
+
+                // south boundary
+                }else if(j == 0){
+                    bc[t] = true;
+                    rho[t] = _bc.s_rho;
+                    u[t] = _bc.s_u;
+                    v[t] = _bc.s_v;
+                    type_vel[t] = _bc.s_type_vel;
+                    type_rho[t] = _bc.s_type_rho;
+
+                    periodic_node[t] = t + (num_y-2) *num_x;
+                    neighbour[t] = t + num_x;
+
+                    bc_include[t] = true;
+
+                //north boundary
+
+                }else if( j == (num_y-1)){
+                    bc[t] = true;
+                    rho[t] = _bc.n_rho;
+                    u[t] = _bc.n_u;
+                    v[t] = _bc.n_v;
+                    type_vel[t] = _bc.n_type_vel;
+                    type_rho[t] = _bc.n_type_rho;
+
+                    periodic_node[t] = t - (num_y-2)* num_x;
+                    neighbour[t] = t - num_x;
+                    bc_include[t] = false;
+
+                }else {
+                    bc[t] = false;
+                }
+
+                t++;
             }
 
 
-
-            t++;
-        }
-
+    }
 
     }
+
 }
 void Boundary_Conditions::assign_boundary_conditions(int num_x, int num_y, quad_bcs _bc){
 

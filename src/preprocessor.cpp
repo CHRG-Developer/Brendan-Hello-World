@@ -44,6 +44,7 @@ void preprocessor::mach_number_factor( global_variables &globals,quad_bcs_plus &
 
 
     double factor = globals.max_velocity/globals.scale ;
+    //double factor = globals.max_velocity;
 
     bcs.e_u = bcs.e_u * factor;
     bcs.w_u = bcs.w_u * factor;
@@ -202,6 +203,7 @@ void preprocessor::parse_initial_conditions(XMLDocument &xmlDoc, initial_conditi
 
     const char* parent = "initial_conditions";
     initials.average_rho = get_xml_double(parent, "average_rho", xmlDoc);
+    initials.pressure_gradient = get_xml_double(parent, "pressure_gradient", xmlDoc);
     initials.rho_gradient.x = get_xml_double(parent,"rho","gradient","x",xmlDoc);
     initials.rho_gradient.y = get_xml_double(parent,"rho","gradient","y",xmlDoc);
     initials.rho_gradient.z = get_xml_double(parent,"rho","gradient","z",xmlDoc);
@@ -256,6 +258,7 @@ void preprocessor::parse_global_variables(XMLDocument &xmlDoc, global_variables 
     globals.testcase= get_xml_double(parent, "testcase", xmlDoc);
     globals.mesh_type= get_xml_double(parent, "mesh_type", xmlDoc);
     globals.scale= get_xml_double(parent, "scale", xmlDoc);
+    globals.womersley_no= get_xml_double(parent, "womersley_no", xmlDoc);
 }
 
 double preprocessor::get_xml_double(const char* parent, const char* child, XMLDocument &doc){

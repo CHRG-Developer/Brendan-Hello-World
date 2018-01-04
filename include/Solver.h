@@ -7,6 +7,7 @@
 #include "initial_conditions.h"
 #include "flux_var.h"
 #include "vector"
+#include "post_processing.h"
 #ifndef SOLVER_H
 #define SOLVER_H
 
@@ -32,7 +33,7 @@ class Solver
         void Uniform_Mesh_Solver_Clean_MK2( Mesh &Mesh , Solution &soln, Boundary_Conditions &bc,
                                    external_forces &source,global_variables &globals, domain_geometry &domain,
                                    initial_conditions &init_conds,quad_bcs_plus &quad_bcs_orig, int mg,
-                                   Solution &residual,int fmg);
+                                   Solution &residual,int fmg, post_processing &pp);
         void multi_grid_agglomoration( Solution &residuals , Solution &soln,
                                          int cycle_no, Mesh &fine_mesh,  quad_bcs_plus &bcs,
                                          initial_conditions &init_conds, int &mg, global_variables globals,

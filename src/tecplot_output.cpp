@@ -5,9 +5,11 @@
 #include <stdio.h>
 #include <fstream>
 #include <iostream>
+#include "post_processing.h"
 
 tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &Soln,
-                             Boundary_Conditions &bcs, int fileType_e, double timestamp)
+                             Boundary_Conditions &bcs, int fileType_e, double timestamp,
+                             post_processing &pp)
 {
     //ctor
 
@@ -32,8 +34,8 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
     }else{
         output_location = globals.output_file + "/" + tt.str() +".plt";
-        valueLocation = new int[6];
-        for(int i = 0; i < 6;i++){
+        valueLocation = new int[8];
+        for(int i = 0; i < 8;i++){
                valueLocation[i] = 0;
         }
         strandID  = 1;
@@ -43,7 +45,7 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
    //enum fileType_e { FULL = 0, GRID = 1, SOLUTION = 2 };
 
-     float *nodx, *nody, *z, *p,*u, *v,*y ,*x, *u_err, *u_exact ,*w;
+     float *nodx, *nody, *z, *p,*u, *v,*y ,*x, *u_err, *u_exact ,*w, *vort, *st;
     int *connectivity;
     double solTime;
     INTEGER4 debug, i, j, k, dIsDouble, vIsDouble, zoneType,  parentZn, isBlock;
@@ -56,8 +58,16 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
     INTEGER4 nNodes, nCells, nFaces, connectivityCount, index;
     int XDIM, YDIM, ZDIM; // nodes
     int t,r;
-    XDIM = Mesh.get_num_x() +1 -2;
-    YDIM = Mesh.get_num_y() +1 -2;
+    int n_ghost;  // number of host cells;
+
+    n_ghost = 1;
+
+    if(globals.testcase = 3){
+        n_ghost = 2;
+    }
+
+    XDIM = Mesh.get_num_x() +1 -2*n_ghost;
+    YDIM = Mesh.get_num_y() +1 -2*n_ghost;
     ZDIM = 2;
 
     debug     = 1;
@@ -97,7 +107,7 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
      }else{
      i = TECINI142((char*) "Couette Flow" ,
-                  (char*)"p u v x y w ",
+                  (char*)"p u v w x y vort stf",
                   (char*) output_location.c_str(),
                   (char*) ".",
                   &fileFormat,
@@ -110,17 +120,19 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
     i = TECAUXSTR142("Re" ,  reynolds_text.c_str());
 
      if( fileType_e == 1){
-        nodx  = (float*)malloc(nNodes * sizeof(float));
-        nody  = (float*)malloc(nNodes * sizeof(float));
-        z  = (float*)malloc(nNodes * sizeof(float));
+        nodx  = (float*)calloc(nNodes , sizeof(float));
+        nody  = (float*)calloc(nNodes , sizeof(float));
+        z  = (float*)calloc(nNodes , sizeof(float));
         t = 0;
         r=0;
         for (k = 0; k < ZDIM; k++){
             r=0;
-            for (j = 0; j < Mesh.get_num_y(); j++){
-                for (i = 0; i < Mesh.get_num_x(); i++)
+            for (j = 0; j < Mesh.get_num_y() ; j++){
+                for (i = 0; i < Mesh.get_num_x() ; i++)
                 {
-                    if( i != 0 && j != 0 ){
+                    if( i != 0 && j != 0 && i != (n_ghost-1) && j != (n_ghost-1)
+                    && i != (Mesh.get_num_x() - (n_ghost-1))
+                     && j != (Mesh.get_num_y() - (n_ghost-1))){
                         nodx[t] = (float)(Mesh.get_west_x(r));
                         nody[t] = (float)(Mesh.get_south_y(r));
                         z[t] = (float)(k + 1);
@@ -151,12 +163,14 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
 
      }
      else{
-         p  = (float*)malloc(nCells * sizeof(float));
-        u = (float*)malloc(nCells * sizeof(float));
-        v = (float*)malloc(nCells * sizeof(float));
-        w = (float*)malloc(nCells * sizeof(float));
-        y = (float*)malloc(nCells * sizeof(float));
-        x = (float*)malloc(nCells * sizeof(float));
+         p  = (float*)calloc(nCells , sizeof(float));
+        u = (float*)calloc(nCells , sizeof(float));
+        v = (float*)calloc(nCells , sizeof(float));
+        w = (float*)calloc(nCells , sizeof(float));
+        y = (float*)calloc(nCells , sizeof(float));
+        x = (float*)calloc(nCells , sizeof(float));
+        vort = (float*)calloc(nCells , sizeof(float));
+        st = (float*)calloc(nCells , sizeof(float));
         t=0;
         for (i = 0; i < Mesh.get_total_cells(); ++i){
         if( bcs.get_bc(i) == false){
@@ -166,6 +180,8 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
             w[t] = (float) 0.0;
             x[t] = (float) Mesh.get_centroid_x(i)/Mesh.get_X();
             y[t] = (float) Mesh.get_centroid_y(i)/Mesh.get_Y();
+            vort[t] = (float) pp.vorticity[i];
+            st[t] = (float) pp.streamfunction[i];
             t++;
         }
 
@@ -225,21 +241,24 @@ tecplot_output::tecplot_output(global_variables &globals, Mesh &Mesh, Solution &
         i = TECDAT142(&nCells, p, &dIsDouble);
         i = TECDAT142(&nCells, u, &dIsDouble);
         i = TECDAT142(&nCells, v, &dIsDouble);
+        i = TECDAT142(&nCells, w, &dIsDouble);
         i = TECDAT142(&nCells, x, &dIsDouble);
         i = TECDAT142(&nCells, y, &dIsDouble);
-        i = TECDAT142(&nCells, w, &dIsDouble);
+        i = TECDAT142(&nCells, vort, &dIsDouble);
+        i = TECDAT142(&nCells, st, &dIsDouble);
+
         free(p);
         free(u);
         free(v);
         free(x);
         free(y);
         free(w);
-
+        free(vort);
+        free(st);
 
    }
-
-
-
+    delete [] valueLocation;
+    valueLocation= NULL;
 
     i = TECEND142();
 }

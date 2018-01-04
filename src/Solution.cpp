@@ -27,9 +27,9 @@ Solution::Solution(int _total_nodes)
      w = new double [total_nodes +1];
         if (w==NULL) exit (1);
         error = new double [total_nodes +1];
-        if (w==NULL) exit (1);
+        if (error==NULL) exit (1);
         u_exact = new double [total_nodes +1];
-        if (w==NULL) exit (1);
+        if (u_exact==NULL) exit (1);
     Initialise();
 
 }
@@ -58,8 +58,12 @@ void Solution::Initialise() {
     std::fill_n(u, total_nodes, 0.0);
     std::fill_n(v, total_nodes , 0.0);
     std::fill_n(w, total_nodes , 0.0);
+    std::fill_n(error, total_nodes , 0.0);
+    std::fill_n(u_exact, total_nodes , 0.0);
 
     average_rho = 0.0; //default value
+
+
 
 }
 
@@ -73,7 +77,7 @@ void Solution::assign_pressure_gradient( vector_var _gradient, vector_var gradie
         double rho_0, rho_coeff, L,PI;
         rho_0 = origin_magnitude.Magnitude();
         rho_coeff = rho_0 * pow(globals.max_velocity,2)/4.0*3.0;
-        L = (Mesh.get_num_x()-2)*Mesh.get_dx();
+        L = (Mesh.get_num_x()-4)*Mesh.get_dx();
         PI = globals.PI;
         for( int t =0 ; t< Mesh.get_total_cells(); t++){
             rho[t] = rho_0 - rho_coeff* (cos( 4*PI*Mesh.get_centroid_x(t)/L )
@@ -110,7 +114,7 @@ void Solution::assign_velocity_gradient( vector_var _gradient, vector_var gradie
         double U_0,  L,PI;
         U_0 = globals.max_velocity;
 
-        L = (Mesh.get_num_x()-2)*Mesh.get_dx();
+        L = (Mesh.get_num_x()-4)*Mesh.get_dx();
         PI = globals.PI;
         for( int t =0 ; t< Mesh.get_total_cells(); t++){
             u[t] = -U_0* (  cos( 2*PI*Mesh.get_centroid_x(t)/L )
@@ -176,6 +180,46 @@ void Solution::output (std::string output_location, global_variables &globals,
 
 }
 
+void Solution::output_centrelines (std::string output_location, global_variables &globals,
+        Mesh &mesh){
+
+    std::ofstream rho_txt,u_txt,v_txt ;
+    std::string rho_file, u_file, v_file;
+
+    u_file = output_location + "/uy.dat";
+    v_file = output_location + "/vx.dat";
+
+    u_txt.open(u_file.c_str(), ios::out);
+    v_txt.open(v_file.c_str(), ios::out);
+
+
+    int mid_x, mid_y;
+    mid_x = ceil(mesh.get_num_x()/2);
+    mid_y = ceil(mesh.get_num_y()/2);
+    int counter ;
+    counter = 0;
+    for( int i = 0; i < mesh.get_num_x(); i++){
+        for ( int j =0 ; j < mesh.get_num_y(); j++){
+
+            if (i == mid_x && (j >0) && ( j< (mesh.get_num_y()-1))) {
+                v_txt   << mesh.get_centroid_x(counter)/mesh.get_X() << " ,"  << v[counter]/globals.max_velocity << endl;
+
+            }
+            if (j == mid_y && (i >0) && ( i< (mesh.get_num_x()-1))){
+                u_txt << u[counter]/globals.max_velocity << " ," << mesh.get_centroid_y(counter)/mesh.get_Y()    << endl;
+            }
+
+            counter = counter + 1;
+        }
+
+     }
+
+    rho_txt.close();
+    u_txt.close();
+    v_txt.close();
+
+}
+
 void Solution::clone( Solution &soln_a){
 
         for (int i =0; i< total_nodes; i++){
@@ -209,6 +253,73 @@ void Solution::post_process(double gamma, Mesh &mesh, global_variables &globals,
               //second divide by 3 for rho to P conversion
              error[i] = (u[i] - u_exact[i])  *100;
           }
+
+    }
+
+}
+
+// update gradients for each cell
+void Solution::update_gradients(Boundary_Conditions &bcs,Mesh &mesh,domain_geometry &domain,
+                    int direction, Solution &src ){
+
+    int i1,i2 ;
+    double dx;
+
+    dx = mesh.get_dx();
+
+
+    for(int i =0; i< mesh.get_total_cells();i++){
+
+
+        // x direction
+        if (direction == 1) {
+
+            i1 = mesh.get_e_node(i);
+            i2 = mesh.get_w_node(i);
+
+            if (mesh.get_w_node(i) < 0) {
+                u[i] = (src.get_u(i1) - src.get_u(i)) /dx;
+                v[i] = (src.get_v(i1) - src.get_v(i)) /dx;
+                rho[i] = (src.get_rho(i1) - src.get_rho(i)) /dx;
+
+            }else if (mesh.get_e_node(i) < 0) {
+                u[i] = (src.get_u(i) - src.get_u(i2)) /dx;
+                v[i] = (src.get_v(i) - src.get_v(i2)) /dx;
+                rho[i] = (src.get_rho(i) - src.get_rho(i2)) /dx;
+
+
+            }else{
+                u[i] = (src.get_u(i1) - src.get_u(i2)) /dx*0.5;
+                v[i] = (src.get_v(i1) - src.get_v(i2)) /dx*0.5;
+                rho[i] = (src.get_rho(i1) - src.get_rho(i2)) /dx*0.5;
+            }
+
+
+
+        }else{
+
+            i1 = mesh.get_n_node(i);
+            i2 = mesh.get_s_node(i);
+
+
+            if (mesh.get_s_node(i) < 0) {
+                 u[i] = (src.get_u(i1) - src.get_u(i)) /dx;
+                v[i] = (src.get_v(i1) - src.get_v(i)) /dx;
+                rho[i] = (src.get_rho(i1) - src.get_rho(i)) /dx;
+
+            }else if (mesh.get_n_node(i) < 0) {
+                 u[i] = (src.get_u(i) - src.get_u(i2)) /dx;
+                v[i] = (src.get_v(i) - src.get_v(i2)) /dx;
+                rho[i] = (src.get_rho(i) - src.get_rho(i2)) /dx;
+
+
+            }else{
+                u[i] = (src.get_u(i1) - src.get_u(i2)) /dx*0.5;
+                v[i] = (src.get_v(i1) - src.get_v(i2)) /dx*0.5;
+                rho[i] = (src.get_rho(i1) - src.get_rho(i2)) /dx*0.5;
+            }
+
+        }
 
     }
 

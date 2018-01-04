@@ -63,7 +63,7 @@ class Mesh
     private:
 
 
-        void create_standard_mesh();
+        void create_standard_mesh(int strt, int fnsh);
         void create_cosine_mesh(double PI,double dt);
         int num_x_cells, num_y_cells, total_cells;
         double X,Y,dx,dy,multi_grid_dt;
